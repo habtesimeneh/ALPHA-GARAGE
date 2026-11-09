@@ -1,0 +1,4 @@
+# Deny all direct web access to encryption keys and private data
+Require all denied
+Deny from all
+

@@ -1,0 +1,11 @@
+<?php
+// Copy this file to local.php and set your local database connection.
+// local.php is git-ignored and the app directory is blocked from web access.
+return [
+    'host' => 'localhost',
+    'port' => 3306,
+    'name' => 'garage_management_system',
+    'user' => 'garage_app',
+    'pass' => 'replace-with-the-password-created-for-garage_app',
+    'tz' => '+03:00',
+];

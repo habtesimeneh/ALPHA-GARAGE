@@ -1,0 +1,33 @@
+/* ==========================================================================
+   auth.css — login, setup (registration) and other bare pages
+   Automotive Enterprise: Deep Navy (#111C2E), Electric Blue (#2563EB), Cyan (#06B6D4)
+   ========================================================================== */
+.auth-body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-4); position: relative; overflow-x: hidden; background: radial-gradient(900px 520px at 0% 0%, rgba(37, 99, 235, .20), transparent 60%), radial-gradient(700px 480px at 100% 100%, rgba(6, 182, 212, .18), transparent 60%), linear-gradient(160deg, var(--navy-sidebar-dark), var(--navy-primary) 140%); background-size: 140% 140%; animation: authShift 18s ease-in-out infinite alternate; }
+@keyframes authShift { to { background-position: 100% 60%; } }
+.auth-body:has(.auth-split) { padding: 0; display: block; background: var(--background); animation: none; }
+
+/* Split-screen */
+.auth-split { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.auth-aside { position: relative; overflow: hidden; isolation: isolate; display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-8); padding: var(--space-12); color: #fff; background: radial-gradient(600px 400px at 90% 0%, rgba(6, 182, 212, .25), transparent 65%), radial-gradient(500px 500px at 0% 100%, rgba(37, 99, 235, .25), transparent 65%), var(--grad-hero); background-size: 130% 130%; animation: authShift 16s ease-in-out infinite alternate; }
+.auth-aside::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .45; background: repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, .03) 26px 28px); }
+.auth-aside::after { content: ""; position: absolute; right: -120px; bottom: -120px; width: 420px; height: 420px; border-radius: 50%; border: 56px solid rgba(6, 182, 212, .12); z-index: -1; }
+.auth-aside .auth-brand { display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: var(--text-md); color: #fff; }
+.auth-aside .auth-brand img { border-radius: 10px; box-shadow: 0 0 0 1px rgba(6, 182, 212, .5); }
+.auth-aside h1 { color: #fff; font-size: clamp(1.9rem, 3.2vw, 2.9rem); line-height: 1.12; letter-spacing: -.02em; margin: 0 0 var(--space-4); }
+.auth-aside h1 span { color: var(--cyan-accent); }
+.auth-aside p { color: #CBD5E1; max-width: 48ch; font-size: var(--text-base); }
+.auth-points { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-3); }
+.auth-points li { display: flex; gap: var(--space-3); align-items: center; color: #F1F5F9; font-weight: 500; }
+.auth-points li::before { content: "✓"; flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--grad-cyan); color: #fff; font-size: .8rem; font-weight: 900; box-shadow: 0 2px 8px rgba(6, 182, 212, .4); }
+.auth-aside small { color: #94A3B8; }
+.auth-main { display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4); background: radial-gradient(500px 300px at 100% 0%, rgba(37, 99, 235, .08), transparent 70%), var(--background); }
+
+.auth-card { width: min(450px, 100%); background: var(--surface); border-radius: var(--radius-xl); padding: var(--space-8); box-shadow: var(--shadow-lg); border: 1px solid var(--border); border-top: 4px solid var(--blue-primary); position: relative; animation: pop .4s var(--ease); }
+.auth-split .auth-card { box-shadow: var(--shadow-md); }
+.auth-wide { width: min(640px, 100%); }
+.auth-card .logo { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.auth-card .logo img { width: 48px; height: 48px; border-radius: 12px; }
+.auth-card .logo h2 { font-size: var(--text-lg); margin: 0; color: var(--navy-primary); font-weight: 700; }
+.auth-card .btn-primary { padding: .72rem 1.15rem; font-size: var(--text-base); }
+.auth-back { display: inline-block; margin-top: var(--space-3); font-size: var(--text-sm); color: var(--blue-primary); }
+.auth-back:hover { text-decoration: underline; }

@@ -1,0 +1,15 @@
+/* typography.css */
+body { font-family: var(--font); font-size: var(--text-base); line-height: 1.55; color: var(--text-primary); background: var(--background); }
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.25; color: var(--deep-green); letter-spacing: -.01em; margin: 0 0 .4em; }
+h1 { font-size: var(--text-2xl); } h2 { font-size: var(--text-xl); } h3 { font-size: var(--text-md); font-weight: 700; } h4 { font-size: var(--text-base); }
+p { margin: 0 0 .8em; }
+a { color: var(--secondary-green); text-decoration: none; transition: color var(--t-fast); }
+a:hover { color: var(--primary-green); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--gold); }
+a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: var(--radius-sm); }
+strong { font-weight: 650; }
+.muted { color: var(--text-secondary); } .small { font-size: var(--text-sm); } .big { font-size: var(--text-xl); }
+.right { text-align: right; } .nowrap { white-space: nowrap; } .pre-wrap { white-space: pre-wrap; }
+.mono { font-family: var(--font-mono); font-size: .9em; }
+.req { color: var(--danger); }
+.eyebrow { display: inline-block; font-size: var(--text-xs); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+::selection { background: var(--gold-soft); color: var(--deep-green); }

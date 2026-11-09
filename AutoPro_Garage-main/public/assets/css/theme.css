@@ -1,0 +1,62 @@
+/* Persistent application theme tokens and readable dark-mode component overrides. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0B1220;
+  --surface: #111B2B;
+  --surface-alt: #162235;
+  --text-primary: #E5EAF2;
+  --text-secondary: #A7B4C7;
+  --text-muted: #8290A4;
+  --text-inverse: #0F172A;
+  --border: #2A374A;
+  --border-strong: #3A4A61;
+  --navy-primary: #E5EAF2;
+  --blue-subtle: rgba(59, 130, 246, .16);
+  --neutral-bg: #1E293B;
+  --neutral-border: #475569;
+  --neutral: #CBD5E1;
+  --ok-bg: #123523;
+  --ok-border: #166534;
+  --warn-bg: #3A2C0D;
+  --warn-border: #854D0E;
+  --danger-bg: #3B1D24;
+  --danger-border: #7F1D1D;
+  --info-bg: #102E43;
+  --info-border: #075985;
+}
+
+html[data-theme="dark"] body.app-body { background: var(--background); color: var(--text-primary); }
+html[data-theme="dark"] .topbar { background: rgba(17, 27, 43, .94); }
+html[data-theme="dark"] .topbar-search input:focus,
+html[data-theme="dark"] .input:focus { background: #172338; }
+html[data-theme="dark"] .dropdown > summary,
+html[data-theme="dark"] .dropdown-menu,
+html[data-theme="dark"] .dropdown-menu::before { background: var(--surface); color: var(--text-primary); }
+html[data-theme="dark"] .table th { background: linear-gradient(180deg, #1B293D, #152236); color: var(--text-primary); }
+html[data-theme="dark"] .table tbody tr:nth-child(even) { background: rgba(255, 255, 255, .025); }
+html[data-theme="dark"] .table tbody tr:hover { background: rgba(59, 130, 246, .1); }
+html[data-theme="dark"] .page { background: var(--surface); }
+html[data-theme="dark"] .page.active { background: var(--grad-primary); }
+html[data-theme="dark"] .toast,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .doc { background: var(--surface); color: var(--text-primary); }
+html[data-theme="dark"] .has-error .input { background: #321D25; }
+html[data-theme="dark"] .loader { background: rgba(11, 18, 32, .76); }
+html[data-theme="dark"] .app-body .dashboard-eyebrow { color: #E8CD83; }
+html[data-theme="dark"] .app-body .stat .value { color: var(--text-primary); }
+html[data-theme="dark"] .app-body .stat.green .value { color: #86EFAC; }
+html[data-theme="dark"] .app-body .stat.red .value { color: #FCA5A5; }
+html[data-theme="dark"] .app-body .stat.blue .value { color: #93C5FD; }
+html[data-theme="dark"] .app-body .stat.cyan .value { color: #67E8F9; }
+html[data-theme="dark"] .app-body .stat .stat-icon { color: #E8CD83; }
+html[data-theme="dark"] .app-body .dashboard-progress > div:first-child span { color: #E8CD83; }
+html[data-theme="dark"] .app-body .bar-track { background: #2A374A; }
+html[data-theme="dark"] .app-body .analytics-line-chart.gold .chart-line { stroke: #E8CD83; }
+html[data-theme="dark"] .app-body .analytics-line-chart.gold .chart-point { stroke: #E8CD83; }
+html[data-theme="dark"] .app-body .finance-result-line { stroke: #E8CD83; }
+html[data-theme="dark"] .app-body .finance-result-point { stroke: #E8CD83; }
+html[data-theme="dark"] .app-body .financial-chart-legend .legend-result { background: #E8CD83; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] *, html[data-theme] *::before, html[data-theme] *::after { scroll-behavior: auto; }
+}

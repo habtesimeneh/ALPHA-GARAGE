@@ -1,0 +1,118 @@
+/* ==========================================================================
+   variables.css — Luxury Automotive Enterprise Design System
+   Primary Palette: Dark Forest Green (#10291F), Deep Emerald (#183B2B),
+   Luxury Gold (#D4AF37), Champagne Gold (#E8CD83), Warm Ivory (#F5F2E9)
+   ========================================================================== */
+:root {
+  /* Luxury Automotive Core Palette */
+  --forest-dark: #10291F;
+  --forest-deep: #183B2B;
+  --forest-surface: #143526;
+  --forest-darkest: #0A1B14;
+  --gold-luxury: #D4AF37;
+  --gold-champagne: #E8CD83;
+  --gold-light: #FBF4DC;
+  --ivory-warm: #F5F2E9;
+  --pure-white: #FFFFFF;
+  --gray-muted: #A7B0AA;
+  --gray-dark: #2B3D34;
+  
+  --gold-subtle: rgba(212, 175, 55, 0.12);
+  --gold-glow: rgba(212, 175, 55, 0.35);
+  --forest-glass: rgba(16, 41, 31, 0.78);
+  --forest-glass-card: rgba(24, 59, 43, 0.85);
+
+  --grad-gold: linear-gradient(135deg, #D4AF37 0%, #E8CD83 100%);
+  --grad-gold-hover: linear-gradient(135deg, #E8CD83 0%, #D4AF37 100%);
+  --grad-forest: linear-gradient(135deg, #10291F 0%, #183B2B 100%);
+  --grad-forest-dark: linear-gradient(180deg, #10291F 0%, #0A1B14 100%);
+  --grad-overlay: linear-gradient(180deg, rgba(16, 41, 31, 0.82) 0%, rgba(10, 27, 20, 0.94) 100%);
+  --grad-overlay-side: linear-gradient(90deg, rgba(16, 41, 31, 0.95) 0%, rgba(16, 41, 31, 0.7) 60%, rgba(16, 41, 31, 0.9) 100%);
+
+  /* Automotive Enterprise Core Palette */
+  --navy-primary: #101827;
+  --navy-sidebar: #111C2E;
+  --navy-sidebar-dark: #0B1320;
+  --blue-primary: #2563EB;
+  --blue-hover: #1D4ED8;
+  --blue-light: #DBEAFE;
+  --blue-subtle: rgba(37, 99, 235, 0.08);
+  --cyan-accent: #06B6D4;
+  --cyan-hover: #0891B2;
+  --cyan-light: #CFFAFE;
+  
+  /* Brand mappings */
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --accent: #06B6D4;
+  --accent-hover: #0891B2;
+  --background: #F1F5F9;
+  --surface: #FFFFFF;
+  --surface-alt: #F8FAFC;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --text-inverse: #F8FAFC;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+  
+  /* Sidebar Specific */
+  --sidebar-bg: #111C2E;
+  --sidebar-bg-2: #0B1320;
+  --sidebar-text: #E2E8F0;
+  --sidebar-text-muted: #94A3B8;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.16);
+  --sidebar-active-text: #38BDF8;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+
+  /* Semantic status colors (meeting WCAG AA contrast) */
+  --ok: #16A34A;          --ok-bg: #DCFCE7;     --ok-border: #86EFAC;
+  --warn: #D97706;        --warn-bg: #FEF3C7;   --warn-border: #FCD34D;
+  --danger: #DC2626;      --danger-bg: #FEE2E2; --danger-border: #FCA5A5;
+  --info: #0284C7;        --info-bg: #E0F2FE;   --info-border: #7DD3FC;
+  --neutral: #475569;     --neutral-bg: #F1F5F9; --neutral-border: #CBD5E1;
+
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  --grad-navy: linear-gradient(135deg, #111C2E 0%, #101827 100%);
+  --grad-cyan: linear-gradient(135deg, #06B6D4 0%, #0284C7 100%);
+  --grad-hero: linear-gradient(135deg, #111C2E 0%, #1E293B 50%, #0F172A 100%);
+  --grad-accent: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+
+  /* Spacing scale */
+  --space-1: .25rem; --space-2: .5rem;  --space-3: .75rem; --space-4: 1rem;
+  --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;   --space-10: 2.5rem;
+  --space-12: 3rem;  --space-16: 4rem;  --space-20: 5rem;
+
+  /* Radius */
+  --radius-sm: 6px; --radius: 10px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 22px; --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 39, .05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 39, .08), 0 1px 2px rgba(16, 24, 39, .04);
+  --shadow: 0 4px 6px -1px rgba(16, 24, 39, .08), 0 2px 4px -2px rgba(16, 24, 39, .06);
+  --shadow-md: 0 10px 15px -3px rgba(16, 24, 39, .08), 0 4px 6px -4px rgba(16, 24, 39, .04);
+  --shadow-lg: 0 20px 25px -5px rgba(16, 24, 39, .10), 0 8px 10px -6px rgba(16, 24, 39, .06);
+  --shadow-blue: 0 6px 20px rgba(37, 99, 235, .28);
+  --shadow-cyan: 0 6px 20px rgba(6, 182, 212, .25);
+  --ring: 0 0 0 3px rgba(37, 99, 235, .28);
+
+  /* Typography */
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Segoe UI Semibold", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-xs: .75rem; --text-sm: .85rem; --text-base: .9375rem; --text-md: 1.05rem;
+  --text-lg: 1.25rem; --text-xl: 1.5rem; --text-2xl: 1.9rem; --text-3xl: 2.6rem; --text-4xl: 3.4rem;
+
+  /* Motion */
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --t-fast: .15s var(--ease); --t: .25s var(--ease); --t-slow: .5s var(--ease);
+
+  /* Layout */
+  --sidebar-w: 272px; --sidebar-w-collapsed: 78px; --sidebar-current: var(--sidebar-w);
+  --topbar-h: 66px; --content-max: 1440px; --container: 1180px;
+
+  /* Z-index layers */
+  --z-base: 1; --z-sticky: 20; --z-dropdown: 30; --z-backdrop: 35; --z-sidebar: 40;
+  --z-modal: 90; --z-loader: 95; --z-toast: 100;
+}

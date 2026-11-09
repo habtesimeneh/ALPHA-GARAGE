@@ -1,0 +1,8 @@
+app/config/local.php
+storage/private/*.generated.sql
+storage/logs/*
+!storage/logs/.gitkeep
+storage/installed.lock
+.DS_Store
+*.log
+storage/private/*.generated.sql

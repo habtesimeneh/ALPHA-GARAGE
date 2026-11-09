@@ -1,0 +1,6 @@
+# Defence in depth when the whole project folder sits inside MAMP/htdocs:
+# only /public is meant to be reachable; app, database, storage and tests are denied (also by their own .htaccess).
+Options -Indexes
+<FilesMatch "\.(sql|log|md|example|lock)$">
+  Require all denied
+</FilesMatch>

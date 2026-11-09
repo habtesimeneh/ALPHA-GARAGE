@@ -1,0 +1,106 @@
+/* ==========================================================================
+   forms.css — inputs, selects, validation, form layouts, filters
+   Automotive Enterprise: Electric Blue (#2563EB) & Clean Contrast
+   ========================================================================== */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-5); }
+.form-grid .full { grid-column: 1 / -1; }
+/* Inventory issue page (improved, compatible with existing app.js estimator) */
+.issue-grid { grid-template-columns: 1fr; gap: var(--space-4); margin-top: var(--space-2); }
+.issue-part-line { min-width: 0; padding: var(--space-4); margin: 0; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-alt); display: grid; gap: var(--space-3); }
+.issue-part-line .field { margin-bottom: 0; }
+.issue-part-line p { margin: 0; }
+.issue-line-title { font-weight: 700; color: var(--text-primary); margin-bottom: .1rem; }
+.issue-part-search { margin: 0; }
+.issue-part-search label { display: block; font-size: var(--text-xs); color: var(--text-secondary); margin-bottom: .35rem; font-weight: 600; }
+.issue-line-meta { display: flex; flex-wrap: wrap; gap: .55rem 1.15rem; font-size: var(--text-sm); color: var(--text-secondary); align-items: center; margin-top: .1rem; padding-top: .15rem; }
+.issue-line-meta strong { color: var(--text-primary); }
+.issue-lines-head { margin: var(--space-4) 0 var(--space-3); padding-top: var(--space-2); }
+.issue-lines-head h4 { margin: 0 0 .2rem; }
+.issue-lines-head p { margin: 0; }
+.stock-warn { padding: .2rem .55rem; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: 700; }
+.stock-warn[hidden] { display: none !important; }
+.stock-warn.is-error { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+.stock-warn.is-warn { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-border); }
+.issue-cost-summary { margin: var(--space-4) 0 0; max-width: 420px; padding: var(--space-4) var(--space-5); }
+.issue-pending-card { margin-top: var(--space-5); padding: var(--space-5); }
+.issue-pending-card .card-head { margin-bottom: var(--space-4); padding-bottom: var(--space-2); }
+.issue-stock-alert { padding: var(--space-4) var(--space-5) var(--space-4) calc(var(--space-5) + 4px); margin-bottom: var(--space-5); line-height: 1.5; }
+.issue-stock-alert strong { margin-right: .15rem; }
+.card.form-section.issue-direct-card { padding: var(--space-5) var(--space-6); }
+.issue-direct-card .form-grid { row-gap: var(--space-3); }
+.issue-direct-card .issue-lines-head { margin: var(--space-5) 0 var(--space-4); }
+.issue-direct-card .issue-part-line { padding: var(--space-4) var(--space-5); gap: var(--space-3); }
+.issue-part-hidden-select { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; opacity: 0 !important; pointer-events: none !important; }
+.issue-direct-card .field[data-combobox-root] { position: relative; }
+.issue-direct-card .form-actions { margin-top: var(--space-5); padding-top: var(--space-4); }
+.issue-estimate-note { margin: var(--space-3) 0 0; }
+.alert + .card.form-section { margin-top: 0; }
+.field { margin-bottom: var(--space-4); min-width: 0; }
+.field label { display: block; margin-bottom: .35rem; font-weight: 600; font-size: var(--text-sm); color: var(--text-primary); }
+
+.input, select.input, textarea.input {
+  width: 100%; padding: .62rem .85rem; background: var(--surface); color: var(--text-primary);
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius); box-shadow: var(--shadow-xs) inset;
+  font-family: inherit; font-size: var(--text-base);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+}
+.input::placeholder { color: var(--text-muted); }
+.input:hover { border-color: #94A3B8; }
+.input:focus { outline: none; border-color: var(--blue-primary); box-shadow: var(--ring); background: #fff; }
+.input:disabled, .input[readonly] { background: var(--surface-alt); color: var(--text-secondary); cursor: not-allowed; }
+textarea.input { resize: vertical; min-height: 92px; line-height: 1.5; }
+select.input {
+  appearance: none; -webkit-appearance: none; padding-right: 2.4rem; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%232563EB'%3E%3Cpath d='M5.5 7.5l4.5 4.5 4.5-4.5' stroke='%232563EB' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .8rem center; background-size: 16px;
+}
+input[type="date"].input, input[type="datetime-local"].input, input[type="number"].input { font-variant-numeric: tabular-nums; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--blue-primary); width: 1.05rem; height: 1.05rem; cursor: pointer; }
+.check { display: flex; gap: var(--space-2); align-items: center; }
+.check input { width: 1.05rem; flex: none; }
+.check label, label.check { font-weight: 500; margin: 0; cursor: pointer; }
+.help { display: block; margin-top: .25rem; color: var(--text-secondary); font-size: var(--text-xs); }
+
+/* Validation (class hooks used by validation.js) */
+.field-error { color: var(--danger); font-size: var(--text-xs); font-weight: 600; min-height: 0; margin-top: .2rem; }
+.field-error:not(:empty)::before { content: "⚠ "; }
+.has-error .input { border-color: var(--danger); background: #FFF8F7; }
+.has-error .input:focus { box-shadow: 0 0 0 3px rgba(220, 38, 38, .22); }
+.has-error label { color: var(--danger); }
+.field:has(.input:user-valid:not(:placeholder-shown):required) .input { border-color: var(--ok); }
+
+.form-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-3); padding-top: var(--space-4); border-top: 1px dashed var(--border); }
+
+/* Filter bars above tables */
+.filters { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-end; margin-bottom: var(--space-4); padding: var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-xs); }
+/* Job card form sections, searchable combobox, service chips, cost summary */
+.jobcard-form-card { max-width: 980px; }
+.jobcard-form-card .form-section { margin: 0 0 var(--space-5); padding: 0 0 var(--space-4); border-bottom: 1px dashed var(--border); }
+.jobcard-form-card .form-section:last-of-type { border-bottom: 0; margin-bottom: 0; }
+.card.form-section { padding: var(--space-5); margin-bottom: var(--space-5); border-bottom: 0; }
+.form-section-title { margin: 0 0 var(--space-4); font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: .5rem; }
+
+.combobox { position: relative; }
+.combobox > .input { padding-right: 2.4rem; }
+.combobox-toggle { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; padding: .35rem .45rem; border-radius: var(--radius-sm); font-size: .9rem; }
+.combobox-toggle:hover { color: var(--blue-primary); background: var(--blue-subtle); }
+.combobox-panel { position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 4px); background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius); box-shadow: var(--shadow); max-height: 280px; overflow: auto; }
+.combobox-panel[hidden] { display: none !important; }
+.combobox-status { padding: .65rem .85rem; color: var(--text-secondary); font-size: var(--text-sm); }
+.combobox-status.is-error { color: var(--danger); }
+.combobox-list { list-style: none; margin: 0; padding: .25rem; }
+.combobox-option { padding: .55rem .7rem; border-radius: var(--radius-sm); cursor: pointer; font-size: var(--text-sm); color: var(--text-primary); }
+.combobox-option:hover, .combobox-option.is-active { background: var(--blue-subtle); }
+.combobox-option.is-selected { background: rgba(37, 99, 235, .12); font-weight: 600; }
+.combobox-multi > .input { cursor: text; }
+
+.selected-services { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .65rem; min-height: 1.5rem; }
+.service-chip { display: inline-flex; align-items: center; gap: .4rem; padding: .28rem .45rem .28rem .65rem; background: var(--blue-subtle); color: var(--text-primary); border: 1px solid rgba(37, 99, 235, .18); border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: 600; }
+.service-chip-remove { border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 .15rem; border-radius: 999px; }
+.service-chip-remove:hover { color: var(--danger); background: rgba(220, 38, 38, .08); }
+
+.cost-summary { background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); max-width: 420px; }
+.cost-row { display: flex; justify-content: space-between; gap: var(--space-3); padding: .25rem 0; color: var(--text-secondary); font-size: var(--text-sm); }
+.cost-row strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.cost-total { margin-top: .35rem; padding-top: .55rem; border-top: 1px solid var(--border-strong); font-size: var(--text-base); color: var(--text-primary); }
+.cost-total strong { color: var(--blue-primary); font-size: 1.05rem; }
