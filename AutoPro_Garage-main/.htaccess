@@ -4,3 +4,7 @@ Options -Indexes
 <FilesMatch "\.(sql|log|md|example|lock)$">
   Require all denied
 </FilesMatch>
+# Never serve dotfiles (for example .gitignore or .env) from inside htdocs.
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

@@ -74,7 +74,7 @@ erDiagram
 
 | Table | Purpose | Primary Key | Foreign Keys / Key Constraints |
 |---|---|---|---|
-| `roles` | System roles (Administrator, Receptionist, Mechanic, Inventory Manager, Accountant) | `id` (TINYINT) | `name` UNIQUE |
+| `roles` | System roles (Administrator, Receptionist, Mechanic, Inventory Manager, Accountant, Customer) | `id` (TINYINT) | `name` UNIQUE |
 | `permissions` | Granular system capabilities | `id` (SMALLINT) | `code` UNIQUE |
 | `role_permissions` | RBAC mapping junction | `(role_id, permission_id)` | FK `roles(id)`, FK `permissions(id)` |
 | `users` | Staff credentials and active status | `id` (INT) | FK `roles(id)`, `username` UNIQUE, `email` UNIQUE |

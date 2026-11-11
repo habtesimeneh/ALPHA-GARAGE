@@ -89,16 +89,16 @@ check('Successful login is audited', auditCount('login_success') >= 1);
 $d = http('GET', 'dashboard.php', [], $adminJar);
 check('Dashboard renders real data and analytics for administrator', $d['code'] === 200
     && str_contains($d['body'], 'Active Job Cards')
-    && str_contains($d['body'], 'Workshop Status Overview')
-    && str_contains($d['body'], 'Appointment Volume')
+    && str_contains($d['body'], 'Completed Jobs')
     && str_contains($d['body'], 'dashboard-range')
-    && str_contains($d['body'], 'Revenue performance')
-    && str_contains($d['body'], 'Customer Growth')
-    && str_contains($d['body'], 'Inventory by Category')
-    && str_contains($d['body'], 'Recent Invoices')
+    && str_contains($d['body'], 'Revenue vs Expenses')
+    && str_contains($d['body'], 'Profit &amp; Loss Analysis')
+    && str_contains($d['body'], 'chart-jobs-donut')
+    && str_contains($d['body'], 'chart-inventory-bar')
+    && str_contains($d['body'], 'chart-services')
+    && str_contains($d['body'], 'Pending Payments')
     && str_contains($d['body'], 'Inventory Value')
-    && str_contains($d['body'], 'Revenue, expenses &amp; net result')
-    && str_contains($d['body'], 'Profit / (Loss)')
+    && str_contains($d['body'], 'Revenue, expenses &amp; profit')
     && !str_contains($d['body'], 'Something went wrong'));
 check('Security headers present (CSP, X-Frame-Options)', str_contains($d['head'], 'Content-Security-Policy') && str_contains($d['head'], 'X-Frame-Options: DENY'));
 check('Logout via GET is refused (POST + CSRF only)', http('GET', 'logout.php', [], $adminJar)['code'] === 405);
@@ -275,7 +275,7 @@ check('Passwords are stored with password_hash (bcrypt/argon)', (int) Database::
 check('Audit page accessible to administrator and verification works', str_contains(post_to($adminJar, 'audit-logs/', 'audit-logs/', ['do' => 'verify'])['body'], 'Chain verified'));
 
 section('9. Setup lock & misc');
-check('setup.php refuses to run after installation', http('GET', 'setup.php')['code'] === 403);
+check('setup.php refuses to run after installation', http('GET', 'setup.php')['code'] === 404);
 check('Admin can export audit CSV', str_contains(http('GET', 'audit-logs/?export=csv', [], $adminJar)['head'], 'text/csv'));
 check('Accountant can export a revenue report CSV', str_contains(http('GET', 'reports/?report=daily_revenue&export=csv', [], $accJar)['head'], 'text/csv'));
 foreach (['customers/', 'vehicles/', 'job-cards/', 'mechanics/', 'inventory/', 'inventory/issue.php', 'inventory/history.php', 'invoices/', 'payments/', 'expenses/', 'reports/', 'users/', 'users/roles.php', 'users/settings.php', 'audit-logs/', 'profile.php', 'services/', 'suppliers/', 'appointments/', 'notifications/'] as $p) {
@@ -398,13 +398,13 @@ check('Password reset completion succeeds', $resetRes['ok']);
 // Verify single-use: token cannot be reused
 check('Used token cannot be reused', PasswordResetService::validateToken($rawTokenTest) === null);
 
-// Verify authentication with new credentials works
-$loginNew = AuthService::attempt($testUsername, $newPass);
-check('Login with NEW password succeeds', $loginNew['ok']);
+// Verify authentication with new credentials works (real HTTP flow; CLI sessions cannot regenerate after output)
+[, $loginNew] = login($testUsername, $newPass);
+check('Login with NEW password succeeds', $loginNew['code'] === 302 && str_contains($loginNew['loc'], 'index.php'));
 
 // Verify old password no longer works
-$loginOld = AuthService::attempt($testUsername, $oldPass);
-check('Login with OLD password fails', !$loginOld['ok']);
+[, $loginOld] = login($testUsername, $oldPass);
+check('Login with OLD password fails', $loginOld['code'] === 200 && str_contains($loginOld['body'], 'Invalid username or password'));
 
 echo "\n\033[1mResult: $pass passed, $fail failed\033[0m\n";
 exit($fail > 0 ? 1 : 0);

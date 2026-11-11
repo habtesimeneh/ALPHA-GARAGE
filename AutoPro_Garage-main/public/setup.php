@@ -2,21 +2,34 @@
 declare(strict_types=1);
 /**
  * One-time installer: creates the first administrator (and optionally demo data).
- * It locks itself: it refuses to run once any user exists or storage/installed.lock is present.
+ * It locks itself: it refuses to run once storage/installed.lock exists or any user exists.
+ * Optional hardening: set GMS_SETUP_TOKEN and open setup.php?token=<value> for a fresh install.
  * After setup, DELETE this file from public/ (the README explains why).
  */
 require __DIR__ . '/../app/bootstrap.php';
 require_once APP_ROOT . '/app/views/layout.php';
 
-$lock = APP_ROOT . '/storage/installed.lock';
+$lock = storage_path('installed.lock');
+if (is_file($lock)) {
+    abort(404, 'Not found.');
+}
+
+$setupToken = getenv('GMS_SETUP_TOKEN');
+if (is_string($setupToken) && $setupToken !== '') {
+    $providedToken = (string) ($_GET['token'] ?? '');
+    if (!hash_equals($setupToken, $providedToken)) {
+        abort(404, 'Not found.');
+    }
+}
+
 try {
     $hasUsers = (int) Database::value('SELECT COUNT(*) FROM users') > 0;
 } catch (Throwable $e) {
     app_log('setup: ' . $e->getMessage());
-    abort(500, 'Cannot reach the database. Configure app/config/local.php from local.php.example (or set the GMS_DB_* environment variables), start MySQL, and import database/database.sql into an empty database first.');
+    abort(503, 'Setup is temporarily unavailable. Check the server log for details.');
 }
-if ($hasUsers || is_file($lock)) {
-    abort(403, 'Setup is already complete and has been locked. Delete public/setup.php.');
+if ($hasUsers) {
+    abort(404, 'Not found.');
 }
 
 $errors = [];

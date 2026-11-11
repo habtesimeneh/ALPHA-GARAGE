@@ -139,8 +139,10 @@ $bookingUrl = current_user()
       <?php if (!current_user()): ?><li class="mobile-nav-login"><a href="<?= e(url('login.php')) ?>" class="nav-link">Client sign in</a></li><?php endif; ?>
     </ul>
     <div class="nav-actions">
-      <?php if (current_user()): ?>
+      <?php if (current_user() && can('dashboard.view')): ?>
         <a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta">Dashboard</a>
+      <?php elseif (current_user()): ?>
+        <a href="<?= e(url('profile.php')) ?>" class="btn-nav-cta">My Account</a>
       <?php else: ?>
         <a href="<?= e(url('login.php')) ?>" class="btn-nav-login">Sign In</a>
         <a href="<?= e(url('register.php')) ?>" class="btn-nav-cta">Get Started</a>

@@ -174,17 +174,17 @@ Run it from the project root after configuring `app/config/local.php` or the dat
 
 The browser-based setup endpoint is locked after setup and should be removed from the public directory. Do not expose it as a demo seeder. Use a disposable local database for test data; the checked-in integration test suite writes to its configured database.
 
+The installer refuses all access once `storage/installed.lock` exists or any user row is present, returning HTTP 404. It also requires `GMS_SETUP_TOKEN` in the query string when that environment variable is set. Fresh installations must delete `storage/installed.lock` and `public/setup.php` only as part of a deliberate reinstall.
+
 ---
 
 ### Step 6: Verifying the Installation
 
 1. Open your web browser and navigate to:
    ```
-   http://localhost/garage-management-systems/public/login.php
+   http://localhost/AutoPro_Garage-main/AutoPro_Garage-main/public/login.php
    ```
-2. Log in using the default Super Administrator account:
-   - **Username:** `admin`
-   - **Password:** `Admin#2026!`
+2. Log in with the administrator account created during first-time setup. Passwords are never stored in documentation.
 3. Verify that the Dashboard loads with full styling, metric cards, navigation sidebar, and topbar.
 
 ---
@@ -200,10 +200,12 @@ AutoPro includes a self-contained regression test suite in `tests/run_tests.php`
 6. Invoicing math, tax calculations, and payment settlements
 7. Append-only audit trigger immutability and SHA-256 hash chain verification
 
-To execute the test suite:
+To execute the test suite (same CLI flags used by Phase 1 verification):
 ```powershell
-& "C:\MAMP\bin\php\php8.2.14\php.exe" "C:\MAMP\htdocs\garage-management-system (1)\garage-management-systems\tests\run_tests.php"
+& "C:\MAMP\bin\php\php8.3.1\php.exe" -d extension_dir="C:\MAMP\bin\php\php8.3.1\ext" -d extension=pdo_mysql "C:\MAMP\htdocs\AutoPro_Garage-main\AutoPro_Garage-main\tests\run_tests.php"
 ```
+
+Individual read-only suites can be run the same way from `tests/`: `auth_unit.php`, `inventory_unit.php`, and `security_hardening_unit.php`.
 
 ---
 

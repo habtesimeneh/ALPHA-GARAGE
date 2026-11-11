@@ -27,17 +27,27 @@ if (is_post()) {
     $v['subject'] = trim((string) ($_POST['subject'] ?? ''));
     $v['message'] = trim((string) ($_POST['message'] ?? ''));
 
-    $errors = ContactInquiryService::validate($v);
-    if ($errors) {
-        $errorMessage = 'Please review the form fields and correct the highlighted information.';
+    if (trim((string) ($_POST['hp_website'] ?? '')) !== '') {
+        // Honeypot: acknowledge silently so automated submissions do not learn the trap.
+        $successMessage = 'Thank you! Your inquiry has been received. Our support team will respond shortly.';
+        $v = ['name' => '', 'email' => '', 'phone' => '', 'channel' => 'Telegram', 'subject' => '', 'message' => ''];
+    } elseif (!($limit = RateLimiter::check('contact|' . client_ip(), 5, 600))['allowed']) {
+        http_response_code(429);
+        header('Retry-After: ' . $limit['retry_after']);
+        $errorMessage = 'Too many inquiries from this network. Please wait ' . max(1, (int) ceil($limit['retry_after'] / 60)) . ' minute(s) before trying again.';
     } else {
-        try {
-            ContactInquiryService::create($v);
-            $successMessage = 'Thank you! Your inquiry has been received. Our support team will respond via ' . $v['channel'] . ' shortly.';
-            $v = ['name' => '', 'email' => '', 'phone' => '', 'channel' => 'Telegram', 'subject' => '', 'message' => ''];
-        } catch (Throwable $e) {
-            app_log('Contact inquiry submission error: ' . $e->getMessage());
-            $errorMessage = 'We could not save your inquiry right now. Your information is still in the form; please try again shortly.';
+        $errors = ContactInquiryService::validate($v);
+        if ($errors) {
+            $errorMessage = 'Please review the form fields and correct the highlighted information.';
+        } else {
+            try {
+                ContactInquiryService::create($v);
+                $successMessage = 'Thank you! Your inquiry has been received. Our support team will respond via ' . $v['channel'] . ' shortly.';
+                $v = ['name' => '', 'email' => '', 'phone' => '', 'channel' => 'Telegram', 'subject' => '', 'message' => ''];
+            } catch (Throwable $e) {
+                app_log('Contact inquiry submission error: ' . $e->getMessage());
+                $errorMessage = 'We could not save your inquiry right now. Your information is still in the form; please try again shortly.';
+            }
         }
     }
 }
@@ -88,8 +98,10 @@ if (is_post()) {
     </ul>
 
     <div class="nav-actions">
-      <?php if (current_user()): ?>
+      <?php if (current_user() && can('dashboard.view')): ?>
         <a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta">Dashboard</a>
+      <?php elseif (current_user()): ?>
+        <a href="<?= e(url('profile.php')) ?>" class="btn-nav-cta">My Account</a>
       <?php else: ?>
         <a href="<?= e(url('login.php')) ?>" class="btn-nav-login">Sign In</a>
         <a href="<?= e(url('register.php')) ?>" class="btn-nav-cta">Get Started</a>
@@ -232,6 +244,11 @@ if (is_post()) {
         <form method="post" action="<?= e(url('contact.php')) ?>">
           <?= csrf_field() ?>
 
+          <div hidden aria-hidden="true">
+            <label for="hp_website">Website</label>
+            <input id="hp_website" name="hp_website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
           <div class="contact-form-row">
             <div class="luxury-form-group">
               <label for="name">Your Name *</label>
@@ -351,7 +368,7 @@ if (is_post()) {
         <li><a href="<?= e(url('login.php')) ?>">Client Sign In</a></li>
         <li><a href="<?= e(url('register.php')) ?>">Create Account</a></li>
         <li><a href="<?= e(url('forgot-password.php')) ?>">Forgot Password</a></li>
-        <li><a href="<?= e(url('dashboard.php')) ?>">Workshop Dashboard</a></li>
+        <?php if (current_user() && can('dashboard.view')): ?><li><a href="<?= e(url('dashboard.php')) ?>">Workshop Dashboard</a></li><?php endif; ?>
       </ul>
     </details>
 

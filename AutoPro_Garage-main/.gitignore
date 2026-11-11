@@ -6,3 +6,6 @@ storage/installed.lock
 .DS_Store
 *.log
 storage/private/*.generated.sql
+storage/private/encryption.key
+storage/mail_spool/
+storage/rate_limits/

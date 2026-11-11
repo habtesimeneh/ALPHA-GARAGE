@@ -153,7 +153,7 @@ SELECT last_hash, last_id FROM audit_chain_head WHERE id = 1 FOR UPDATE;
 ### Layer 1: Application-Level Enforcement
 - No controller, service, or API endpoint provides an `UPDATE` or `DELETE` path for `audit_logs`.
 - The web interface only provides read-only inspection and CSV export features.
-- Access to audit inspection is restricted solely to the `Super Administrator` role.
+- Access to audit inspection requires the `audit.view` permission, which only the `administrator` role holds in the live database (verified 2026-11-09).
 
 ### Layer 2: Database Engine Triggers
 Even if an attacker gains code execution or exploits an SQL injection vulnerability in the application layer, the database engine itself rejects any attempt to mutate audit records:

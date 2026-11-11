@@ -1,16 +1,19 @@
 <?php
 declare(strict_types=1);
 
-define('APP_ROOT', dirname(__DIR__));
+if (!defined('APP_ROOT')) {
+    define('APP_ROOT', dirname(__DIR__));
+}
 
 $config = require APP_ROOT . '/app/config/app.php';
 $GLOBALS['config'] = $config;
 date_default_timezone_set($config['timezone']);
+require_once APP_ROOT . '/app/helpers/functions.php';
 
 /* ---- error handling: never leak internals to the browser ---- */
 ini_set('display_errors', $config['debug'] ? '1' : '0');
 ini_set('log_errors', '1');
-ini_set('error_log', APP_ROOT . '/storage/logs/php-error.log');
+ini_set('error_log', storage_path('logs/php-error.log'));
 error_reporting(E_ALL);
 
 set_exception_handler(function (Throwable $e): void {
@@ -30,7 +33,6 @@ spl_autoload_register(function (string $class): void {
         if (is_file($f)) { require_once $f; return; }
     }
 });
-require_once APP_ROOT . '/app/helpers/functions.php';
 require_once APP_ROOT . '/app/middleware/auth.php';
 require_once APP_ROOT . '/app/middleware/permissions.php';
 
@@ -47,7 +49,24 @@ $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 ini_set('session.use_strict_mode', '1');
 ini_set('session.use_only_cookies', '1');
 ini_set('session.cookie_httponly', '1');
-session_name($config['session']['name']);
+
+// Explicit trusted test-mode session isolation:
+$isTestMode = getenv('GMS_TEST_MODE') === '1'
+    || (getenv('GMS_STORAGE_PATH') !== false && trim((string) getenv('GMS_STORAGE_PATH')) !== '');
+
+if ($isTestMode) {
+    $sessDir = storage_path('sessions');
+    if (!is_dir($sessDir) && !@mkdir($sessDir, 0700, true) && !is_dir($sessDir)) {
+        app_log('Cannot create test session directory: ' . $sessDir);
+    }
+    if (is_dir($sessDir)) {
+        session_save_path($sessDir);
+    }
+    session_name('GMSSESSID_TEST');
+} else {
+    session_name($config['session']['name']);
+}
+
 session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
 session_start();
 

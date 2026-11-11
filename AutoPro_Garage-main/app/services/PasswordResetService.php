@@ -50,22 +50,42 @@ final class PasswordResetService
                 );
             });
 
-            // Build full password recovery URL
-            $resetUrl = url('reset-password.php?token=' . $rawToken);
+            // Build full password recovery URL (absolute: it is opened from an e-mail client)
+            $resetUrl = app_url('reset-password.php?token=' . $rawToken);
 
             // Deliver notification via MailService
             $mailResult = MailService::sendPasswordReset($user['email'], $user['full_name'], $resetUrl);
+            $delivered  = !empty($mailResult['ok']);
 
-            // Audit the request (without ever exposing raw token)
+            // Audit the request (without ever exposing raw token or link)
             AuditLogger::logSafe(
                 'password_reset_requested',
                 'users',
-                (string) $user['id'],
+                (int) $user['id'],
                 null,
-                ['email' => $email, 'transport' => $mailResult['transport'] ?? 'unknown'],
+                [
+                    'email'     => $email,
+                    'transport' => $mailResult['transport'] ?? 'unknown',
+                    'delivered' => $delivered,
+                ],
                 'success',
                 ['user_id' => (int) $user['id'], 'username' => $user['username']]
             );
+
+            if (!$delivered) {
+                AuditLogger::logSafe(
+                    'password_reset_delivery_failed',
+                    'security',
+                    (int) $user['id'],
+                    null,
+                    [
+                        'email'     => $email,
+                        'transport' => $mailResult['transport'] ?? 'unknown',
+                        'error'     => mb_substr((string) ($mailResult['error'] ?? 'Unknown delivery failure.'), 0, 300),
+                    ],
+                    'failure'
+                );
+            }
 
             // For local development convenience if SMTP is not active
             if (($mailResult['transport'] ?? '') === 'dev_spool' && !empty($GLOBALS['config']['debug'])) {

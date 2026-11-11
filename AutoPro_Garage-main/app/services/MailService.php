@@ -19,23 +19,51 @@ final class MailService
             }
         }
 
+        $encryption = strtolower((string) (getenv('SMTP_ENCRYPTION') ?: ($local['encryption'] ?? 'tls')));
+        if (!in_array($encryption, ['tls', 'ssl', 'none'], true)) {
+            $encryption = 'tls';
+        }
+
+        $fromEmail = (string) (getenv('SMTP_FROM_EMAIL') ?: ($local['from_email'] ?? ''));
+        if ($fromEmail === '' || !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            $fromEmail = self::defaultSender();
+        }
+
         return [
-            'host'       => getenv('SMTP_HOST') ?: ($local['host'] ?? 'smtp.gmail.com'),
+            'host'       => (string) (getenv('SMTP_HOST') ?: ($local['host'] ?? '')),
             'port'       => (int) (getenv('SMTP_PORT') ?: ($local['port'] ?? 587)),
-            'user'       => getenv('SMTP_USERNAME') ?: ($local['user'] ?? ''),
-            'pass'       => getenv('SMTP_PASSWORD') ?: ($local['pass'] ?? ''),
-            'from_email' => getenv('SMTP_FROM_EMAIL') ?: ($local['from_email'] ?? 'noreply@autopro-garage.com'),
-            'from_name'  => getenv('SMTP_FROM_NAME') ?: ($local['from_name'] ?? 'Alpha Garage'),
-            'encryption' => getenv('SMTP_ENCRYPTION') ?: ($local['encryption'] ?? 'tls'), // 'tls', 'ssl', or 'none'
+            'user'       => (string) (getenv('SMTP_USERNAME') ?: ($local['user'] ?? '')),
+            'pass'       => (string) (getenv('SMTP_PASSWORD') ?: ($local['pass'] ?? '')),
+            'from_email' => $fromEmail,
+            'from_name'  => (string) (getenv('SMTP_FROM_NAME') ?: ($local['from_name'] ?? 'Alpha Garage')),
+            'encryption' => $encryption, // 'tls', 'ssl', or 'none'
         ];
     }
 
+    /** Sender on the configured application domain; never the legacy AutoPro domain. */
+    private static function defaultSender(): string
+    {
+        $appUrl = getenv('GMS_APP_URL');
+        if ($appUrl === false) {
+            $appUrl = (string) ($GLOBALS['config']['app_url'] ?? '');
+        }
+        $host = $appUrl !== '' ? parse_url($appUrl, PHP_URL_HOST) : null;
+        if (is_string($host) && preg_match('/^[A-Za-z0-9.-]+$/', $host)) {
+            return 'no-reply@' . strtolower($host);
+        }
+        return 'no-reply@localhost';
+    }
+
     /**
-     * Send an email via SMTP or fallback to native mail/dev-logger.
+     * Attempt delivery over SMTP, then native mail(). The local spool is a
+     * development record only and is reported as a delivery failure.
+     *
+     * @return array{ok: bool, transport: string, message: string, error?: string, file?: string}
      */
     public static function send(string $toEmail, string $toName, string $subject, string $htmlBody, string $textBody = ''): array
     {
         $cfg = self::config();
+        $error = '';
 
         // If SMTP credentials are fully provided, attempt SMTP socket delivery
         if (!empty($cfg['host']) && !empty($cfg['user']) && !empty($cfg['pass'])) {
@@ -43,8 +71,8 @@ final class MailService
                 self::sendViaSmtp($cfg, $toEmail, $toName, $subject, $htmlBody, $textBody);
                 return ['ok' => true, 'transport' => 'smtp', 'message' => 'Email sent successfully via SMTP.'];
             } catch (Throwable $e) {
-                app_log('SMTP delivery error: ' . $e->getMessage());
-                // Fall back to native mail if permitted
+                $error = $e->getMessage();
+                app_log('SMTP delivery error: ' . $error);
             }
         }
 
@@ -54,7 +82,7 @@ final class MailService
             'Content-type: text/html; charset=UTF-8',
             'From: ' . self::formatAddress($cfg['from_email'], $cfg['from_name']),
             'Reply-To: ' . $cfg['from_email'],
-            'X-Mailer: AutoPro-Enterprise-Mailer',
+            'X-Mailer: Alpha-Garage-Mailer',
         ];
 
         if (!empty(ini_get('sendmail_path')) || !empty(ini_get('SMTP'))) {
@@ -62,21 +90,34 @@ final class MailService
             if ($sent) {
                 return ['ok' => true, 'transport' => 'native', 'message' => 'Email sent via native mail().'];
             }
+            if ($error === '') {
+                $error = 'Native mail() reported a delivery failure.';
+            }
+            app_log('Native mail() delivery failed for ' . $toEmail . '.');
         }
 
-        // Development fallback: Record in local development mail spool
-        $spoolDir = APP_ROOT . '/storage/mail_spool';
+        // Development spool: writes a local copy only, never a delivered message.
+        $spoolDir = storage_path('mail_spool');
         if (!is_dir($spoolDir)) {
             @mkdir($spoolDir, 0775, true);
         }
         $filename = $spoolDir . '/mail_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.html';
-        @file_put_contents($filename, "<!-- TO: {$toEmail} ({$toName}) | SUBJECT: {$subject} -->\n" . $htmlBody);
+        $spooled = @file_put_contents($filename, "<!-- TO: {$toEmail} ({$toName}) | SUBJECT: {$subject} -->\n" . $htmlBody) !== false;
+        if (!$spooled) {
+            $filename = '';
+        }
+
+        if ($error === '') {
+            $error = 'No SMTP transport is configured.';
+        }
+        app_log('Email to ' . $toEmail . ' was not delivered: ' . $error . ($spooled ? ' (spooled locally for inspection)' : ' (spool write failed)'));
 
         return [
-            'ok'        => true,
+            'ok'        => false,
             'transport' => 'dev_spool',
             'file'      => $filename,
-            'message'   => 'Local development mode: Email queued to storage/mail_spool.',
+            'error'     => $error,
+            'message'   => 'Email was NOT delivered. ' . $error . ($spooled ? ' A local copy was written to storage/mail_spool.' : ''),
         ];
     }
 
@@ -87,6 +128,11 @@ final class MailService
     {
         $garageName = Setting::get('garage_name', 'Alpha Garage');
         $subject = 'Reset Your Password — ' . $garageName;
+
+        // The address and link can contain user-controlled characters; escape for HTML.
+        $safeGarage = e($garageName);
+        $safeName   = e($toName);
+        $safeUrl    = e($resetUrl);
 
         $html = <<<HTML
 <!DOCTYPE html>
@@ -112,20 +158,20 @@ final class MailService
 <body>
 <div class="wrapper">
   <div class="header">
-    <div class="brand">{$garageName}</div>
+    <div class="brand">{$safeGarage}</div>
     <div class="tagline">EXCELLENCE IN EVERY DETAIL &middot; LUXURY AUTOMOTIVE SERVICE</div>
   </div>
   <div class="content">
     <h2 class="h1">Password Recovery Request</h2>
-    <p>Dear {$toName},</p>
+    <p>Dear {$safeName},</p>
     <p>We received a request to reset the password for your account. Click the secure link below to proceed:</p>
     
     <div class="btn-container">
-      <a href="{$resetUrl}" class="btn" target="_blank">Reset Password</a>
+      <a href="{$safeUrl}" class="btn" target="_blank">Reset Password</a>
     </div>
 
     <p style="font-size: 13px; color: #A7B0AA;">If the button above does not open, copy and paste this URL into your browser:</p>
-    <div class="url-box">{$resetUrl}</div>
+    <div class="url-box">{$safeUrl}</div>
 
     <div class="note">
       <strong>Important Security Notice:</strong>
@@ -137,7 +183,7 @@ final class MailService
     </div>
   </div>
   <div class="footer">
-    &copy; {$garageName} &middot; Highly Secure Automotive Management System.
+    &copy; {$safeGarage} &middot; Highly Secure Automotive Management System.
   </div>
 </div>
 </body>
@@ -227,7 +273,7 @@ HTML;
         $write('DATA');
         $expect('354');
 
-        $boundary = '=_AutoPro_' . md5(uniqid((string) mt_rand(), true));
+        $boundary = '=_AlphaGarage_' . md5(uniqid((string) mt_rand(), true));
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
 
         $data = [

@@ -20,7 +20,7 @@ if (is_post()) {
         });
         session_regenerate_id(true);
         flash('success', 'Password updated.');
-        redirect('dashboard.php');
+        redirect($user['role_name'] === 'customer' ? 'index.php' : 'dashboard.php');
     } else {
         AuditLogger::logSafe('password_change_failed', 'users', (int) $user['id'], null, ['fields' => array_keys($errors)], 'failure');
     }

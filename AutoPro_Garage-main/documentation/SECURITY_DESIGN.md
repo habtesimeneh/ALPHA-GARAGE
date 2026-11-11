@@ -69,7 +69,17 @@ Two independent layers of rate limiting are enforced via `login_attempts`:
 3. **Generic Error Responses:**
    - Failed logins return `"Invalid username or password"`, preventing account enumeration.
 
-### 2.4 Session Security Lifecycle
+### 2.4 Public Form Abuse Protection (Phase 1)
+`public/register.php` and `public/contact.php` apply server-side throttling before any validation or persistence:
+- **Registration:** maximum 5 POST attempts per IP per 15-minute window.
+- **Contact inquiries:** maximum 5 POST attempts per IP per 10-minute window.
+- **Mechanism:** `RateLimiter` (`app/services/RateLimiter.php`) stores a hashed `action|client_ip` key in `storage/rate_limits/`, guarded by `flock(LOCK_EX)`. Counters contain no personal data and use fixed windows.
+- **Denied requests:** HTTP `429 Too Many Requests` with a `Retry-After` header and a generic user-facing message. Validation and persistence are skipped.
+- **Honeypot:** both forms include a visually hidden `hp_website` field. Submissions that fill it are acknowledged without creating a record (contact) or an account (registration).
+- **Fail-open:** if the rate-limit storage is unavailable the failure is logged and requests are allowed, so a storage problem cannot take public forms offline.
+- CSRF verification still runs globally before these checks, and normal submissions are unaffected.
+
+### 2.5 Session Security Lifecycle
 Native PHP session management is fortified with hardened configuration directives:
 
 | Session Directive | Configured Value | Security Purpose |
@@ -103,38 +113,52 @@ Users ────(1:N)────> Roles ────(N:M)────> Permis
 
 ### 3.2 Granular Permissions Matrix
 
-| Permission Code | Super Admin | Manager | Receptionist | Mechanic | Inventory Mgr | Accountant |
+> **Verified against the live database on 2026-11-09 (Phase 1 reconciliation).** The live schema defines **40** permission codes and **6** roles. The `administrator` role holds all 40 codes; the `customer` role holds none. Role names are the literal `roles.name` values.
+
+| Permission Code | administrator | receptionist | mechanic | inventory_manager | accountant | customer |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| `dashboard.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `customers.view` | ✓ | ✓ | ✓ | ✗ | ✗ | ✓ |
-| `customers.manage` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `vehicles.view` | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
-| `vehicles.manage` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `appointments.view` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `appointments.manage`| ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `services.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `services.manage` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
-| `suppliers.view` | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ |
-| `suppliers.manage` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
-| `jobs.view_all` | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ |
-| `jobs.view_assigned`| ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
-| `jobs.create` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `jobs.edit` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| `jobs.update_status`| ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
-| `jobs.assign_mechanic`| ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
-| `inventory.view` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
-| `inventory.manage` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
-| `inventory.issue` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
-| `inventory.adjust` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
-| `invoices.view` | ✓ | ✓ | ✗ | ✗ | ✗ | ✓ |
-| `invoices.manage` | ✓ | ✓ | ✗ | ✗ | ✗ | ✓ |
-| `invoices.pay` | ✓ | ✓ | ✗ | ✗ | ✗ | ✓ |
-| `invoices.refund` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `reports.view` | ✓ | ✓ | ✗ | ✗ | ✗ | ✓ |
+| `appointments.manage` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `appointments.view` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | `audit.view` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `users.view` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| `users.manage` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `customers.deactivate` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `customers.manage` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `customers.view` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
+| `dashboard.view` | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| `expenses.manage` | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ |
+| `expenses.view` | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ |
+| `inventory.issue` | ✓ | ✗ | ✗ | ✓ | ✗ | ✗ |
+| `inventory.manage` | ✓ | ✗ | ✗ | ✓ | ✗ | ✗ |
+| `inventory.stock` | ✓ | ✗ | ✗ | ✓ | ✗ | ✗ |
+| `inventory.view` | ✓ | ✗ | ✓ | ✓ | ✗ | ✗ |
+| `invoices.create` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `invoices.edit` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `invoices.view` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
+| `jobs.assign` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `jobs.create` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `jobs.edit` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `jobs.progress` | ✓ | ✗ | ✓ | ✗ | ✗ | ✗ |
+| `jobs.request_parts` | ✓ | ✗ | ✓ | ✗ | ✗ | ✗ |
+| `jobs.view_all` | ✓ | ✓ | ✗ | ✓ | ✗ | ✗ |
+| `jobs.view_assigned` | ✓ | ✗ | ✓ | ✗ | ✗ | ✗ |
+| `mechanics.manage` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `mechanics.view` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `payments.record` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
+| `payments.refund` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `payments.view` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
+| `reports.financial` | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ |
+| `reports.inventory` | ✓ | ✗ | ✗ | ✓ | ✗ | ✗ |
+| `reports.view` | ✓ | ✓ | ✗ | ✗ | ✓ | ✗ |
+| `roles.manage` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `services.manage` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `services.view` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | `settings.manage` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `suppliers.manage` | ✓ | ✗ | ✗ | ✓ | ✗ | ✗ |
+| `suppliers.view` | ✓ | ✓ | ✗ | ✓ | ✗ | ✗ |
+| `users.manage` | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `vehicles.manage` | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
+| `vehicles.view` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+
+> **Historical note:** earlier revisions of this document used codes that do not exist in the live schema (`jobs.update_status`, `jobs.assign_mechanic`, `inventory.adjust`, `invoices.manage`, `invoices.pay`, `invoices.refund`, `users.view`) and roles that were never provisioned (`super_admin`, `manager`). Those rows have been replaced by the verified matrix above.
 
 ### 3.3 Server-Side Enforcement (Defense Against IDOR)
 - **Zero Frontend Reliance:** Hiding navigation links in UI is treated merely as UX convenience. Every single backend endpoint enforces authorization via:
@@ -208,17 +232,17 @@ To search sensitive fields without decrypting the entire database into memory:
 ### 5.3 Cross-Site Request Forgery (CSRF) Prevention
 - **Token Mechanism:** Cryptographically random 256-bit token generated per session (`random_bytes(32)`).
 - **Form Injection:** Embedded in all HTML forms via `<?= csrf_field() ?>`.
-- **Enforcement:** All non-idempotent HTTP methods (`POST`, `PUT`, `DELETE`) require valid token verification via `validate_csrf()`. Mismatched or missing tokens abort with HTTP 403 Forbidden.
-- **AJAX Support:** APIs support `X-CSRF-Token` HTTP request headers.
+- **Enforcement:** Every `POST` request is verified in `app/bootstrap.php` via `verify_csrf()`. Mismatched, missing, or expired tokens abort with HTTP 419 and are recorded in the audit log.
+- **AJAX Support:** Requests may supply the token in the `X-CSRF-Token` request header instead of the `_csrf` form field.
 
 ### 5.4 Content Security Policy (CSP) & HTTP Headers
-The application injects modern browser defensive headers on every HTTP response:
+The application injects these browser defensive headers on every HTTP response (verified in `app/bootstrap.php`):
 ```http
-Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; frame-ancestors 'none';
-X-Frame-Options: SAMEORIGIN
+Content-Security-Policy: default-src 'self'; img-src 'self' data: https://images.unsplash.com; style-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'
+X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: geolocation=(), microphone=(), camera=()
+Referrer-Policy: same-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
 ```
 
 ### 5.5 Insecure Direct Object References (IDOR)

@@ -5,6 +5,12 @@
 -- initial configuration (roles, permissions, settings).
 -- No user accounts are created here: the first administrator is created
 -- through public/setup.php (password chosen by you, stored with password_hash).
+--
+-- DESTRUCTIVE: this file contains CREATE DATABASE and USE garage_management_system
+-- and DROPs the listed tables. Importing it with a differently named database on
+-- the command line does NOT redirect it: the USE statement wins. For a disposable
+-- or test database, strip the CREATE DATABASE/USE lines first (see
+-- docs/phase-1.6/PHASE_1_6_EXECUTION_REPORT.md §5).
 -- =====================================================================
 CREATE DATABASE IF NOT EXISTS garage_management_system
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

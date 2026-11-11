@@ -129,15 +129,16 @@ final class AuthService
             return null;
         }
 
-        $row['permissions'] = array_column(Database::all(
+        $user['permissions'] = array_column(Database::all(
             'SELECT p.code FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = ?', [$user['role_id']]), 'code');
         $mech = Database::one('SELECT id FROM mechanics WHERE user_id = ? AND is_active = 1', [$user['id']]);
-        $row['mechanic_id'] = $mech ? (int) $mech['id'] : null;
+        $user['mechanic_id'] = $mech ? (int) $mech['id'] : null;
 
         // Rotate the remember token on each use (theft-limited reuse).
         self::setRememberToken((int) $user['id'], (int) ($GLOBALS['config']['remember']['duration_days'] ?? 30));
 
-        // Re-establish the PHP session.
+        // Re-establish the PHP session with a fresh ID (no fixation via a pre-set session cookie).
+        session_regenerate_id(true);
         $authenticatedSession = [
             'uid' => (int) $user['id'],
             'started_at' => time(),

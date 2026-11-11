@@ -4,7 +4,9 @@
 **System:** AutoPro Garage Management System (Group 1)  
 **Test Suite:** Automated Integration & Security Suite (`tests/run_tests.php`)  
 **Execution Environment:** PHP 8.x / MariaDB 10.x / MAMP on Windows  
-**QA Status:** PASSED (100% Test Pass Rate, Zero Security Vulnerabilities)  
+**QA Status:** HISTORICAL / NOT VERIFIED (see Phase 1 notice below)
+
+> **Phase 1 reconciliation notice (2026-11-09).** This document is a historical template report. Its results were **not re-executed against the live database** during Phase 1 and must be treated as **NOT VERIFIED**. Known inaccuracies: the live schema has **29** tables (not 25); the live permission code is `payments.record` (not `invoices.pay`); and codes such as `invoices.refund`, `invoices.manage`, `jobs.update_status`, `jobs.assign_mechanic`, and `inventory.adjust` do not exist in the live schema. Current evidence-based results are recorded in `docs/phase-1/PHASE_1_TEST_RESULTS.md`.  
 
 ---
 
@@ -58,7 +60,7 @@ Testing was conducted across ten test suites covering functional business workfl
 
 ### 3.3 Suite 3: Role-Based Access Control (RBAC) & IDOR Defenses
 - **Assertion 3.1:** Receptionist role denied access to `users.manage` and `audit.view` (HTTP 403). (**PASSED**)
-- **Assertion 3.2:** Accountant role permitted to record payments (`invoices.pay`) but denied access to workshop job card creation (`jobs.create`). (**PASSED**)
+- **Assertion 3.2:** Accountant role permitted to record payments (`payments.record`) but denied access to workshop job card creation (`jobs.create`). (**PASSED**)
 - **Assertion 3.3 (Horizontal IDOR Defense):** A mechanic logged into the system is strictly limited to viewing job cards assigned to their technician ID; attempting to access another mechanic's job card returns HTTP 403. (**PASSED**)
 
 ### 3.4 Suite 4: Data Validation & Input Sanitization
@@ -131,12 +133,12 @@ Testing was conducted across ten test suites covering functional business workfl
 
 ## 5. QA Sign-Off
 
-The AutoPro Garage Management System has met and exceeded all functional, database, and security requirements specified for Group 1. The software is verified as **robust, secure, and production-ready**.
+> **Superseded (2026-11-09):** the sign-off below reflects the historical template run, not a current Phase 1 assessment. Do not treat it as a production-readiness decision. See `docs/phase-1/PHASE_1_TEST_RESULTS.md` and `docs/phase-1/PHASE_1_REMAINING_RISKS.md` for the current state.
 
 - **Lead QA Engineer:** Antigravity Engineering QA  
 - **Lead Security Architect:** Antigravity Cyber Defense  
 - **Date:** November 2026  
-- **Final Verdict:** **APPROVED FOR DEPLOYMENT**  
+- **Historical Verdict:** APPROVED FOR DEPLOYMENT (not re-verified in Phase 1)
 
 ---
 *End of Quality Assurance & Security Verification Test Report.*

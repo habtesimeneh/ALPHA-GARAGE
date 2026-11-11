@@ -42,7 +42,7 @@ final class CryptoService
         }
 
         // 2. Check local secure key file in storage/private/
-        $keyDir = APP_ROOT . '/storage/private';
+        $keyDir = storage_path('private');
         $keyFile = $keyDir . '/encryption.key';
 
         if (!is_dir($keyDir) && !mkdir($keyDir, 0700, true) && !is_dir($keyDir)) {

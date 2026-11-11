@@ -53,8 +53,10 @@ try {
     </ul>
 
     <div class="nav-actions">
-      <?php if (current_user()): ?>
+      <?php if (current_user() && can('dashboard.view')): ?>
         <a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta">Dashboard</a>
+      <?php elseif (current_user()): ?>
+        <a href="<?= e(url('profile.php')) ?>" class="btn-nav-cta">My Account</a>
       <?php else: ?>
         <a href="<?= e(url('login.php')) ?>" class="btn-nav-login">Sign In</a>
         <a href="<?= e(url('register.php')) ?>" class="btn-nav-cta">Get Started</a>
@@ -204,7 +206,7 @@ try {
         <li><a href="<?= e(url('login.php')) ?>">Client Sign In</a></li>
         <li><a href="<?= e(url('register.php')) ?>">Create Account</a></li>
         <li><a href="<?= e(url('forgot-password.php')) ?>">Forgot Password</a></li>
-        <li><a href="<?= e(url('dashboard.php')) ?>">Workshop Dashboard</a></li>
+        <?php if (current_user() && can('dashboard.view')): ?><li><a href="<?= e(url('dashboard.php')) ?>">Workshop Dashboard</a></li><?php endif; ?>
       </ul>
     </details>
 

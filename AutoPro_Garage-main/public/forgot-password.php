@@ -15,13 +15,31 @@ $email = '';
 
 if (is_post()) {
     $email = post('email');
-    $result = PasswordResetService::requestReset($email);
-    $message = $result['message'];
-    $isSuccess = true;
+    $normalizedEmail = strtolower(trim($email));
 
-    if (!empty($_SESSION['_dev_reset_link'])) {
-        $devResetLink = $_SESSION['_dev_reset_link'];
-        unset($_SESSION['_dev_reset_link']);
+    // Throttle per IP and per normalized address; both buckets are hashed on disk.
+    $ipLimit    = RateLimiter::check('password_reset_ip|' . client_ip(), 5, 900);
+    $emailLimit = ['allowed' => true, 'retry_after' => 0];
+    if ($normalizedEmail !== '' && filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+        $emailLimit = RateLimiter::check('password_reset_email|' . $normalizedEmail, 5, 900);
+    }
+
+    if (!$ipLimit['allowed'] || !$emailLimit['allowed']) {
+        $retryAfter = max((int) $ipLimit['retry_after'], (int) $emailLimit['retry_after'], 1);
+        http_response_code(429);
+        header('Retry-After: ' . $retryAfter);
+        $message   = 'Too many password recovery requests. Please try again in '
+                   . max(1, (int) ceil($retryAfter / 60)) . ' minute(s).';
+        $isSuccess = false;
+    } else {
+        $result    = PasswordResetService::requestReset($email);
+        $message   = $result['message'];
+        $isSuccess = (bool) $result['ok'];
+
+        if (!empty($_SESSION['_dev_reset_link'])) {
+            $devResetLink = $_SESSION['_dev_reset_link'];
+            unset($_SESSION['_dev_reset_link']);
+        }
     }
 }
 
@@ -97,9 +115,9 @@ $sliderImages = [
     </div>
 
     <?php if ($message): ?>
-      <div class="luxury-alert luxury-alert-success" role="alert">
+      <div class="luxury-alert <?= $isSuccess ? 'luxury-alert-success' : 'luxury-alert-danger' ?>" role="alert">
         <div>
-          <strong>Request Processed</strong><br>
+          <strong><?= $isSuccess ? 'Request Processed' : 'Request Not Processed' ?></strong><br>
           <?= e($message) ?>
         </div>
       </div>

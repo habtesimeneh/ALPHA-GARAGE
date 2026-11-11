@@ -141,7 +141,10 @@ try {
         }
 
         foreach (migration_statements($sql) as $statement) {
-            $pdo->exec($statement);
+            $result = $pdo->query($statement);
+            if ($result instanceof PDOStatement) {
+                $result->closeCursor();
+            }
         }
         $record = $pdo->prepare('INSERT INTO schema_migrations (migration, checksum) VALUES (?, ?)');
         $record->execute([$name, $checksum]);

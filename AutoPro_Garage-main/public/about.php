@@ -43,7 +43,8 @@ $faqs = [
       <li><a href="<?= e(url('contact.php')) ?>" class="nav-link">Contact</a></li>
     </ul>
     <div class="nav-actions">
-      <?php if (current_user()): ?><a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta">Dashboard</a>
+      <?php if (current_user() && can('dashboard.view')): ?><a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta">Dashboard</a>
+      <?php elseif (current_user()): ?><a href="<?= e(url('profile.php')) ?>" class="btn-nav-cta">My Account</a>
       <?php else: ?><a href="<?= e(url('login.php')) ?>" class="btn-nav-login">Sign In</a><a href="<?= e(url('register.php')) ?>" class="btn-nav-cta">Get Started</a><?php endif; ?>
       <button class="nav-toggle-btn" type="button" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false"><span aria-hidden="true">&#9776;</span></button>
     </div>
@@ -227,7 +228,7 @@ $faqs = [
         <li><a href="<?= e(url('login.php')) ?>">Client Sign In</a></li>
         <li><a href="<?= e(url('register.php')) ?>">Create Account</a></li>
         <li><a href="<?= e(url('forgot-password.php')) ?>">Forgot Password</a></li>
-        <li><a href="<?= e(url('dashboard.php')) ?>">Workshop Dashboard</a></li>
+        <?php if (current_user() && can('dashboard.view')): ?><li><a href="<?= e(url('dashboard.php')) ?>">Workshop Dashboard</a></li><?php endif; ?>
       </ul>
     </details>
   </div>

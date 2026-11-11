@@ -26,6 +26,54 @@ function url(string $path = ''): string
     return base_url() . '/' . ltrim($path, '/');
 }
 
+/**
+ * Absolute application URL for links that leave the browser session (e-mail).
+ * GMS_APP_URL (or local.php 'app_url') should be the public base URL, e.g.
+ * https://garage.example.com or https://garage.example.com/public.
+ * Falls back to the current request host for local development only.
+ */
+function app_url(string $path = ''): string
+{
+    static $base = null;
+
+    if ($base === null) {
+        $configured = getenv('GMS_APP_URL');
+        if ($configured === false) {
+            $configured = (string) ($GLOBALS['config']['app_url'] ?? '');
+        }
+        $configured = trim((string) $configured);
+        $parts = $configured !== '' ? parse_url($configured) : false;
+
+        $valid = is_array($parts)
+            && in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true)
+            && !empty($parts['host'])
+            && empty($parts['user'])
+            && empty($parts['pass'])
+            && empty($parts['query'])
+            && empty($parts['fragment']);
+
+        if ($valid) {
+            $base = rtrim($configured, '/');
+            if (strtolower((string) $parts['scheme']) === 'http'
+                && !in_array(strtolower((string) $parts['host']), ['localhost', '127.0.0.1', '::1'], true)) {
+                app_log('GMS_APP_URL uses http on a non-local host; outbound links will not be HTTPS.');
+            }
+        } else {
+            if ($configured !== '') {
+                app_log('Ignoring invalid GMS_APP_URL configuration.');
+            }
+            $https  = !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+            $host   = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+            if (!preg_match('/^[A-Za-z0-9.\-:\[\]]+$/', $host)) {
+                $host = 'localhost';
+            }
+            $base = ($https ? 'https' : 'http') . '://' . $host . base_url();
+        }
+    }
+
+    return $base . '/' . ltrim($path, '/');
+}
+
 function asset(string $path): string
 {
     $file = APP_ROOT . '/public/assets/' . ltrim($path, '/');
@@ -135,9 +183,94 @@ function abort(int $code, string $message = ''): never
     exit;
 }
 
+/**
+ * Resolves an absolute path within the application storage directory.
+ *
+ *  - Uses GMS_STORAGE_PATH when explicitly configured in the environment.
+ *  - Otherwise defaults to APP_ROOT . '/storage'.
+ *  - Normalizes slashes and validates against path traversal (rejects '..' segments).
+ *  - Forbids placing storage inside the public web root.
+ *  - Automatically creates required directories safely with 0770 permissions.
+ *
+ * @param string $subpath Relative subpath within storage (e.g. 'logs/app.log', 'rate_limits').
+ * @return string Absolute normalized filesystem path with forward slashes.
+ * @throws InvalidArgumentException If path traversal or an unsafe path is detected.
+ * @throws RuntimeException If test mode attempts to use the production storage directory.
+ */
+function storage_path(string $subpath = ''): string
+{
+    $envPath = getenv('GMS_STORAGE_PATH');
+    if ($envPath !== false && trim($envPath) !== '') {
+        $root = str_replace('\\', '/', trim($envPath));
+    } else {
+        $root = str_replace('\\', '/', APP_ROOT) . '/storage';
+    }
+    $root = rtrim($root, '/');
+
+    // Test mode safety guard: test mode must never point to production storage
+    $isTestMode = getenv('GMS_TEST_MODE') === '1' || getenv('GMS_ALLOW_DESTRUCTIVE_TESTS') === '1';
+    $prodDefault = rtrim(str_replace('\\', '/', APP_ROOT), '/') . '/storage';
+    if ($isTestMode && strcasecmp($root, $prodDefault) === 0) {
+        throw new RuntimeException('Test mode is enabled but storage points to production storage. Set GMS_STORAGE_PATH to an isolated directory.');
+    }
+
+    // Web root safety guard: storage must NEVER reside inside public web root
+    $publicDir = rtrim(str_replace('\\', '/', APP_ROOT), '/') . '/public';
+    if (str_starts_with(strtolower($root), strtolower($publicDir))) {
+        throw new InvalidArgumentException('Storage directory cannot reside within the public web root.');
+    }
+
+    if ($subpath === '') {
+        if (!is_dir($root) && !@mkdir($root, 0770, true) && !is_dir($root)) {
+            throw new RuntimeException("Cannot create storage root directory: $root");
+        }
+        return $root;
+    }
+
+    if (str_contains($subpath, "\0")) {
+        throw new InvalidArgumentException('Null byte detected in storage path.');
+    }
+
+    $normalized = str_replace('\\', '/', trim($subpath));
+
+    // Reject absolute paths or Windows drive letters in subpath (e.g. 'C:', '/', '\')
+    if (preg_match('~^[a-zA-Z]:|^/|^\\\\~', $normalized)) {
+        throw new InvalidArgumentException('Subpath must be relative to storage root.');
+    }
+
+    $segments = explode('/', $normalized);
+    $cleanSegments = [];
+    foreach ($segments as $seg) {
+        $seg = trim($seg);
+        if ($seg === '' || $seg === '.') {
+            continue;
+        }
+        if ($seg === '..') {
+            throw new InvalidArgumentException('Path traversal detected in storage path.');
+        }
+        $cleanSegments[] = $seg;
+    }
+
+    $relative = implode('/', $cleanSegments);
+    $target = $root . '/' . $relative;
+
+    $lastSegment = end($cleanSegments);
+    if (str_contains($lastSegment, '.')) {
+        $targetDir = dirname($target);
+    } else {
+        $targetDir = $target;
+    }
+
+    if (!is_dir($targetDir) && !@mkdir($targetDir, 0770, true) && !is_dir($targetDir)) {
+        // Fallback if unwritable
+    }
+
+    return $target;
+}
+
 function app_log(string $message): void
 {
-    $dir = APP_ROOT . '/storage/logs';
+    $dir = storage_path('logs');
     if (!is_dir($dir)) {
         @mkdir($dir, 0775, true);
     }

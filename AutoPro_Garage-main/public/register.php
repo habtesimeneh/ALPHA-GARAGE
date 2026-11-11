@@ -27,6 +27,22 @@ if (is_post()) {
         'phone'     => post('phone'),
         'username'  => post('username'),
     ];
+
+    if (trim((string) ($_POST['hp_website'] ?? '')) !== '') {
+        // Honeypot: pretend success so automated registrations do not learn the trap.
+        flash('success', 'Your account has been created successfully! Please sign in with your credentials.');
+        redirect('login.php');
+    }
+
+    $limit = RateLimiter::check('register|' . client_ip(), 5, 900);
+    if (!$limit['allowed']) {
+        http_response_code(429);
+        header('Retry-After: ' . $limit['retry_after']);
+        $errors['form'] = 'Too many registration attempts from this network. Please try again in ' . max(1, (int) ceil($limit['retry_after'] / 60)) . ' minute(s).';
+    }
+}
+
+if (is_post() && !$errors) {
     $password = (string) ($_POST['password'] ?? '');
     $passwordConfirm = (string) ($_POST['password_confirm'] ?? '');
     $terms = !empty($_POST['terms']);
@@ -104,7 +120,7 @@ if (is_post()) {
             AuditLogger::logSafe(
                 'user_registered',
                 'users',
-                (string) $uid,
+                (int) $uid,
                 null,
                 ['username' => $v['username'], 'email' => $v['email'], 'role_id' => $roleId],
                 'success',
@@ -191,8 +207,17 @@ $sliderImages = [
       <p class="luxury-form-desc">Register with <?= e($garageName) ?> for precision service</p>
     </div>
 
+    <?php if (!empty($errors['form'])): ?>
+      <div class="luxury-alert luxury-alert-danger" role="alert"><?= e($errors['form']) ?></div>
+    <?php endif; ?>
+
     <form method="post" autocomplete="off" novalidate>
       <?= csrf_field() ?>
+
+      <div hidden aria-hidden="true">
+        <label for="hp_website">Website</label>
+        <input id="hp_website" name="hp_website" type="text" tabindex="-1" autocomplete="off">
+      </div>
 
       <!-- Full Name -->
       <div class="luxury-field">

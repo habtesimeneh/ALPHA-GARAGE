@@ -67,7 +67,7 @@ page_header(
             <?php else: foreach ($parts as $p): ?>
               <tr>
                 <td><code><?= e($p['sku']) ?></code></td>
-                <td><strong><a href="<?= e(url('inventory/history.php?id=' . $p['id'])) ?>"><?= e($p['name']) ?></a></strong></td>
+                <td><strong><a href="<?= e(url('inventory/history.php?part_id=' . $p['id'])) ?>"><?= e($p['name']) ?></a></strong></td>
                 <td><span class="badge"><?= e($p['category'] ?: '—') ?></span></td>
                 <td class="num font-mono"><?= (int) $p['quantity'] ?> <?= e($p['unit']) ?></td>
                 <td class="num font-mono"><?= money($p['unit_cost']) ?></td>

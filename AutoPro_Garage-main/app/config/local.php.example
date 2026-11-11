@@ -1,6 +1,7 @@
 <?php
 // Copy this file to local.php and set your local database connection.
 // local.php is git-ignored and the app directory is blocked from web access.
+// Never commit real credentials, SMTP passwords or private keys.
 return [
     'host' => 'localhost',
     'port' => 3306,
@@ -8,4 +9,19 @@ return [
     'user' => 'garage_app',
     'pass' => 'replace-with-the-password-created-for-garage_app',
     'tz' => '+03:00',
+
+    // Absolute public base URL used in outbound e-mail links (no trailing slash).
+    // GMS_APP_URL overrides this value.
+    'app_url' => 'https://garage.example.com',
+
+    // Optional mail transport. SMTP_* environment variables override these values.
+    'mail' => [
+        'host'       => 'smtp.example.com',
+        'port'       => 587,
+        'user'       => 'alerts@garage.example.com',
+        'pass'       => 'replace-with-the-smtp-password',
+        'from_email' => 'no-reply@garage.example.com',
+        'from_name'  => 'Alpha Garage',
+        'encryption' => 'tls',   // tls, ssl or none
+    ],
 ];

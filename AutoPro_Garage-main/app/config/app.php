@@ -8,6 +8,7 @@ declare(strict_types=1);
  */
 $config = [
     'name'     => 'Alpha Garage',
+    'app_url'  => '',                    // absolute public base URL for outbound links; GMS_APP_URL overrides
     'timezone' => 'Africa/Addis_Ababa',
     'debug'    => false,                 // never true in production: errors are written to storage/logs only
     'session'  => [

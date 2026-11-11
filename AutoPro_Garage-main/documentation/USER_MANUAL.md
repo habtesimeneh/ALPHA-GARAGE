@@ -15,20 +15,12 @@ Open your web browser (Chrome, Edge, or Firefox) and navigate to:
 http://localhost/garage-management-systems/public/login.php
 ```
 
-### 1.2 Demo Credentials Quick-Reference
+### 1.2 System Roles & Accounts
 
-| Role | Username | Default Password | Primary Responsibilities |
-|---|---|---|---|
-| **Super Administrator** | `admin` | `Admin#2026!` | Full system administration, audit verification, user management |
-| **Garage Manager** | `manager` | `Manager#2026!` | Workshop oversight, reports, inventory and financial supervision |
-| **Receptionist** | `receptionist`| `Recept#2026!` | Customer onboarding, appointments, vehicle intake, job card creation |
-| **Mechanic 1** | `mechanic1` | `Mechanic#2026!`| Engine & diagnostics technician, job card execution, parts requests |
-| **Mechanic 2** | `mechanic2` | `Mechanic#2026!`| Suspension & electrical technician, repair completion |
-| **Inventory Manager** | `inventory` | `Inventory#2026!`| Spare parts stock, supplier purchase orders, issuing parts to jobs |
-| **Accountant** | `accountant` | `Account#2026!` | Commercial invoices, payment collection, receipts, financial reports |
+The live database defines six roles: `administrator`, `receptionist`, `mechanic`, `inventory_manager`, `accountant`, and `customer`. The `customer` role is created through public self-registration and holds no staff dashboard permissions.
 
-> [!NOTE]
-> All users are prompted to change default credentials upon initial deployment. Account lockouts occur automatically after 5 consecutive failed login attempts.
+> [!IMPORTANT]
+> Demo credentials from earlier template documentation are **not provisioned** on this installation, and passwords are deliberately not documented in source control. The administrator account is the one created during first-time setup (`public/setup.php`, which locks itself afterwards). Use the administrator user-management screen or the documented CLI recovery procedure to reset credentials.
 
 ### 1.3 Interface Orientation
 The AutoPro interface uses a modern, high-contrast Automotive Enterprise design:
@@ -41,7 +33,7 @@ The AutoPro interface uses a modern, high-contrast Automotive Enterprise design:
 
 ---
 
-## 2. Super Administrator & Garage Manager Guide
+## 2. Administrator Guide
 
 ### 2.1 Executive Dashboard
 Upon login, the dashboard presents real-time operational indicators:

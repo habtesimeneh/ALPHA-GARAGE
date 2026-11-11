@@ -4,7 +4,7 @@
 **System Database:** `garage_management_system`  
 **Storage Engine:** MySQL / MariaDB InnoDB (`utf8mb4_unicode_ci`)  
 **Architecture:** 3NF Relational Schema with Cryptographic Hash Chaining and Immutable Audit Triggers  
-**Total Tables:** 28  
+**Total Tables:** 29 (verified live on 2026-11-09)
 
 ---
 
@@ -40,6 +40,7 @@
 | 26 | `password_resets` | Security & Auth | `id` | Single-use, time-limited password reset tokens |
 | 27 | `garage_settings` | System Config | `setting_key` | Garage profile and application settings |
 | 28 | `contact_inquiries` | Public Contact | `id` | Public website contact and support submissions |
+| 29 | `schema_migrations` | System Config | `migration` | Applied migration files and checksums (CLI runner bookkeeping) |
 
 ---
 
@@ -50,12 +51,10 @@
 
 | Column Name | Data Type | Nullable | Default | Constraints | Description |
 |---|---|---|---|---|---|
-| `id` | INT UNSIGNED | NO | AUTO_INCREMENT | PRIMARY KEY | Unique role identifier |
-| `name` | VARCHAR(50) | NO | None | UNIQUE | Internal machine name (`super_admin`, `mechanic`, etc.) |
-| `label` | VARCHAR(100) | NO | None | None | Human-readable title (`Super Administrator`, `Mechanic`) |
+| `id` | TINYINT UNSIGNED | NO | AUTO_INCREMENT | PRIMARY KEY | Unique role identifier |
+| `name` | VARCHAR(40) | NO | None | UNIQUE | Internal machine name (`administrator`, `receptionist`, `mechanic`, `inventory_manager`, `accountant`, `customer`) |
+| `label` | VARCHAR(60) | NO | None | None | Human-readable title (`Administrator`, `Mechanic`) |
 | `description` | VARCHAR(255) | YES | NULL | None | Detailed scope of the security role |
-| `is_system` | TINYINT(1) | NO | 0 | None | Flag: 1 = core protected system role, cannot be deleted |
-| `created_at` | TIMESTAMP | NO | CURRENT_TIMESTAMP | None | Audit timestamp of role creation |
 
 ---
 
@@ -64,11 +63,10 @@
 
 | Column Name | Data Type | Nullable | Default | Constraints | Description |
 |---|---|---|---|---|---|
-| `id` | INT UNSIGNED | NO | AUTO_INCREMENT | PRIMARY KEY | Unique permission identifier |
-| `code` | VARCHAR(80) | NO | None | UNIQUE | Unique dot-notation code (`invoices.pay`, `users.manage`) |
-| `module` | VARCHAR(50) | NO | None | INDEX (`idx_perm_module`) | Module grouping (`billing`, `inventory`, `audit`, `users`) |
+| `id` | SMALLINT UNSIGNED | NO | AUTO_INCREMENT | PRIMARY KEY | Unique permission identifier |
+| `code` | VARCHAR(60) | NO | None | UNIQUE | Unique dot-notation code (`payments.record`, `users.manage`) |
+| `module` | VARCHAR(40) | NO | None | INDEX (`idx_perm_module`) | Module grouping (`billing`, `inventory`, `audit`, `users`) |
 | `label` | VARCHAR(120) | NO | None | None | User-friendly capability description |
-| `created_at` | TIMESTAMP | NO | CURRENT_TIMESTAMP | None | Timestamp of permission registration |
 
 ---
 
@@ -495,7 +493,7 @@
 | `id` | BIGINT UNSIGNED | NO | AUTO_INCREMENT | PRIMARY KEY | Expense record identifier |
 | `category` | VARCHAR(40) | NO | None | None | Operating expense category |
 | `description` | VARCHAR(255) | NO | None | None | Human-readable purpose |
-| `amount` | DECIMAL(12,2) | NO | None | CHECK (`amount` > 0) | Recorded expense amount |
+| `amount` | DECIMAL(12,2) | NO | None | CHECK (`amount` > 0) — declared; MySQL 5.7 parses but does not enforce it, so the application validates too | Recorded expense amount |
 | `expense_date` | DATE | NO | None | INDEX (`idx_expense_date`) | Date paid and financial reporting date |
 | `reference` | VARCHAR(80) | YES | NULL | None | Receipt or payment reference |
 | `recorded_by` | INT UNSIGNED | YES | NULL | FK -> `users.id` ON DELETE SET NULL | User who entered the record |
@@ -536,6 +534,19 @@
 | `ip_address` | VARCHAR(45) | YES | NULL | None | Submission IP address |
 | `status` | ENUM | NO | `new` | `new`, `in_progress`, `resolved` | Inquiry workflow status |
 | `created_at` | TIMESTAMP | NO | CURRENT_TIMESTAMP | None | Submission time |
+
+---
+
+### 2.29 `schema_migrations`
+*Bookkeeping for the CLI migration runner (`database/migrate.php`). Not used by runtime UI.*
+
+| Column Name | Data Type | Nullable | Default | Constraints | Description |
+|---|---|---|---|---|---|
+| `migration` | VARCHAR(255) | NO | None | PRIMARY KEY | Migration file name |
+| `checksum` | CHAR(64) | NO | None | None | SHA-256 of the migration file at apply time |
+| `applied_at` | TIMESTAMP | NO | CURRENT_TIMESTAMP | None | Time the migration was applied |
+
+> **Live state (2026-11-09):** 9 migrations recorded. The table is readable by the runtime account (`SELECT` only); it is written exclusively by the migrator account.
 
 ---
 *End of Data Dictionary.*
