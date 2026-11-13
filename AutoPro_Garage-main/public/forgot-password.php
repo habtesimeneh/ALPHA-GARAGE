@@ -10,7 +10,6 @@ if (current_user()) {
 
 $message = '';
 $isSuccess = false;
-$devResetLink = null;
 $email = '';
 
 if (is_post()) {
@@ -35,11 +34,6 @@ if (is_post()) {
         $result    = PasswordResetService::requestReset($email);
         $message   = $result['message'];
         $isSuccess = (bool) $result['ok'];
-
-        if (!empty($_SESSION['_dev_reset_link'])) {
-            $devResetLink = $_SESSION['_dev_reset_link'];
-            unset($_SESSION['_dev_reset_link']);
-        }
     }
 }
 
@@ -121,18 +115,6 @@ $sliderImages = [
           <?= e($message) ?>
         </div>
       </div>
-
-      <?php if ($devResetLink): ?>
-        <div class="luxury-alert luxury-alert-info reset-link-alert">
-          <div>
-            <strong>Development Helper (SMTP Spool):</strong><br>
-            <small>Direct recovery link generated in development:</small><br>
-            <a href="<?= e($devResetLink) ?>" class="reset-link-action">
-              &rarr; Click here to open password reset link
-            </a>
-          </div>
-        </div>
-      <?php endif; ?>
     <?php endif; ?>
 
     <form method="post" autocomplete="off" novalidate>

@@ -97,8 +97,8 @@ $serviceGuides = [
 ];
 
 $bookingUrl = current_user()
-    ? url('appointments/form.php')
-    : url('login.php?redirect=appointments/form.php');
+    ? url('book.php')
+    : url('login.php?redirect=book.php');
 ?>
 <!doctype html>
 <html lang="en">
@@ -192,7 +192,7 @@ $bookingUrl = current_user()
           <?php foreach ($services as $service): ?>
             <?php
               $serviceId = (int) $service['id'];
-              $servicePath = 'appointments/form.php?service_id=' . $serviceId;
+              $servicePath = 'book.php?service_id=' . $serviceId;
               $serviceBookingUrl = current_user()
                   ? url($servicePath)
                   : url('login.php?redirect=' . rawurlencode($servicePath));

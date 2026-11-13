@@ -127,7 +127,7 @@ if (is_post()) {
     <h1 class="inner-hero-title">Let’s get you back<br>on the road.</h1>
     <p class="inner-hero-lead">Questions about your vehicle or a service visit? Choose the way that works for you, and tell our team what you need.</p>
     <div class="contact-hero-actions">
-      <a class="contact-hero-primary" href="<?= current_user() ? e(url('appointments/form.php')) : e(url('login.php?redirect=appointments/form.php')) ?>">Book a service <span aria-hidden="true">&rarr;</span></a>
+      <a class="contact-hero-primary" href="<?= current_user() ? e(url('book.php')) : e(url('login.php?redirect=book.php')) ?>">Book a service <span aria-hidden="true">&rarr;</span></a>
       <a class="contact-hero-secondary" href="tel:+251911234567"><span aria-hidden="true">&#9742;</span> Call reception</a>
       <a class="contact-hero-inquiry" href="#contact-inquiry">Send an inquiry <span aria-hidden="true">&rarr;</span></a>
     </div>

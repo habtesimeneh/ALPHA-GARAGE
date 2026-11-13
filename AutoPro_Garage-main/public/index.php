@@ -139,7 +139,7 @@ $serviceImageForCategory = static function (string $category): string {
       <p class="hero-lead">Find the right service, book your visit, and stay informed while your vehicle is in our care.</p>
 
       <div class="hero-ctas">
-        <a href="<?= current_user() ? e(url('appointments/form.php')) : e(url('login.php?redirect=appointments/form.php')) ?>" class="btn-hero-primary">Book a service <span aria-hidden="true">&rarr;</span></a>
+        <a href="<?= current_user() ? e(url('book.php')) : e(url('login.php?redirect=book.php')) ?>" class="btn-hero-primary">Book a service <span aria-hidden="true">&rarr;</span></a>
         <a href="<?= e(url('services.php')) ?>" class="btn-hero-secondary">Explore services</a>
       </div>
 
@@ -153,7 +153,7 @@ $serviceImageForCategory = static function (string $category): string {
       <span class="hero-card-kicker">Your next step</span>
       <h2>Let's get you back on the road.</h2>
       <p>Choose a service or talk with our team if you are not sure where to start.</p>
-      <a class="hero-card-link" href="<?= current_user() ? e(url('appointments/form.php')) : e(url('login.php?redirect=appointments/form.php')) ?>">
+      <a class="hero-card-link" href="<?= current_user() ? e(url('book.php')) : e(url('login.php?redirect=book.php')) ?>">
         <span class="hero-card-link-icon" aria-hidden="true">&#128663;</span>
         <span><strong>Book online</strong><small>Request an appointment in a few steps</small></span>
         <span class="hero-card-arrow" aria-hidden="true">&rarr;</span>
@@ -237,7 +237,7 @@ $serviceImageForCategory = static function (string $category): string {
             <li><span class="request-step-marker">02</span><span class="request-step-label">We follow up</span></li>
             <li><span class="request-step-marker">03</span><span class="request-step-label">Visit the garage</span></li>
           </ol>
-          <a href="<?= current_user() ? e(url('appointments/form.php')) : e(url('login.php?redirect=appointments/form.php')) ?>">Request a visit <span aria-hidden="true">&rarr;</span></a>
+          <a href="<?= current_user() ? e(url('book.php')) : e(url('login.php?redirect=book.php')) ?>">Request a visit <span aria-hidden="true">&rarr;</span></a>
         </article>
       </div>
       <div class="journey-carousel-controls">
@@ -326,7 +326,7 @@ $serviceImageForCategory = static function (string $category): string {
       <?php foreach ($services as $srv): ?>
         <?php
           $serviceId = isset($srv['id']) ? (int) $srv['id'] : 0;
-          $servicePath = 'appointments/form.php' . ($serviceId > 0 ? '?service_id=' . $serviceId : '');
+          $servicePath = 'book.php' . ($serviceId > 0 ? '?service_id=' . $serviceId : '');
           $serviceBookingUrl = $isLoggedIn
               ? url($servicePath)
               : url('login.php?redirect=' . rawurlencode($servicePath));
@@ -360,7 +360,7 @@ $serviceImageForCategory = static function (string $category): string {
     <?php endif; ?>
 
     <div class="services-cta">
-      <a href="<?= current_user() ? e(url('appointments/form.php')) : e(url('login.php?redirect=appointments/form.php')) ?>" class="btn-hero-primary">Book an Inspection</a>
+      <a href="<?= current_user() ? e(url('book.php')) : e(url('login.php?redirect=book.php')) ?>" class="btn-hero-primary">Book an Inspection</a>
       <a href="<?= e(url('services.php')) ?>" class="btn-hero-secondary">View all services <span aria-hidden="true">&rarr;</span></a>
     </div>
   </div>
@@ -469,7 +469,7 @@ $serviceImageForCategory = static function (string $category): string {
         <span class="journey-icon" aria-hidden="true">&#128197;</span>
         <h3>Request a visit</h3>
         <p>Sign in or create an account to send an appointment request online.</p>
-        <a href="<?= current_user() ? e(url('appointments/form.php')) : e(url('register.php')) ?>">Get started <span aria-hidden="true">&rarr;</span></a>
+        <a href="<?= current_user() ? e(url('book.php')) : e(url('register.php')) ?>">Get started <span aria-hidden="true">&rarr;</span></a>
       </article>
       <article class="journey-card journey-slide" role="group" aria-roledescription="slide" aria-label="3 of 3" hidden>
         <span class="journey-number">03</span>
@@ -618,7 +618,7 @@ $serviceImageForCategory = static function (string $category): string {
     <a class="mobile-call-action" href="tel:<?= e(preg_replace('/[^0-9+]/', '', $garagePhone)) ?>">
       <span aria-hidden="true">&#9742;</span> Call <?= e($garagePhone) ?>
     </a>
-    <a class="mobile-book-action" href="<?= current_user() ? e(url('appointments/form.php')) : e(url('login.php?redirect=appointments/form.php')) ?>">
+    <a class="mobile-book-action" href="<?= current_user() ? e(url('book.php')) : e(url('login.php?redirect=book.php')) ?>">
       Book a service <span aria-hidden="true">&rarr;</span>
     </a>
   </div>

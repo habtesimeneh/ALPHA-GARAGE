@@ -3,6 +3,9 @@ declare(strict_types=1);
 require __DIR__ . '/../../app/bootstrap.php';
 require_once APP_ROOT . '/app/views/layout.php';
 $user = require_login();
+if (($user['role_name'] ?? '') === 'customer') {
+    redirect('book.php');
+}
 require_permission('appointments.manage');
 
 $customers = Database::all('SELECT id, full_name, phone FROM customers WHERE is_active = 1 ORDER BY full_name ASC');

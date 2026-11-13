@@ -86,11 +86,6 @@ final class PasswordResetService
                     'failure'
                 );
             }
-
-            // For local development convenience if SMTP is not active
-            if (($mailResult['transport'] ?? '') === 'dev_spool' && !empty($GLOBALS['config']['debug'])) {
-                $_SESSION['_dev_reset_link'] = $resetUrl;
-            }
         } else {
             // Log generic failed attempt for monitoring
             AuditLogger::logSafe(

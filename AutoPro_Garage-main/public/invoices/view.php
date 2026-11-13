@@ -46,7 +46,7 @@ page_header($inv['invoice_number'], 'Job card ' . $inv['job_number'], $acts);
 <?php endif; ?>
 <?php if (can('payments.refund') && $net['net'] > 0): ?>
   <div class="card"><h3>Authorised refund</h3><p class="muted small">Net paid: <?= e(money(from_cents($net['net']))) ?>. Refunds are permanent, require a reason and are audited.</p>
-    <form method="post" action="<?= e(url('payments/refund.php')) ?>" data-validate novalidate><?= csrf_field() ?><input type="hidden" name="invoice_id" value="<?= $id ?>">
+    <form method="post" action="<?= e(url('payments/refund.php')) ?>" data-validate novalidate><?= csrf_field() ?><input type="hidden" name="invoice_id" value="<?= $id ?>"><input type="hidden" name="idempotency_key" value="<?= e(PaymentIdempotencyService::generateKey()) ?>">
     <?php form_input('amount', 'Refund amount', from_cents($net['net']), [], ['type' => 'number', 'step' => '0.01', 'min' => '0.01', 'required' => true]); $mo = []; foreach (Setting::paymentMethods() as $m) { $mo[$m] = $m; } form_select('method', 'Refunded via', $mo); form_input('reason', 'Reason', '', [], ['required' => true, 'maxlength' => 255]); ?>
     <button class="btn btn-danger btn-sm" type="submit" data-no-loader>Issue refund</button></form></div>
 <?php endif; ?>

@@ -152,7 +152,7 @@ $flashes = pull_flash();
     <?php elseif (!$installed): ?>
       <div class="luxury-alert luxury-alert-info">
         <div>
-          No accounts exist yet. <a href="<?= e(url('setup.php')) ?>" class="auth-setup-link">Run the first-time setup</a> to initialize your administrator.
+          No accounts exist yet. Please run the authorized CLI initialization script or contact your system administrator.
         </div>
       </div>
     <?php endif; ?>

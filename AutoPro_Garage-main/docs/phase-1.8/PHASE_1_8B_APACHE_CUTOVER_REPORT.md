@@ -1,59 +1,62 @@
 # ALPHA GARAGE — PHASE 1.8B
-# CONTROLLED MAMP APACHE VIRTUALHOST CUTOVER REPORT
+# FINAL MAMP APACHE VIRTUALHOST CUTOVER & VERIFICATION REPORT
 
-**Execution Date:** November 11, 2026  
+**Execution & Verification Date:** November 13, 2026  
 **Environment:** Windows 10/11 | MAMP 5.x | Apache 2.4.33 (Win64) | PHP 8.3.1 | MySQL 5.7.24  
 **Project Path:** `C:\MAMP\htdocs\AutoPro_Garage-main\AutoPro_Garage-main`  
 **Target DocumentRoot:** `C:\MAMP\htdocs\AutoPro_Garage-main\AutoPro_Garage-main\public`  
+**Status:** **CUTOVER COMPLETE, RESTARTED & VERIFIED (28/28 TESTS PASS)**  
 **Auditor / Agent:** Antigravity  
 
 ---
 
 ## 1. Executive Summary
 
-Phase 1.8B implements the controlled cutover of the MAMP Apache web root from the generic multi-tenant folder `C:\MAMP\htdocs` to the dedicated application public directory `C:\MAMP\htdocs\AutoPro_Garage-main\AutoPro_Garage-main\public`.
+Phase 1.8B has successfully executed and verified the permanent DocumentRoot cutover of the local MAMP Apache web server. The effective web root has been moved from the generic, multi-tenant directory `C:\MAMP\htdocs` to the dedicated application public directory `C:\MAMP\htdocs\AutoPro_Garage-main\AutoPro_Garage-main\public`.
 
-### Key Outcomes:
-1. **Configuration On Disk: 100% READY & VERIFIED**  
-   - Dedicated modular VirtualHost file created: `C:\MAMP\conf\apache\alphagarage-vhost.conf`.  
-   - `httpd.conf` and `gms-ssl.conf` updated with strict DocumentRoot and directory controls.  
-   - Pre-cutover backups verified and stored in timestamped directory outside web root.  
-   - Syntax validation via `httpd.exe -t` confirmed: **`Syntax OK`**.  
-   - Compiled VirtualHost dump via `httpd.exe -S` confirmed: `*:80` and `*:443` bound strictly to `.../public`.
-2. **Critical Diagnostic Finding: Running Process Still Using Old In-Memory Configuration**  
-   - Windows process inspection (`Get-Process httpd`) revealed that the active Apache process (**PID 10432**) and its worker process (**PID 13612**) were started on **November 9, 2026 at 8:41:16 AM** and have **never been restarted**.  
-   - PID 10432 is still serving from the old in-memory configuration (`C:\MAMP\htdocs`).  
-   - The user's browser tests returned 404 for `/database/` and 403 for `/.git/` because those requests hit `C:\MAMP\htdocs\database\` (which does not exist) and the Phase 1.6 global git block.  
-   - The application was accessed via the old nested URL `/AutoPro_Garage-main/AutoPro_Garage-main/public/login.php`, while `https://localhost/login.php` returned HTTP 404 because the old in-memory process looks for `C:/MAMP/htdocs/login.php`.
-3. **Database & Audit Integrity: 100% INTACT**  
-   - Live database `garage_management_system` was strictly read-only during this phase.  
-   - Inactive admin ID 1 (`kilotest_auth_63e8ee04`, `is_active = 0`) preserved.  
-   - Active owner admin ID 4 (`barok_admin`, `is_active = 1`) preserved.  
-   - All 53 audit records verified with cryptographic hash chain intact (`AuditLogger::verifyChain() => ok: true`).
+Following the owner's termination of the legacy orphaned Apache process (PID 10432 from Nov 9) and a clean restart via MAMP, a fresh Apache parent process (**PID 6176**) and worker process (**PID 8600**) were spawned on **November 13, 2026 at 01:37:37 AM**.
+
+An exhaustive read-only audit comprising **28 distinct HTTP/HTTPS test vectors** was conducted against the live running server. Every single test passed with recorded empirical evidence:
+- **Root & Application Access:** `https://localhost/` and `https://localhost/login.php` load directly with **HTTP 200**.
+- **Static Asset Delivery:** CSS (`variables.css`, `luxury-auth.css`), JavaScript (`luxury.js`), and SVG assets load with **HTTP 200**.
+- **Directory Traversal & Architecture Isolation:** Non-public application directories (`/storage/`, `/docs/`, `/tests/`, `/app/`, `/database/`) are completely unreachable from the web root and return **HTTP 404 Not Found**.
+- **Directory Indexing Protection:** Browsing directories without an index file (`/assets/`, `/assets/css/`, `/assets/js/`) is blocked by `Options -Indexes` returning **HTTP 403 Forbidden**.
+- **Source Code & Credential Protection:** Sensitive files (`.env.example`, `.git/`, `.git/HEAD`, `database.php`, `encryption.key`, `database.sql`, `app.log`) are completely protected with **HTTP 403** or **HTTP 404**.
+- **Route Interception:** Unauthenticated attempts to access internal application modules (`/dashboard.php`, `/customers/`, `/appointments/`, `/vehicles/`, `/job-cards/`, `/invoices/`, `/services/`) are cleanly intercepted with **HTTP 302 Redirect** pointing directly to `/login.php`.
+- **Legacy Path Decommissioning:** Old nested URLs (`/AutoPro_Garage-main/...`) return **HTTP 404 Not Found**.
+- **Database & Audit Integrity:** Live database `garage_management_system` remains untouched; all 53 audit records verified with cryptographic hash chain intact (`AuditLogger::verifyChain() => ok: true`).
 
 ---
 
-## 2. Configuration Files & Backups
+## 2. Configuration Files & Checksums
 
 ### 2.1 Pre-Cutover Configuration Backups
-Timestamped backups were captured before modifying any Apache configuration. Stored outside `htdocs` in `C:\Users\Temesgen\alpha-garage-backups\apache_config_20261111_054518\`:
+Timestamped backups were captured prior to making any configuration modifications and stored in `C:\Users\Temesgen\alpha-garage-backups\apache_config_20261111_054518\`:
 
 | Original File | Backup Path | File Size | SHA-256 Checksum |
 |---|---|---|---|
 | `C:\MAMP\conf\apache\httpd.conf` | `apache_config_20261111_054518\httpd.conf` | 23,573 bytes | `8EE74EF4CA6324B93C1682208384D6FAB5A071C4593E33BB7F0001D82E71D6C6` |
 | `C:\MAMP\conf\apache\gms-ssl.conf` | `apache_config_20261111_054518\gms-ssl.conf` | 993 bytes | `4529BDE780D400E3061C2EC11C88EB765413357BA464F7912BFA1959AAC74966` |
 
-### 2.2 Applied Configuration Files
+### 2.2 Applied Modular VirtualHost: `C:\MAMP\conf\apache\alphagarage-vhost.conf`
+A dedicated modular configuration was created to encapsulate all Alpha Garage VirtualHost declarations on port 80 (HTTP) and port 443 (HTTPS):
 
-#### 1. Dedicated Modular VirtualHost: `C:\MAMP\conf\apache\alphagarage-vhost.conf`
-Defined VirtualHosts for port 80 and port 443 pointing strictly to the `public/` directory:
 ```apache
+# =============================================================================
+# ALPHA GARAGE MANAGEMENT SYSTEM — SECURE LOCAL VIRTUAL HOST CONFIGURATION
+# =============================================================================
+# Scope: Ports 80 (HTTP) and 443 (HTTPS) bound strictly to public/
+# Server: Apache 2.4.33 (Win64) on MAMP
+
 Listen 443
 
-# Port 80 (HTTP)
+# -----------------------------------------------------------------------------
+# 1. Port 80 (HTTP) VirtualHost
+# -----------------------------------------------------------------------------
 <VirtualHost *:80>
     ServerName localhost
     ServerAlias 127.0.0.1 alphagarage.local
+
     DocumentRoot "C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public"
 
     <Directory "C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public">
@@ -67,10 +70,13 @@ Listen 443
     CustomLog "C:/MAMP/logs/alphagarage_http_access.log" combined
 </VirtualHost>
 
-# Port 443 (HTTPS)
+# -----------------------------------------------------------------------------
+# 2. Port 443 (HTTPS) VirtualHost
+# -----------------------------------------------------------------------------
 <VirtualHost *:443>
     ServerName localhost
     ServerAlias 127.0.0.1 alphagarage.local
+
     DocumentRoot "C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public"
 
     <Directory "C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public">
@@ -93,29 +99,49 @@ Listen 443
 </VirtualHost>
 ```
 
-#### 2. Main Apache Configuration: `C:\MAMP\conf\apache\httpd.conf`
+### 2.3 Main Configuration Updates: `C:\MAMP\conf\apache\httpd.conf`
 - **Line 253:** `DocumentRoot "C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public"`
-- **Lines 278–293:** `<Directory "C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public">` with `Options -Indexes +FollowSymLinks` and `DirectoryIndex index.php index.html`.
+- **Lines 278–293:** Directory stanza updated with `Options -Indexes +FollowSymLinks` and `DirectoryIndex index.php index.html`.
 - **Line 640:** `Include "C:/MAMP/conf/apache/alphagarage-vhost.conf"`
 
 ---
 
-## 3. On-Disk Compilation & Syntax Verification
+## 3. Apache Process Lifecycle & Runtime Verification
 
-Executing Apache binary validation against the active configuration:
+### 3.1 Active Process Inspection
+Verified using PowerShell `Get-Process httpd`:
 ```powershell
-& "C:\MAMP\bin\apache\bin\httpd.exe" -d "C:/MAMP/bin/apache" -f "C:\MAMP\conf\apache\httpd.conf" -t
+Get-Process httpd -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, StartTime, Path | Format-Table -AutoSize
 ```
-**Result:**
+**Recorded Output:**
 ```
-Syntax OK
+  Id ProcessName StartTime             Path                            
+  -- ----------- ---------             ----                            
+6176 httpd       11/13/2026 1:37:37 AM C:\MAMP\bin\apache\bin\httpd.exe
+8600 httpd       11/13/2026 1:37:42 AM C:\MAMP\bin\apache\bin\httpd.exe
 ```
 
-Executing VirtualHost inspection:
+- **PID 6176:** Apache parent process, started November 13, 2026 at 01:37:37 AM.
+- **PID 8600:** Apache worker child process, started November 13, 2026 at 01:37:42 AM.
+- **PID File (`C:\MAMP\bin\apache\logs\httpd.pid`):** Contains `6176`.
+- **Legacy Processes (PID 10432 / 13612):** Completely terminated.
+
+### 3.2 Network Port Ownership
+Verified using `netstat -ano`:
+```
+  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING       6176
+  TCP    0.0.0.0:443            0.0.0.0:0              LISTENING       6176
+  TCP    [::]:80                [::]:0                 LISTENING       6176
+  TCP    [::]:443               [::]:0                 LISTENING       6176
+```
+Both HTTP (port 80) and HTTPS (port 443) are cleanly owned by Apache PID 6176.
+
+### 3.3 Active VirtualHost Compilation Dump
+Verified using `httpd.exe -S`:
 ```powershell
 & "C:\MAMP\bin\apache\bin\httpd.exe" -d "C:/MAMP/bin/apache" -f "C:\MAMP\conf\apache\httpd.conf" -S
 ```
-**Result:**
+**Recorded Output:**
 ```
 VirtualHost configuration:
 *:80                   localhost (C:/MAMP/conf/apache/alphagarage-vhost.conf:12)
@@ -128,142 +154,152 @@ PidFile: "C:/MAMP/bin/apache/logs/httpd.pid"
 
 ---
 
-## 4. Diagnostic Finding: Running Process vs In-Memory Configuration
+## 4. Comprehensive Endpoint Security & Functionality Audit
 
-### 4.1 Process Evidence
+All tests executed via `curl.exe` against the running server PID 6176 / 8600. Every single test recorded an empirical status code:
+
+| # | Test Target | URL | Expected | Actual Code | Status | Verification Evidence / Details |
+|---|---|---|---|---|---|---|
+| 1 | HTTPS Public Root | `https://localhost/` | 200 | **HTTP 200** | **PASS** | Serves `public/index.php` directly (Alpha Garage Home) |
+| 2 | HTTP Public Root | `http://localhost/` | 200 | **HTTP 200** | **PASS** | Serves `public/index.php` over HTTP |
+| 3 | HTTPS Login Page | `https://localhost/login.php` | 200 | **HTTP 200** | **PASS** | Luxury login page rendered with CSRF token & security headers |
+| 4 | HTTP Login Page | `http://localhost/login.php` | 200 | **HTTP 200** | **PASS** | Login page accessible over HTTP |
+| 5 | CSS Variables Asset | `https://localhost/assets/css/variables.css` | 200 | **HTTP 200** | **PASS** | Design token styles loaded (4,994 bytes) |
+| 6 | CSS Luxury Auth | `https://localhost/assets/css/luxury-auth.css` | 200 | **HTTP 200** | **PASS** | Authentication styles loaded (18,272 bytes) |
+| 7 | JS Luxury Script | `https://localhost/assets/js/luxury.js` | 200 | **HTTP 200** | **PASS** | Luxury UI client script loaded (13,487 bytes) |
+| 8 | SVG Logo Asset | `https://localhost/assets/images/logo.svg` | 200 | **HTTP 200** | **PASS** | SVG brand asset loaded (1,103 bytes) |
+| 9 | Private `storage/` (HTTPS) | `https://localhost/storage/` | 404 | **HTTP 404** | **PASS** | Completely unreachable; not present inside `public/` |
+| 10 | Private `storage/` (HTTP) | `http://localhost/storage/` | 404 | **HTTP 404** | **PASS** | Completely unreachable over HTTP |
+| 11 | Private `docs/` (HTTPS) | `https://localhost/docs/` | 404 | **HTTP 404** | **PASS** | Completely unreachable; not present inside `public/` |
+| 12 | Private `docs/` (HTTP) | `http://localhost/docs/` | 404 | **HTTP 404** | **PASS** | Completely unreachable over HTTP |
+| 13 | Private `tests/` (HTTPS) | `https://localhost/tests/` | 404 | **HTTP 404** | **PASS** | Test scripts unreachable from web |
+| 14 | Private `tests/` (HTTP) | `http://localhost/tests/` | 404 | **HTTP 404** | **PASS** | Test scripts unreachable over HTTP |
+| 15 | Private `app/` (HTTPS) | `https://localhost/app/` | 404 | **HTTP 404** | **PASS** | Core PHP application code isolated from web |
+| 16 | Private `app/` (HTTP) | `http://localhost/app/` | 404 | **HTTP 404** | **PASS** | Core PHP application code isolated over HTTP |
+| 17 | Private `database/` (HTTPS) | `https://localhost/database/` | 404 | **HTTP 404** | **PASS** | Migration scripts and recovery CLI isolated |
+| 18 | Private `database/` (HTTP) | `http://localhost/database/` | 404 | **HTTP 404** | **PASS** | Migration scripts isolated over HTTP |
+| 19 | Git Folder Root | `https://localhost/.git/` | 403 | **HTTP 403** | **PASS** | Blocked by Phase 1.6 global `<LocationMatch>` rule |
+| 20 | Git HEAD Metadata (HTTPS) | `https://localhost/.git/HEAD` | 403 | **HTTP 403** | **PASS** | Repository metadata access denied |
+| 21 | Git HEAD Metadata (HTTP) | `http://localhost/.git/HEAD` | 403 | **HTTP 403** | **PASS** | Repository metadata access denied over HTTP |
+| 22 | Sensitive Environment File | `https://localhost/.env.example` | 403 | **HTTP 403** | **PASS** | Denied by Phase 1.6 dotfile protection rules |
+| 23 | Database SQL Dump | `https://localhost/database/database.sql` | 404 | **HTTP 404** | **PASS** | Schema dump cannot be downloaded via HTTP |
+| 24 | Application Log File | `https://localhost/storage/logs/app.log` | 404 | **HTTP 404** | **PASS** | Runtime logs unreachable via HTTP |
+| 25 | Encryption Key File | `https://localhost/storage/private/encryption.key` | 404 | **HTTP 404** | **PASS** | App encryption key unreachable via HTTP |
+| 26 | Database Credentials File | `https://localhost/app/config/database.php` | 404 | **HTTP 404** | **PASS** | Database credentials unreachable via HTTP |
+| 27 | Old Nested Directory | `https://localhost/AutoPro_Garage-main/` | 404 | **HTTP 404** | **PASS** | Decommissioned; old subdirectory path does not exist |
+| 28 | Old Nested Login URL | `https://localhost/.../public/login.php` | 404 | **HTTP 404** | **PASS** | Decommissioned; obsolete path completely gone |
+
+**Total Audit Score:** **28 / 28 Passed (0 Failed)**
+
+---
+
+## 5. Protected Route Interception & Directory Listing Verification
+
+### 5.1 Unauthenticated Route Interception
+Tested by sending unauthenticated GET requests to protected module entry points:
+
 ```powershell
-Get-Process httpd | Select-Object Id, ProcessName, StartTime, Path
+$pages = @("/customers/", "/appointments/", "/vehicles/", "/job-cards/", "/invoices/", "/services/", "/dashboard.php")
 ```
-| Process ID | Process Name | StartTime | Executable Path |
-|---|---|---|---|
-| **10432** | `httpd` | `11/9/2026 8:41:16 AM` | `C:\MAMP\bin\apache\bin\httpd.exe` |
-| **13612** | `httpd` | `11/9/2026 8:41:27 AM` | `C:\MAMP\bin\apache\bin\httpd.exe` |
+**Recorded Output:**
+```
+/customers/          : 302 -> https://localhost/login.php
+/appointments/       : 302 -> https://localhost/login.php
+/vehicles/           : 302 -> https://localhost/login.php
+/job-cards/          : 302 -> https://localhost/login.php
+/invoices/           : 302 -> https://localhost/login.php
+/services/           : 302 -> https://localhost/login.php
+/dashboard.php       : 302 -> https://localhost/login.php
+```
+- Each module's `index.php` is properly parsed and executed by PHP 8.3.1.
+- Authentication middleware successfully intercepts unauthenticated users and redirects them to the root login page (`https://localhost/login.php`).
+- Security headers are properly transmitted:
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: same-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `Content-Security-Policy: default-src 'self'; ...`
+  - `Set-Cookie: GMSSESSID=...; path=/; secure; HttpOnly; SameSite=Lax`
 
-- `C:\MAMP\bin\apache\logs\httpd.pid` contains PID `10432`.
-- `netstat -ano` confirms PID 10432 holds port 80 and port 443.
-- The Apache processes have been running uninterrupted since **Monday Nov 9, 2026**.
+### 5.2 Directory Listing (Indexing) Audit
+Tested by requesting asset directories directly without index files:
+- `https://localhost/assets/` → **HTTP 403 Forbidden**
+- `https://localhost/assets/css/` → **HTTP 403 Forbidden**
+- `https://localhost/assets/js/` → **HTTP 403 Forbidden**
 
-### 4.2 Apache Error Log Evidence (`C:\MAMP\logs\apache_error.log`)
-During the post-cutover verification test at `07:08:30` and `07:19:11`, requests to `https://localhost/login.php` triggered the following log entry:
-```
-[Wed Nov 11 07:08:30.959151 2026] [php:error] [pid 13612:tid 1332] [client ::1:64449] script 'C:/MAMP/htdocs/login.php' not found or unable to stat
-[Wed Nov 11 07:19:11.130371 2026] [php:error] [pid 13612:tid 1332] [client ::1:64588] script 'C:/MAMP/htdocs/login.php' not found or unable to stat
-```
-**Conclusion:** The running Apache worker process (PID 13612) is still looking for files inside `C:/MAMP/htdocs/` instead of `.../public/`.
-
-### 4.3 Access Log Evidence (`C:\MAMP\logs\access.log`)
-The user's manual browser verification recorded the following access requests:
-```
-[11/Nov/2026:06:06:34 -0800] "GET /AutoPro_Garage-main/AutoPro_Garage-main/public/login.php HTTP/1.1" 200
-[11/Nov/2026:06:08:09 -0800] "POST /AutoPro_Garage-main/AutoPro_Garage-main/public/login.php HTTP/1.1" 302
-[11/Nov/2026:06:08:09 -0800] "GET /AutoPro_Garage-main/AutoPro_Garage-main/public/dashboard.php HTTP/1.1" 200
-[11/Nov/2026:06:12:20 -0800] "GET /database/ HTTP/1.1" 404
-[11/Nov/2026:06:13:07 -0800] "GET /storage/ HTTP/1.1" 404
-[11/Nov/2026:06:13:17 -0800] "GET /docs/ HTTP/1.1" 404
-[11/Nov/2026:06:13:31 -0800] "GET /tests/ HTTP/1.1" 404
-[11/Nov/2026:06:16:01 -0800] "GET /.git/ HTTP/1.1" 403
-```
-- The user logged in through the **old nested path** (`/AutoPro_Garage-main/.../login.php`).
-- The requests to `/database/`, `/storage/`, `/docs/`, `/tests/` returned 404 because `C:\MAMP\htdocs\` does not contain those folders (they reside inside `AutoPro_Garage-main\AutoPro_Garage-main\`).
-- The request to `/.git/` returned 403 because of the Phase 1.6 global `<LocationMatch>` rule.
+`Options -Indexes` in `alphagarage-vhost.conf` prevents any directory traversal or directory listing.
 
 ---
 
-## 5. Live Endpoint Audit Matrix
+## 6. Apache Log Review
 
-Tested against the active server (`PID 10432`) on November 11, 2026:
+### 6.1 `C:\MAMP\logs\alphagarage_ssl_access.log`
+Dedicated log created and active. Records all 200, 302, 403, and 404 responses cleanly. Sample entries:
+```
+::1 - - [13/Nov/2026:01:54:50 -0800] "GET /assets/css/luxury-auth.css HTTP/1.1" 200 18272 "-" "curl/8.13.0"
+::1 - - [13/Nov/2026:01:54:50 -0800] "GET /storage/ HTTP/1.1" 404 206 "-" "curl/8.13.0"
+::1 - - [13/Nov/2026:01:54:51 -0800] "GET /.git/ HTTP/1.1" 403 214 "-" "curl/8.13.0"
+::1 - - [13/Nov/2026:01:55:13 -0800] "GET /login.php HTTP/1.1" 200 6439 "-" "curl/8.13.0"
+::1 - - [13/Nov/2026:01:56:43 -0800] "GET /customers/ HTTP/1.1" 302 - "-" "curl/8.13.0"
+```
 
-| # | Endpoint / URL | Expected Post-Restart Result | Current Live Result (PID 10432) | Status Explanation |
-|---|---|---|---|---|
-| 1 | `https://localhost/` | HTTP 200 (Alpha Garage Home) | **HTTP 200 (MAMP PRO Welcome)** | Serves `C:/MAMP/htdocs/index.php` (old config) |
-| 2 | `http://localhost/` | HTTP 200 (Alpha Garage Home) | **HTTP 200 (MAMP PRO Welcome)** | Serves `C:/MAMP/htdocs/index.php` (old config) |
-| 3 | `https://localhost/login.php` | HTTP 200 (Login Page) | **HTTP 404 Not Found** | Looking for `C:/MAMP/htdocs/login.php` |
-| 4 | `http://localhost/login.php` | HTTP 200 (Login Page) | **HTTP 404 Not Found** | Looking for `C:/MAMP/htdocs/login.php` |
-| 5 | `https://localhost/assets/css/variables.css` | HTTP 200 (CSS File) | **HTTP 404 Not Found** | Looking for `C:/MAMP/htdocs/assets/...` |
-| 6 | `https://localhost/assets/js/luxury.js` | HTTP 200 (JS File) | **HTTP 404 Not Found** | Looking for `C:/MAMP/htdocs/assets/...` |
-| 7 | `https://localhost/assets/images/logo.svg` | HTTP 200 (SVG File) | **HTTP 404 Not Found** | Looking for `C:/MAMP/htdocs/assets/...` |
-| 8 | `https://localhost/database/` | HTTP 404 Not Found | **HTTP 404 Not Found** | Folder not in `htdocs`; will remain 404 in `public/` |
-| 9 | `http://localhost/database/` | HTTP 404 Not Found | **HTTP 404 Not Found** | Folder not in `htdocs`; will remain 404 in `public/` |
-| 10 | `https://localhost/.git/` | HTTP 403 or 404 | **HTTP 403 Forbidden** | Blocked by Phase 1.6 `<LocationMatch>` |
-| 11 | `http://localhost/.git/` | HTTP 403 or 404 | **HTTP 403 Forbidden** | Blocked by Phase 1.6 `<LocationMatch>` |
-| 12 | `https://localhost/storage/` | HTTP 404 Not Found | **HTTP 404 Not Found** | Folder not in `htdocs`; will remain 404 in `public/` |
-| 13 | `https://localhost/docs/` | HTTP 404 Not Found | **HTTP 404 Not Found** | Folder not in `htdocs`; will remain 404 in `public/` |
-| 14 | `https://localhost/tests/` | HTTP 404 Not Found | **HTTP 404 Not Found** | Folder not in `htdocs`; will remain 404 in `public/` |
-| 15 | `https://localhost/app/` | HTTP 404 Not Found | **HTTP 404 Not Found** | Folder not in `htdocs`; will remain 404 in `public/` |
-| 16 | `https://localhost/AutoPro_Garage-main/.../login.php` | HTTP 404 Not Found | **HTTP 200 OK** | Still accessible under old path until restart |
-| 17 | `https://localhost/AutoPro_Garage-main/` | HTTP 404 Not Found | **HTTP 200 OK** | Still accessible under old path until restart |
+### 6.2 `C:\MAMP\logs\alphagarage_http_access.log`
+Dedicated HTTP log active. Sample entries:
+```
+::1 - - [13/Nov/2026:01:54:49 -0800] "GET / HTTP/1.1" 200 34656 "-" "curl/8.13.0"
+::1 - - [13/Nov/2026:01:54:49 -0800] "GET /login.php HTTP/1.1" 200 6439 "-" "curl/8.13.0"
+::1 - - [13/Nov/2026:01:54:50 -0800] "GET /storage/ HTTP/1.1" 404 206 "-" "curl/8.13.0"
+```
+
+### 6.3 `C:\MAMP\logs\alphagarage_ssl_error.log`
+Only expected `AH01630` access denial events from the probe tests against `/.git` and `/.env.example`:
+```
+[Fri Nov 13 01:54:51.063528 2026] [authz_core:error] [pid 8600:tid 1468] [client ::1:53913] AH01630: client denied by server configuration: C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public/.git
+[Fri Nov 13 01:54:51.317914 2026] [authz_core:error] [pid 8600:tid 1468] [client ::1:53916] AH01630: client denied by server configuration: C:/MAMP/htdocs/AutoPro_Garage-main/AutoPro_Garage-main/public/.env.example
+```
+**Zero server crashes, zero missing module warnings, zero unhandled PHP fatal errors.**
 
 ---
 
-## 6. Live Database & Cryptographic Audit Verification
+## 7. Database & Cryptographic Audit Verification
 
-Verification conducted via PHP 8.3.1 PDO against database `garage_management_system`:
+Verification conducted via PHP 8.3.1 PDO against live database `garage_management_system`:
 
 ```
 Active DB: garage_management_system
 Users in database:
   ID: 1 | Username: kilotest_auth_63e8ee04 | Role: administrator (ID: 1) | Active: 0
-  ID: 4 | Username: barok_admin | Role: administrator (ID: 1) | Active: 1
+  ID: 4 | Username: barok_admin           | Role: administrator (ID: 1) | Active: 1
 Total audit records: 53
 Audit chain valid: YES
 ```
 
-### Recent Audit Activity Breakdown:
+### Audit Record Verification:
 - **Record #44:** `user_deactivated` (Test Admin ID 1 deactivated in Phase 1.7F).
 - **Record #45:** `administrator_recovered` (Owner Admin ID 4 created in Phase 1.7F).
-- **Records #46–50:** Verification authentication events.
-- **Records #51–53:** Authentication events from browser testing:
-  - #51: `login_failed` (baroksimeneh4@gmail.com) at 17:07:14 UTC.
-  - #52: `login_failed` (baroksimeneh4@gmail.com) at 17:07:36 UTC.
-  - #53: `login_success` (barok_admin) at 17:08:09 UTC.
-- All 53 cryptographic hashes (`prev_hash` -> `row_hash`) are unbroken.
+- **Records #46–53:** Authentication events from verification testing (unsuccessful password checks, valid session creation).
+- **Cryptographic Chaining:** Verified through `AuditLogger::verifyChain()`. All 53 hashes (`prev_hash` to `row_hash`) are cryptographically linked and intact.
 
 ---
 
-## 7. Resolution: Steps for the Owner to Restart Apache
+## 8. Remaining Risks & Production Readiness Assessment
 
-Because this phase is strictly **READ-ONLY** and assistant execution of process termination / restarts is forbidden by safety rules, the owner must restart the Apache process using the following steps:
+| Risk Category | Current Status | Risk Level | Mitigation & Future Phase Action |
+|---|---|---|---|
+| **Local Self-Signed SSL** | Local certificate valid for localhost development | Low (Dev only) | For production online deployment, replace `localhost-cert.pem` with a valid CA certificate (e.g., Let's Encrypt / Certbot). |
+| **HSTS Header** | Intentionally disabled on localhost | Low | Do not enable HSTS on localhost to prevent permanent browser caching of self-signed certs. Enable HSTS during production cloud deployment. |
+| **HTTP to HTTPS Redirect** | HTTP on port 80 currently serves the application | Low (Dev only) | In production, configure an unconditional 301/308 redirect from HTTP to HTTPS. |
+| **Pre-Cutover Backups** | Stored in `alpha-garage-backups` | None | Stored outside `htdocs` in user home directory; safe from web traversal. |
 
-### Step 1: Terminate the Orphaned Apache Process
-Open PowerShell as Administrator (or standard PowerShell) and run:
+---
+
+## 9. Rollback Instructions (Reference Only)
+
+In the event a rollback to the pre-cutover state is ever needed:
 ```powershell
 Stop-Process -Name httpd -Force
+Copy-Item "C:\Users\Temesgen\alpha-garage-backups\apache_config_20261111_054518\httpd.conf" "C:\MAMP\conf\apache\httpd.conf" -Force
+Copy-Item "C:\Users\Temesgen\alpha-garage-backups\apache_config_20261111_054518\gms-ssl.conf" "C:\MAMP\conf\apache\gms-ssl.conf" -Force
+Remove-Item "C:\MAMP\conf\apache\alphagarage-vhost.conf" -Force
 ```
-*(Alternatively, open Windows Task Manager, find all `Apache HTTP Server` / `httpd.exe` processes under MAMP, right-click and select **End Task**).*
-
-### Step 2: Restart Apache via MAMP
-1. In the MAMP application window, if the servers are showing "Started", click **Stop Servers**.
-2. Click **Start Servers**.
-
-### Step 3: Verify the New Apache Process
-Run this command in PowerShell to confirm a new PID and fresh start time:
-```powershell
-Get-Process httpd | Select-Object Id, ProcessName, StartTime
-```
-*(The StartTime should now reflect the current time).*
-
-### Step 4: Verify the New URLs in Your Browser
-Once Apache restarts with the new configuration, test:
-1. **`https://localhost/login.php`** -> Should load the Alpha Garage luxury login page directly.
-2. **`https://localhost/`** -> Should load Alpha Garage directly (no more MAMP PRO welcome page).
-3. **`https://localhost/database/`** -> Should return **404 Not Found**.
-4. **`https://localhost/.git/`** -> Should return **403 Forbidden** or **404 Not Found**.
-5. **`https://localhost/storage/`** -> Should return **404 Not Found**.
-6. **`https://localhost/AutoPro_Garage-main/`** -> Should return **404 Not Found** (old path no longer exists).
-
----
-
-## 8. Rollback Procedure (If Ever Required)
-
-To restore the pre-cutover configuration at any point:
-1. Terminate `httpd.exe`:
-   ```powershell
-   Stop-Process -Name httpd -Force
-   ```
-2. Restore original `httpd.conf` and `gms-ssl.conf`:
-   ```powershell
-   Copy-Item "C:\Users\Temesgen\alpha-garage-backups\apache_config_20261111_054518\httpd.conf" "C:\MAMP\conf\apache\httpd.conf" -Force
-   Copy-Item "C:\Users\Temesgen\alpha-garage-backups\apache_config_20261111_054518\gms-ssl.conf" "C:\MAMP\conf\apache\gms-ssl.conf" -Force
-   Remove-Item "C:\MAMP\conf\apache\alphagarage-vhost.conf" -Force
-   ```
-3. Start servers in MAMP.
+Restart MAMP servers to restore `C:\MAMP\htdocs` as DocumentRoot.
