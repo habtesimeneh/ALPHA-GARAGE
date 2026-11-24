@@ -21,7 +21,7 @@
 .home-hero-slides { position: absolute; inset: 0; z-index: 0; }
 .home-hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; opacity: 0; transition: opacity 1s ease; }
 .home-hero-slide.is-active { opacity: 1; }
-.home-hero::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(105deg, rgba(8, 23, 15, .96) 0%, rgba(11, 46, 27, .86) 48%, rgba(20, 40, 27, .52) 100%), radial-gradient(520px 320px at 85% 15%, rgba(250, 204, 21, .16), transparent 70%), repeating-linear-gradient(115deg, transparent 0 28px, rgba(255, 255, 255, .025) 28px 30px); }
+.home-hero::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(105deg, rgba(8, 23, 15, .68) 0%, rgba(11, 46, 27, .50) 48%, rgba(20, 40, 27, .30) 100%), radial-gradient(520px 320px at 85% 15%, rgba(250, 204, 21, .12), transparent 70%), repeating-linear-gradient(115deg, transparent 0 28px, rgba(255, 255, 255, .02) 28px 30px); }
 .home-hero > .container { position: relative; z-index: 2; }
 .home-hero-controls { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-5); }
 .home-hero-dots { display: flex; align-items: center; gap: .55rem; }

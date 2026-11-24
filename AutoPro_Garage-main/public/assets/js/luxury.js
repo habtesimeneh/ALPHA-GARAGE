@@ -27,15 +27,18 @@
     let charIndex = 0;
     let isDeleting = false;
 
+    el.innerHTML = '<span class="typewriter-text"></span><span class="typewriter-cursor" aria-hidden="true">|</span>';
+    const textSpan = el.querySelector('.typewriter-text');
+
     function tick() {
       const currentPhrase = phrases[phraseIndex];
 
       if (isDeleting) {
         charIndex--;
-        el.textContent = currentPhrase.substring(0, charIndex);
+        textSpan.textContent = currentPhrase.substring(0, charIndex);
       } else {
         charIndex++;
-        el.textContent = currentPhrase.substring(0, charIndex);
+        textSpan.textContent = currentPhrase.substring(0, charIndex);
       }
 
       let delta = isDeleting ? deleteSpeed : typeSpeed;
@@ -46,7 +49,7 @@
       } else if (isDeleting && charIndex === 0) {
         isDeleting = false;
         phraseIndex = (phraseIndex + 1) % phrases.length;
-        delta = 400;
+        delta = 450;
       }
 
       setTimeout(tick, delta);
@@ -345,9 +348,9 @@
       initSlider(slider);
     });
 
-    // 2. Typewriter Elements
-    const typewriterEl = document.querySelector('[data-typewriter]');
-    if (typewriterEl) {
+    // 2. Typewriter Elements (All elements with [data-typewriter])
+    const typewriterEls = document.querySelectorAll('[data-typewriter]');
+    typewriterEls.forEach((typewriterEl) => {
       let phrases = [];
       try {
         phrases = JSON.parse(typewriterEl.getAttribute('data-typewriter'));
@@ -360,8 +363,10 @@
           'Driven by Excellence.'
         ];
       }
-      initTypewriter(typewriterEl, phrases);
-    }
+      if (phrases && phrases.length) {
+        initTypewriter(typewriterEl, phrases);
+      }
+    });
 
     // 3. Password meter & toggles
     initPasswordMeter();

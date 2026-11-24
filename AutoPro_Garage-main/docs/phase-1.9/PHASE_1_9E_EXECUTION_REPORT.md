@@ -38,9 +38,11 @@ The live production database `garage_management_system` was strictly preserved i
 | `public/payments/refund.php` | Modified | Accepts and forwards `idempotency_key` to `PaymentService::refund()`. |
 | `public/invoices/view.php` | Modified | Embedded hidden `idempotency_key` in the authorized refund form. |
 | `tests/payment_idempotency_1_9e_suite.php` | **Created** | Comprehensive 14-test automated idempotency and concurrency test harness. |
+| `docs/phase-1.9/PHASE_1_9E_ARCHITECTURE_AUDIT.md` | **Created** | Read-only architecture inspection of payment/invoice schemas, triggers, and lifecycle risks. |
 | `docs/phase-1.9/PHASE_1_9E_PAYMENT_IDEMPOTENCY_PLAN.md` | **Created** | Architectural idempotency design, state machine, and test strategy. |
 | `docs/phase-1.9/PHASE_1_9E_IMPLEMENTATION_RESULTS.md` | **Created** | Empirical test evidence across all 14 test assertions. |
 | `docs/phase-1.9/PHASE_1_9E_CONCURRENCY_TESTS.md` | **Created** | Deep-dive concurrency and race condition verification evidence. |
+| `docs/phase-1.9/PHASE_1_9E_REGRESSION_RESULTS.md` | **Created** | Comprehensive post-implementation regression test results across 90 assertions. |
 | `docs/phase-1.9/PHASE_1_9E_EXECUTION_REPORT.md` | **Created** | Formal engineering completion and safety verification report. |
 
 ---

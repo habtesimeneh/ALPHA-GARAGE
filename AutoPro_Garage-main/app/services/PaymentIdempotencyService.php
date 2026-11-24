@@ -55,7 +55,8 @@ final class PaymentIdempotencyService
         string $operationType,
         string $amount,
         string $method,
-        string $reference
+        string $reference,
+        string $notes = ''
     ): string {
         $normalized = implode('|', [
             $userId,
@@ -64,6 +65,7 @@ final class PaymentIdempotencyService
             number_format((float) $amount, 2, '.', ''),
             strtolower(trim($method)),
             trim($reference),
+            trim($notes),
         ]);
         return hash('sha256', $normalized);
     }
@@ -80,14 +82,15 @@ final class PaymentIdempotencyService
         string $operationType,
         string $amount,
         string $method,
-        string $reference
+        string $reference,
+        string $notes = ''
     ): array {
         if (!self::isTableAvailable()) {
             return ['status' => 'new'];
         }
 
         $validatedKey = self::validateKey($key);
-        $requestHash = self::computeHash($userId, $invoiceId, $operationType, $amount, $method, $reference);
+        $requestHash = self::computeHash($userId, $invoiceId, $operationType, $amount, $method, $reference, $notes);
         $formattedAmount = number_format((float) $amount, 2, '.', '');
 
         try {
@@ -117,24 +120,31 @@ final class PaymentIdempotencyService
                 throw new DomainException('Unauthorized: Idempotency key belongs to another user.');
             }
 
-            // 2. Handle previously failed transactions: allow clean retry
+            // 2. Handle previously failed transactions: atomically reclaim with conditional update
             if ($existing['status'] === 'failed') {
-                Database::run(
+                $reclaimed = Database::run(
                     'UPDATE payment_idempotency_keys 
                      SET status = "pending", invoice_id = ?, operation_type = ?, amount = ?, request_hash = ?, error_message = NULL 
-                     WHERE idempotency_key = ?',
+                     WHERE idempotency_key = ? AND status = "failed"',
                     [$invoiceId, $operationType, $formattedAmount, $requestHash, $validatedKey]
                 );
-                return ['status' => 'new'];
+                if ($reclaimed > 0) {
+                    return ['status' => 'new'];
+                }
+                // If 0 rows affected, another concurrent request already claimed the failed key; re-fetch
+                $existing = Database::one('SELECT * FROM payment_idempotency_keys WHERE idempotency_key = ?', [$validatedKey]);
+                if (!$existing) {
+                    throw new DomainException('Idempotency lock collision detected, but existing record could not be loaded.');
+                }
             }
 
-            // 3. Verify payload integrity for completed or in-flight keys (prevent key reuse with altered amount/invoice)
+            // 3. Verify payload integrity for completed or in-flight keys (prevent key reuse with altered parameters)
             $existingAmount = number_format((float) $existing['amount'], 2, '.', '');
             if ((int) $existing['invoice_id'] !== $invoiceId ||
                 $existing['operation_type'] !== $operationType ||
                 $existingAmount !== $formattedAmount ||
                 $existing['request_hash'] !== $requestHash) {
-                throw new DomainException('Conflict: Idempotency key was already used with a different payment amount, invoice, or method.');
+                throw new DomainException('Conflict: Idempotency key was already used with a different payment amount, invoice, method, or notes.');
             }
 
             // 4. Completed status
@@ -162,11 +172,13 @@ final class PaymentIdempotencyService
                         ];
                     }
                     if ($poll && $poll['status'] === 'failed') {
-                        Database::run(
-                            'UPDATE payment_idempotency_keys SET status = "pending", request_hash = ?, error_message = NULL WHERE idempotency_key = ?',
-                            [$requestHash, $validatedKey]
+                        $reclaimed = Database::run(
+                            'UPDATE payment_idempotency_keys SET status = "pending", invoice_id = ?, operation_type = ?, amount = ?, request_hash = ?, error_message = NULL WHERE idempotency_key = ? AND status = "failed"',
+                            [$invoiceId, $operationType, $formattedAmount, $requestHash, $validatedKey]
                         );
-                        return ['status' => 'new'];
+                        if ($reclaimed > 0) {
+                            return ['status' => 'new'];
+                        }
                     }
                 }
 
@@ -189,7 +201,7 @@ final class PaymentIdempotencyService
         Database::run(
             'UPDATE payment_idempotency_keys 
              SET status = "completed", payment_id = ?, response_payload = ?, error_message = NULL 
-             WHERE idempotency_key = ?',
+             WHERE idempotency_key = ? AND status = "pending"',
             [$paymentId, json_encode($responsePayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $key]
         );
     }
@@ -207,7 +219,7 @@ final class PaymentIdempotencyService
             Database::run(
                 'UPDATE payment_idempotency_keys 
                  SET status = "failed", error_message = ? 
-                 WHERE idempotency_key = ?',
+                 WHERE idempotency_key = ? AND status = "pending"',
                 [mb_substr($errorMessage, 0, 255), $key]
             );
         } catch (Throwable) {

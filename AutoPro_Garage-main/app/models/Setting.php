@@ -40,6 +40,15 @@ final class Setting
     public static function paymentMethods(): array
     {
         $m = array_filter(array_map('trim', explode(',', self::get('payment_methods', 'Cash,Bank Transfer'))));
+        try {
+            $dbMethods = Database::all('SELECT code, name FROM payment_methods WHERE is_active = 1 ORDER BY display_order ASC, name ASC');
+            foreach ($dbMethods as $row) {
+                $m[] = $row['name'];
+                $m[] = $row['code'];
+            }
+        } catch (Throwable $e) {
+            // Fallback to settings
+        }
         return array_values(array_unique($m)) ?: ['Cash'];
     }
 }

@@ -1,11 +1,53 @@
+# Environment & Configuration Secrets
+.env
+.env.*
+!.env.example
 app/config/local.php
+storage/installed.lock
+
+# Storage Directories & Backups (FIND-16-01 Remediation)
+storage/backups/
+storage/staging/
+storage/sessions/
+storage/rate_limits/
+storage/mail_spool/
+storage/testing/*
+!storage/testing/.gitignore
+
+# Private Storage & Sensitive Files
+storage/private/*
+!storage/private/.htaccess
+storage/private/encryption.key
+storage/private/*.key
 storage/private/*.generated.sql
+
+# Uploads (User Content & Payment Proofs)
+storage/uploads/*
+!storage/uploads/.gitkeep
+!storage/uploads/.htaccess
+
+# Logs
 storage/logs/*
 !storage/logs/.gitkeep
-storage/installed.lock
-.DS_Store
 *.log
-storage/private/*.generated.sql
-storage/private/encryption.key
-storage/mail_spool/
-storage/rate_limits/
+
+# SQL Dumps outside database/ directory
+storage/**/*.sql
+*.dump.sql
+*.backup.sql
+
+# OS & Editor Artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.tmp
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Dependencies
+/vendor/
+node_modules/

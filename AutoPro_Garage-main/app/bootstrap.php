@@ -41,7 +41,7 @@ header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
-header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https://images.unsplash.com; style-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
+header("Content-Security-Policy: default-src 'self'; img-src 'self' data: https://images.unsplash.com https://img.youtube.com https://i.ytimg.com; media-src 'self' data: blob:; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'");
 header('Cache-Control: no-store, max-age=0');
 
 /* ---- hardened session ---- */
@@ -69,6 +69,9 @@ if ($isTestMode) {
 
 session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Lax']);
 session_start();
+
+/* ---- bilingual localization (en / am) ---- */
+init_language();
 
 /* ---- remember-me: restore session from a valid persistent cookie ---- */
 if (($GLOBALS['config']['remember']['enabled'] ?? false) && empty($_SESSION['uid']) && isset($_COOKIE['GMS_REMEMBER'])) {

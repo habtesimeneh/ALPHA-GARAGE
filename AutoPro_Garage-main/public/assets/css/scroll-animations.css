@@ -1,0 +1,408 @@
+/* ==========================================================================
+   scroll-animations.css — ALPHA GARAGE Global Scroll Animation System
+   Luxury Automotive Performance & Interaction System
+   Theme tokens: Deep Forest Green (#0D281E), Champagne Gold (#D4AF37)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Progressive Enhancement & Failsafe Architecture
+   Default: All elements are 100% visible if JavaScript is blocked or fails.
+   Only when 'html.js-ready' is present do initial reveal states activate.
+   -------------------------------------------------------------------------- */
+.reveal,
+.reveal-up,
+.reveal-down,
+.reveal-left,
+.reveal-right,
+.reveal-scale,
+.reveal-fade,
+.reveal-zoom,
+.reveal-blur,
+.reveal-rotate,
+.app-body .content > .card,
+.app-body .content > .grid > .card {
+  /* Failsafe default */
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+html.js-ready .reveal,
+html.js-ready .reveal-up,
+html.js-ready .reveal-down,
+html.js-ready .reveal-left,
+html.js-ready .reveal-right,
+html.js-ready .reveal-scale,
+html.js-ready .reveal-fade,
+html.js-ready .reveal-zoom,
+html.js-ready .reveal-blur,
+html.js-ready .reveal-rotate,
+html.js-ready .app-body .content > .card,
+html.js-ready .app-body .content > .grid > .card {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition-property: opacity, transform, filter;
+  transition-duration: 650ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  backface-visibility: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   2. Directional & Stylistic Initial States
+   -------------------------------------------------------------------------- */
+html.js-ready .reveal,
+html.js-ready .reveal-up,
+html.js-ready .app-body .content > .card,
+html.js-ready .app-body .content > .grid > .card {
+  transform: translateY(28px);
+}
+
+html.js-ready .reveal-down {
+  transform: translateY(-24px);
+}
+
+html.js-ready .reveal-left {
+  transform: translateX(-32px);
+}
+
+html.js-ready .reveal-right {
+  transform: translateX(32px);
+}
+
+html.js-ready .reveal-scale {
+  transform: scale(0.92);
+}
+
+html.js-ready .reveal-fade {
+  transform: none;
+}
+
+html.js-ready .reveal-zoom {
+  transform: scale(1.06);
+}
+
+html.js-ready .reveal-blur {
+  transform: translateY(18px);
+  filter: blur(8px);
+}
+
+html.js-ready .reveal-rotate {
+  transform: translateY(22px) rotate(-1.5deg);
+}
+
+/* --------------------------------------------------------------------------
+   3. Active Revealed State
+   -------------------------------------------------------------------------- */
+html.js-ready .reveal.is-revealed,
+html.js-ready .reveal-up.is-revealed,
+html.js-ready .reveal-down.is-revealed,
+html.js-ready .reveal-left.is-revealed,
+html.js-ready .reveal-right.is-revealed,
+html.js-ready .reveal-scale.is-revealed,
+html.js-ready .reveal-fade.is-revealed,
+html.js-ready .reveal-zoom.is-revealed,
+html.js-ready .reveal-blur.is-revealed,
+html.js-ready .reveal-rotate.is-revealed,
+html.js-ready .app-body .content > .card.is-revealed,
+html.js-ready .app-body .content > .grid > .card.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  filter: blur(0);
+}
+
+/* Duration modifiers */
+.reveal-fast { transition-duration: 400ms !important; }
+.reveal-slow { transition-duration: 900ms !important; }
+.reveal-hero { transition-duration: 1000ms !important; }
+
+/* --------------------------------------------------------------------------
+   4. Stagger Delay Utilities
+   -------------------------------------------------------------------------- */
+.stagger-1 { transition-delay: 80ms !important; }
+.stagger-2 { transition-delay: 160ms !important; }
+.stagger-3 { transition-delay: 240ms !important; }
+.stagger-4 { transition-delay: 320ms !important; }
+.stagger-5 { transition-delay: 400ms !important; }
+.stagger-6 { transition-delay: 480ms !important; }
+.stagger-7 { transition-delay: 560ms !important; }
+.stagger-8 { transition-delay: 640ms !important; }
+
+/* Automatic Container Child Stagger */
+html.js-ready .reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(24px);
+  will-change: transform, opacity;
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(1) { transition-delay: 60ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(2) { transition-delay: 130ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(3) { transition-delay: 200ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(4) { transition-delay: 270ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(5) { transition-delay: 340ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 410ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(7) { transition-delay: 480ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(8) { transition-delay: 550ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(9) { transition-delay: 620ms; }
+html.js-ready .reveal-stagger.is-revealed > *:nth-child(10) { transition-delay: 690ms; }
+
+html.js-ready .reveal-stagger.is-revealed > * {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* --------------------------------------------------------------------------
+   5. Premium Micro-Interactions (Cards, Buttons, Tables)
+   -------------------------------------------------------------------------- */
+/* Interactive Cards */
+.card-interactive,
+.kpi-card,
+.stat,
+.inv-stat,
+.service-card,
+.about-card,
+.luxury-feature-card {
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 280ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 280ms ease,
+              background-color 280ms ease;
+}
+
+.card-interactive:hover,
+.kpi-card:hover,
+.service-card:hover,
+.about-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(7, 23, 17, 0.14),
+              0 0 0 1px rgba(212, 175, 55, 0.28);
+}
+
+[data-theme="dark"] .card-interactive:hover,
+[data-theme="dark"] .kpi-card:hover,
+[data-theme="dark"] .service-card:hover,
+[data-theme="dark"] .about-card:hover {
+  box-shadow: 0 14px 28px -6px rgba(0, 0, 0, 0.45),
+              0 0 18px rgba(212, 175, 55, 0.22);
+}
+
+.card-interactive:active,
+.kpi-card:active {
+  transform: translateY(-1px) scale(0.995);
+}
+
+/* Interactive Buttons */
+.btn-interactive,
+.btn-hero-primary,
+.btn-hero-secondary,
+.btn-luxury-gold,
+.btn-primary,
+.btn-nav-cta {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              background 200ms ease,
+              filter 200ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-interactive:hover,
+.btn-hero-primary:hover,
+.btn-luxury-gold:hover,
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(212, 175, 55, 0.32);
+}
+
+.btn-interactive:active,
+.btn-hero-primary:active,
+.btn-luxury-gold:active,
+.btn-primary:active {
+  transform: translateY(0) scale(0.975);
+}
+
+/* Shimmer Highlight on Primary Buttons */
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  transition: left 750ms ease-in-out;
+  pointer-events: none;
+}
+
+.btn-shimmer:hover::after {
+  left: 130%;
+}
+
+/* Table Row Smooth Reveals */
+.table tbody tr {
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+.table.interactive tbody tr:hover {
+  transform: translateX(3px);
+}
+
+/* --------------------------------------------------------------------------
+   6. Floating Back to Top Button
+   -------------------------------------------------------------------------- */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 85;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--forest-dark, #0D281E);
+  color: var(--gold-primary, #D4AF37);
+  border: 1.5px solid var(--gold-primary, #D4AF37);
+  box-shadow: 0 4px 14px rgba(7, 23, 17, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.85);
+  transition: opacity 300ms ease,
+              visibility 300ms ease,
+              transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 200ms ease,
+              box-shadow 200ms ease;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top:hover {
+  background: var(--forest-deep, #153A2D);
+  color: #FFFFFF;
+  border-color: #E8CD83;
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35);
+}
+
+.back-to-top:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid var(--gold-primary, #D4AF37);
+  outline-offset: 3px;
+}
+
+.back-to-top svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 200ms ease;
+}
+
+.back-to-top:hover svg {
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   7. Smooth Section Progress Bar (Optional Luxury Accent)
+   -------------------------------------------------------------------------- */
+.scroll-progress-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  z-index: 101;
+  pointer-events: none;
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--forest-dark, #0D281E) 0%, var(--gold, #D4AF37) 70%, var(--gold-champagne, #E8CD83) 100%);
+  transition: width 100ms linear;
+}
+
+/* --------------------------------------------------------------------------
+   8. Mobile Viewport Optimization (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  html.js-ready .reveal-left {
+    transform: translateX(-16px);
+  }
+
+  html.js-ready .reveal-right {
+    transform: translateX(16px);
+  }
+
+  html.js-ready .reveal,
+  html.js-ready .reveal-up {
+    transform: translateY(20px);
+  }
+
+  .back-to-top {
+    bottom: 4.5rem; /* Above mobile quick actions */
+    right: 1.25rem;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Strict Accessibility: Prefers-Reduced-Motion Override
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html.js-ready .reveal,
+  html.js-ready .reveal-up,
+  html.js-ready .reveal-down,
+  html.js-ready .reveal-left,
+  html.js-ready .reveal-right,
+  html.js-ready .reveal-scale,
+  html.js-ready .reveal-fade,
+  html.js-ready .reveal-zoom,
+  html.js-ready .reveal-blur,
+  html.js-ready .reveal-rotate,
+  html.js-ready .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .card-interactive:hover,
+  .kpi-card:hover,
+  .btn-interactive:hover {
+    transform: none !important;
+  }
+
+  .back-to-top {
+    transition: opacity 150ms ease !important;
+    transform: none !important;
+  }
+
+  .back-to-top:hover {
+    transform: none !important;
+  }
+}

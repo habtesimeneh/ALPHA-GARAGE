@@ -41,15 +41,21 @@
   .home-links a:not(.btn) { padding: .8rem 0; border-bottom: 1px solid rgba(255, 255, 255, .08); }
   .home-toggle:checked ~ .home-links { display: flex; }
   .home-nav .container { position: relative; }
+  .public-nav-luxury .nav-container { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+  .public-nav-luxury .nav-links { width: 100%; justify-content: flex-start; }
 }
 @media (max-width: 768px) {
   .topbar-search { display: none; }
+  .topbar-right .today { display: none !important; }
   .bar-row { grid-template-columns: 120px 1fr 36px; }
   .service-grid, .testimonial-grid { grid-template-columns: 1fr; }
   .home-footer .cols { grid-template-columns: 1fr 1fr; } .home-footer .cols > :first-child { grid-column: 1 / -1; }
   .hero { padding: var(--space-5); }
 }
 @media (max-width: 640px) {
+  .topbar-right .btn-back-home span { display: none !important; }
+  .topbar-right .btn-back-home { padding: 0.35rem 0.5rem !important; }
+  .topbar-right { gap: var(--space-2) !important; }
   .form-grid { grid-template-columns: 1fr; }
   .kv { grid-template-columns: 1fr; } .kv dt { margin-top: var(--space-2); }
   .doc { padding: var(--space-4); } .doc .cols { grid-template-columns: 1fr; } .doc-meta { text-align: left; }
@@ -62,6 +68,8 @@
   .notification-dropdown { right: -52px; }
   .auth-card { padding: var(--space-5); border-radius: var(--radius-lg); }
   .home-stats { gap: var(--space-5); }
+  .public-nav-luxury .nav-links { gap: var(--space-2); }
+  .public-nav-luxury .nav-links a { padding: .3rem .5rem; font-size: var(--text-xs); }
   /* Tables marked .stack turn into labelled cards */
   .table.stack thead { display: none; }
   .table.stack, .table.stack tbody { display: block; }
@@ -72,6 +80,8 @@
   .table.stack td.num { text-align: right; }
 }
 @media (max-width: 480px) {
+  .lang-switcher-pill { padding: 3px 4px !important; gap: 3px !important; }
+  .lang-switch-btn { min-width: 40px !important; height: 30px !important; padding: 0 9px !important; font-size: 0.84rem !important; font-weight: 750 !important; }
   .hero h2 { font-size: var(--text-lg); }
   .page-head h2 { font-size: var(--text-lg); }
   .bar-row { grid-template-columns: 96px 1fr 30px; font-size: var(--text-xs); }
@@ -81,6 +91,12 @@
   .modal-actions .btn { flex: 1; }
   .home-footer .cols { grid-template-columns: 1fr; }
   .home-cta .btn { flex: 1 1 100%; }
+  .booking-modal-dialog { padding: 1.25rem 1rem !important; width: 96% !important; margin: 0.5rem auto !important; }
+  .booking-modal-title { font-size: 1.2rem !important; }
+  .vehicle-toggle-bar { flex-direction: column !important; gap: 0.35rem !important; }
+  .vehicle-toggle-btn { width: 100% !important; justify-content: center !important; }
+  .booking-modal-actions { flex-direction: column-reverse !important; width: 100% !important; }
+  .booking-modal-actions .btn { width: 100% !important; }
 }
 @media (max-width: 375px) {
   .content { padding: var(--space-3); }
@@ -88,4 +104,12 @@
   .topbar-title { font-size: var(--text-base); }
   .brand small { display: none; }
   .btn { padding: .55rem .8rem; }
+  .booking-modal-dialog { padding: 1.15rem 0.75rem !important; }
+  .booking-modal-header { gap: 0.5rem !important; }
+  .booking-modal-title { font-size: 1.1rem !important; }
+  .booking-modal-close { width: 32px !important; height: 32px !important; font-size: 1.1rem !important; }
+}
+@media (max-width: 320px) {
+  .booking-modal-dialog { padding: 1rem 0.5rem !important; }
+  .booking-section-header { font-size: 0.8rem !important; }
 }

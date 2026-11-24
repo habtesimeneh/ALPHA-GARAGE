@@ -105,17 +105,12 @@ if (is_post() && !$errors) {
                 [(int) $roleId, $v['username'], $v['full_name'], $v['email'], $v['phone'] ?: null, $hash]
             );
 
-            $existingCustId = Database::value('SELECT id FROM customers WHERE LOWER(email) = ?', [$v['email']]);
-            if (!$existingCustId && !empty($v['phone'])) {
-                $existingCustId = Database::value('SELECT id FROM customers WHERE phone = ?', [$v['phone']]);
-            }
-
-            if (!$existingCustId) {
-                Database::insert(
-                    'INSERT INTO customers (full_name, phone, email, created_by) VALUES (?, ?, ?, ?)',
-                    [$v['full_name'], $v['phone'] ?: '+251 90 000 0000', $v['email'], (int) $uid]
-                );
-            }
+            // Always create a dedicated customer profile with explicit immutable user_id ownership.
+            // Walk-in records matching email remain unlinked until independently verified (Remediates FIND-110B-02).
+            Database::insert(
+                'INSERT INTO customers (full_name, phone, email, created_by, user_id) VALUES (?, ?, ?, ?, ?)',
+                [$v['full_name'], $v['phone'] ?: '+251 90 000 0000', $v['email'], (int) $uid, (int) $uid]
+            );
 
             AuditLogger::logSafe(
                 'user_registered',
@@ -146,7 +141,7 @@ $sliderImages = [
 ];
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= e(current_lang()) ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -154,6 +149,7 @@ $sliderImages = [
 <link rel="icon" href="<?= e(asset('images/logo.svg')) ?>" type="image/svg+xml">
 <link rel="stylesheet" href="<?= e(asset('css/variables.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/luxury-auth.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset('css/scroll-animations.css')) ?>">
 </head>
 <body class="luxury-auth-body">
 
@@ -172,26 +168,30 @@ $sliderImages = [
   <div class="luxury-auth-topbar">
     <a href="<?= e(url('index.php')) ?>" class="btn-luxury-back">
       <span class="btn-back-arrow">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" 
+        stroke="currentColor" stroke-width="2.5" 
+        stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </span>
-      <span class="btn-back-text">Back to Homepage</span>
+      <span class="btn-back-text"><?= e(t('Back to Homepage', 'Back to Homepage')) ?></span>
     </a>
+    <?= lang_switcher_html() ?>
     <div class="luxury-badge-portal">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="13" height="13" viewBox="0 0 24 24" 
+      fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
       </svg>
-      <span>Client Portal</span>
+      <span><?= e(t('Client Portal', 'Client Portal')) ?></span>
     </div>
   </div>
 
-  <main class="luxury-auth-centered-card card-wide">
+  <main class="luxury-auth-centered-card card-wide reveal-scale card-interactive">
     <div class="luxury-card-brand">
       <div class="luxury-card-logo-wrap">
-        <img src="<?= e(asset('images/logo.svg')) ?>" alt="" width="44" height="44">
+        <img src="<?= e(asset('images/logo.svg')) ?>" alt="logo image" width="44" height="44">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2">
           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
         </svg>
@@ -203,8 +203,8 @@ $sliderImages = [
     </div>
 
     <div class="luxury-form-header auth-form-header">
-      <h2 class="luxury-form-title auth-form-title">Create an Account</h2>
-      <p class="luxury-form-desc">Register with <?= e($garageName) ?> for precision service</p>
+      <h2 class="luxury-form-title auth-form-title"><?= e(t('Create an Account', 'Create an Account')) ?></h2>
+      <p class="luxury-form-desc"><?= e(t('Register with :garage for precision service', 'Register with :garage for precision service', ['garage' => $garageName])) ?></p>
     </div>
 
     <?php if (!empty($errors['form'])): ?>
@@ -222,7 +222,7 @@ $sliderImages = [
       <!-- Full Name -->
       <div class="luxury-field">
         <label class="luxury-label" for="full_name">
-          <span>Full Name <span class="req">*</span></span>
+          <span><?= e(t('Full Name', 'Full Name')) ?> <span class="req">*</span></span>
         </label>
         <div class="luxury-input-wrapper">
           <input class="luxury-input" id="full_name" name="full_name" type="text"
@@ -238,7 +238,7 @@ $sliderImages = [
       <div class="auth-form-grid">
         <div class="luxury-field">
           <label class="luxury-label" for="email">
-            <span>Email <span class="req">*</span></span>
+            <span><?= e(t('Email', 'Email')) ?> <span class="req">*</span></span>
           </label>
           <div class="luxury-input-wrapper">
             <input class="luxury-input" id="email" name="email" type="email"
@@ -252,7 +252,7 @@ $sliderImages = [
 
         <div class="luxury-field">
           <label class="luxury-label" for="phone">
-            <span>Phone <span class="req">*</span></span>
+            <span><?= e(t('Phone', 'Phone')) ?> <span class="req">*</span></span>
           </label>
           <div class="luxury-input-wrapper">
             <input class="luxury-input" id="phone" name="phone" type="tel"
@@ -268,12 +268,12 @@ $sliderImages = [
       <!-- Username -->
       <div class="luxury-field">
         <label class="luxury-label" for="username">
-          <span>Username <span class="req">*</span></span>
+          <span><?= e(t('Username', 'Username')) ?> <span class="req">*</span></span>
         </label>
         <div class="luxury-input-wrapper">
           <input class="luxury-input" id="username" name="username" type="text"
                  value="<?= e($v['username']) ?>" required minlength="3" maxlength="50"
-                 placeholder="Choose a unique username">
+                 placeholder="<?= e(t('Choose a unique username', 'Choose a unique username')) ?>">
         </div>
         <?php if (!empty($errors['username'])): ?>
           <small class="auth-field-error"><?= e($errors['username']) ?></small>
@@ -283,12 +283,12 @@ $sliderImages = [
       <!-- Password & Strength Meter -->
       <div class="luxury-field">
         <label class="luxury-label" for="password">
-          <span>Password <span class="req">*</span></span>
+          <span><?= e(t('Password', 'Password')) ?> <span class="req">*</span></span>
         </label>
         <div class="luxury-input-wrapper">
           <input class="luxury-input has-toggle" id="password" name="password"
                  type="password" required autocomplete="new-password"
-                 minlength="10" placeholder="Minimum 10 characters with numbers &amp; symbols"
+                 minlength="10" placeholder="<?= e(t('Minimum 10 characters with numbers & symbols', 'Minimum 10 characters with numbers & symbols')) ?>"
                  data-strength-target="true">
           <button type="button" class="toggle-password" data-target="password"
                   aria-label="Toggle password visibility" title="Show password">👁</button>
@@ -307,12 +307,12 @@ $sliderImages = [
       <!-- Confirm Password -->
       <div class="luxury-field">
         <label class="luxury-label" for="password_confirm">
-          <span>Confirm Password <span class="req">*</span></span>
+          <span><?= e(t('Confirm Password', 'Confirm Password')) ?> <span class="req">*</span></span>
         </label>
         <div class="luxury-input-wrapper">
           <input class="luxury-input has-toggle" id="password_confirm" name="password_confirm"
                  type="password" required autocomplete="new-password"
-                 placeholder="Re-enter your password">
+                 placeholder="<?= e(t('Re-enter your password', 'Re-enter your password')) ?>">
           <button type="button" class="toggle-password" data-target="password_confirm"
                   aria-label="Toggle password visibility" title="Show password">👁</button>
         </div>
@@ -326,10 +326,10 @@ $sliderImages = [
         <label class="luxury-checkbox-label auth-terms-label">
           <input type="checkbox" name="terms" value="1" class="luxury-checkbox auth-terms-checkbox" required>
           <span class="auth-terms-copy">
-            I have read and agree to the 
-            <a href="<?= e(url('terms.php')) ?>" target="_blank" rel="noopener" class="auth-terms-link">Terms of Service</a> 
-            and 
-            <a href="<?= e(url('privacy.php')) ?>" target="_blank" rel="noopener" class="auth-terms-link">Privacy Policy</a>.
+            <?= e(t('I have read and agree to the', 'I have read and agree to the')) ?> 
+            <a href="<?= e(url('terms.php')) ?>" target="_blank" rel="noopener" class="auth-terms-link"><?= e(t('Terms of Service', 'Terms of Service')) ?></a> 
+            <?= e(t('and', 'and')) ?> 
+            <a href="<?= e(url('privacy.php')) ?>" target="_blank" rel="noopener" class="auth-terms-link"><?= e(t('Privacy Policy', 'Privacy Policy')) ?></a>.
           </span>
         </label>
         <?php if (!empty($errors['terms'])): ?>
@@ -338,24 +338,26 @@ $sliderImages = [
       </div>
 
       <!-- Submit Button -->
-      <button class="btn-luxury-gold" type="submit">
-        Create Account
+      <button class="btn-luxury-gold btn-interactive btn-shimmer" type="submit">
+        <?= e(t('Create Account', 'Create Account')) ?>
       </button>
     </form>
 
     <div class="luxury-form-footer">
-      Already have an account?
-      <a href="<?= e(url('login.php')) ?>">Sign In</a>
+      <?= e(t('Already have an account?', 'Already have an account?')) ?>
+      <a href="<?= e(url('login.php')) ?>"><?= e(t('Sign In', 'Sign In')) ?></a>
     </div>
   </main>
 
   <footer class="auth-legal-footer">
-    <a href="<?= e(url('terms.php')) ?>" target="_blank" rel="noopener" class="auth-legal-link">Terms of Service</a> &bull;
-    <a href="<?= e(url('privacy.php')) ?>" target="_blank" rel="noopener" class="auth-legal-link">Privacy Policy</a> &bull;
-    <a href="<?= e(url('contact.php')) ?>" class="auth-legal-link">Support &amp; Telegram</a>
+    <a href="<?= e(url('terms.php')) ?>" target="_blank" rel="noopener" class="auth-legal-link"><?= e(t('Terms of Service', 'Terms of Service')) ?></a> &bull;
+    <a href="<?= e(url('privacy.php')) ?>" target="_blank" rel="noopener" class="auth-legal-link"><?= e(t('Privacy Policy', 'Privacy Policy')) ?></a> &bull;
+    <a href="<?= e(url('contact.php')) ?>" class="auth-legal-link"><?= e(t('Support & Telegram', 'Support & Telegram')) ?></a>
   </footer>
 </div>
 
 <script src="<?= e(asset('js/luxury.js')) ?>"></script>
+<script src="<?= e(asset('js/i18n.js')) ?>"></script>
+<script src="<?= e(asset('js/scroll-animations.js')) ?>"></script>
 </body>
 </html>

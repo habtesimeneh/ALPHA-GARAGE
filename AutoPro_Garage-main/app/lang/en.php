@@ -1,0 +1,328 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * ALPHA GARAGE — CANONICAL ENGLISH DICTIONARY
+ * Phase 1.13 Production Translation Master
+ */
+
+return [
+    // -------------------------------------------------------------------------
+    // COMMON & BRANDING
+    // -------------------------------------------------------------------------
+    'common.app_name' => 'Alpha Garage',
+    'common.tagline' => 'Luxury Automotive Care',
+    'common.system_name' => 'Garage Management System',
+    'common.garage_management' => 'Garage Management',
+    'common.save' => 'Save',
+    'common.cancel' => 'Cancel',
+    'common.confirm' => 'Confirm',
+    'common.delete' => 'Delete',
+    'common.edit' => 'Edit',
+    'common.view' => 'View',
+    'common.actions' => 'Actions',
+    'common.status' => 'Status',
+    'common.priority' => 'Priority',
+    'common.date' => 'Date',
+    'common.time' => 'Time',
+    'common.search' => 'Search',
+    'common.filter' => 'Filter',
+    'common.clear' => 'Clear',
+    'common.all' => 'All',
+    'common.all_statuses' => 'All statuses',
+    'common.all_categories' => 'All categories',
+    'common.print' => 'Print',
+    'common.download' => 'Download',
+    'common.export' => 'Export',
+    'common.close' => 'Close',
+    'common.submit' => 'Submit',
+    'common.yes' => 'Yes',
+    'common.no' => 'No',
+    'common.records' => 'records',
+    'common.total' => 'Total',
+    'common.subtotal' => 'Subtotal',
+    'common.tax' => 'Tax',
+    'common.discount' => 'Discount',
+    'common.balance' => 'Balance',
+    'common.amount' => 'Amount',
+    'common.quantity' => 'Quantity',
+    'common.unit_price' => 'Unit Price',
+    'common.notes' => 'Notes',
+    'common.details' => 'Details',
+    'common.back_to_home' => 'Back to Home',
+    'common.back_to_dashboard' => 'Back to Dashboard',
+    'common.back_to_signin' => 'Back to Sign In',
+    'common.today' => 'Today',
+    'common.theme' => 'Theme',
+    'common.switch_theme' => 'Switch theme',
+    'common.filter_page_placeholder' => 'Filter this page…',
+    'common.please_confirm' => 'Please confirm',
+    'common.dismiss' => 'Dismiss',
+    'common.previous' => '‹ Prev',
+    'common.next' => 'Next ›',
+    'common.active' => 'Active',
+    'common.inactive' => 'Inactive',
+
+    // -------------------------------------------------------------------------
+    // STATUSES & PRIORITIES
+    // -------------------------------------------------------------------------
+    'status.pending' => 'Pending',
+    'status.diagnosing' => 'Diagnosing',
+    'status.waiting_for_parts' => 'Waiting for Parts',
+    'status.in_progress' => 'In Progress',
+    'status.completed' => 'Completed',
+    'status.delivered' => 'Delivered',
+    'status.cancelled' => 'Cancelled',
+    'status.confirmed' => 'Confirmed',
+    'status.scheduled' => 'Scheduled',
+    'status.paid' => 'Paid',
+    'status.unpaid' => 'Unpaid',
+    'status.partially_paid' => 'Partially Paid',
+    'status.overdue' => 'Overdue',
+    'status.draft' => 'Draft',
+    'status.healthy' => 'Healthy',
+    'status.low_stock' => 'Low Stock',
+    'status.out_of_stock' => 'Out of Stock',
+    'priority.low' => 'Low',
+    'priority.medium' => 'Medium',
+    'priority.high' => 'High',
+    'priority.urgent' => 'Urgent',
+
+    // -------------------------------------------------------------------------
+    // NAVIGATION
+    // -------------------------------------------------------------------------
+    'nav.home' => 'Home',
+    'nav.services' => 'Our Services',
+    'nav.how_it_works' => 'How It Works',
+    'nav.about_faq' => 'About & FAQ',
+    'nav.about' => 'About Us',
+    'nav.contact' => 'Contact',
+    'nav.client_signin' => 'Client sign in',
+    'nav.signin' => 'Sign In',
+    'nav.signout' => 'Sign Out',
+    'nav.get_started' => 'Get Started',
+    'nav.register' => 'Register',
+    'nav.create_account' => 'Create Account',
+    'nav.dashboard' => 'Dashboard',
+    'nav.my_dashboard' => 'My Dashboard',
+    'nav.my_account' => 'My Account',
+    'nav.profile' => 'Profile',
+    'nav.profile_password' => 'My profile & password',
+    'nav.terms' => 'Terms of Service',
+    'nav.privacy' => 'Privacy Policy',
+
+    // Sidebar groups
+    'nav.group.overview' => 'Overview',
+    'nav.group.workshop' => 'Workshop',
+    'nav.group.inventory' => 'Inventory',
+    'nav.group.finance' => 'Finance',
+    'nav.group.administration' => 'Administration',
+
+    // Sidebar items
+    'nav.item.dashboard' => 'Dashboard',
+    'nav.item.appointments' => 'Appointments',
+    'nav.item.customers' => 'Customers',
+    'nav.item.vehicles' => 'Vehicles',
+    'nav.item.job_cards' => 'Job Cards',
+    'nav.item.my_jobs' => 'My Jobs',
+    'nav.item.services' => 'Services',
+    'nav.item.mechanics' => 'Mechanics',
+    'nav.item.suppliers' => 'Suppliers',
+    'nav.item.inventory' => 'Inventory',
+    'nav.item.invoices' => 'Invoices',
+    'nav.item.payments' => 'Payments',
+    'nav.item.expenses' => 'Expenses',
+    'nav.item.reports' => 'Reports',
+    'nav.item.users' => 'Users',
+    'nav.item.roles' => 'Roles & Access',
+    'nav.item.settings' => 'Garage Settings',
+    'nav.item.audit' => 'Audit Logs',
+    'nav.item.notifications' => 'Notifications',
+
+    // Topbar
+    'topbar.alerts' => 'Alerts',
+    'topbar.mark_all_read' => 'Mark all read',
+    'topbar.no_unread_alerts' => 'No unread notifications',
+    'topbar.view_all_alerts' => 'View all alerts',
+    'topbar.stock_alerts' => 'Stock alerts',
+
+    // -------------------------------------------------------------------------
+    // AUTHENTICATION
+    // -------------------------------------------------------------------------
+    'auth.welcome_back' => 'Welcome Back',
+    'auth.signin_prompt' => 'Sign in to access your garage account',
+    'auth.username_or_email' => 'Username or Email',
+    'auth.username' => 'Username',
+    'auth.email' => 'Email Address',
+    'auth.phone' => 'Phone Number',
+    'auth.full_name' => 'Full Name',
+    'auth.password' => 'Password',
+    'auth.confirm_password' => 'Confirm Password',
+    'auth.current_password' => 'Current password',
+    'auth.new_password' => 'New password',
+    'auth.remember_me' => 'Remember me on this device',
+    'auth.forgot_password' => 'Forgot password?',
+    'auth.dont_have_account' => "Don't have an account yet?",
+    'auth.already_have_account' => 'Already have an account?',
+    'auth.secure_portal' => 'Secure Portal',
+    'auth.client_portal' => 'Client Portal',
+    'auth.recovery_portal' => 'Recovery Portal',
+    'auth.reset_password' => 'Reset Password',
+    'auth.send_recovery_link' => 'Send Recovery Link',
+    'auth.update_password' => 'Update Password',
+    'auth.password_requirements' => 'Password must be at least 10 characters and include uppercase, lowercase, numbers, and symbols.',
+
+    // -------------------------------------------------------------------------
+    // DASHBOARDS
+    // -------------------------------------------------------------------------
+    'dashboard.welcome_user' => 'Welcome back, :name',
+    'dashboard.admin_subtitle' => 'Financial & Operations Command Center',
+    'dashboard.receptionist_subtitle' => 'Front Desk & Workshop Intake Command',
+    'dashboard.mechanic_subtitle' => 'Technician Workstation & Bay Queue',
+    'dashboard.inventory_subtitle' => 'Parts Catalog & Supply Chain Logistics',
+    'dashboard.accountant_subtitle' => 'Accounts Receivable, Ledger & Cash Control',
+    'dashboard.customer_subtitle' => 'VIP Client Services & Repair Tracking Portal',
+
+    // Admin metrics
+    'dashboard.total_revenue' => 'Total Revenue',
+    'dashboard.net_profit' => 'Net Profit',
+    'dashboard.pending_payments' => 'Pending Payments',
+    'dashboard.active_jobs' => 'Active Jobs',
+    'dashboard.completion_rate' => 'Completion Rate',
+    'dashboard.low_stock_alerts' => 'Low Stock Alerts',
+    'dashboard.business_analytics' => 'BUSINESS ANALYTICS',
+    'dashboard.reporting_period' => 'Reporting period',
+    'dashboard.date_range' => 'Date range',
+    'dashboard.range.today' => 'Today',
+    'dashboard.range.last_7_days' => 'Last 7 days',
+    'dashboard.range.last_30_days' => 'Last 30 days',
+    'dashboard.range.this_month' => 'This month',
+    'dashboard.range.last_month' => 'Last month',
+    'dashboard.range.this_year' => 'This year',
+    'dashboard.range.custom' => 'Custom date range',
+
+    // Receptionist
+    'dashboard.registered_customers' => 'Registered Customers',
+    'dashboard.intake_queue' => 'Intake Queue',
+    'dashboard.today_schedule' => "Today's Service Schedule",
+    'dashboard.new_appointment' => '+ Book appointment',
+    'dashboard.new_customer' => '+ New customer',
+    'dashboard.new_vehicle' => '+ New vehicle',
+
+    // Mechanic
+    'dashboard.assigned_tasks' => 'Assigned Tasks',
+    'dashboard.active_queue' => 'My Active Repair Queue',
+    'dashboard.completed_today' => 'Completed Today',
+    'dashboard.my_job_cards' => 'My job cards',
+    'dashboard.browse_parts' => 'Browse parts',
+    'dashboard.service_catalog' => 'Service catalog',
+
+    // Inventory
+    'dashboard.catalog_item_types' => 'Catalog Item Types',
+    'dashboard.physical_units' => 'physical units on shelf',
+    'dashboard.out_of_stock' => 'Out of Stock',
+    'dashboard.critical_restock' => 'Critical Restock Alerts',
+    'dashboard.stock_catalog' => 'Stock catalog',
+    'dashboard.add_spare_part' => '+ Add spare part',
+    'dashboard.suppliers' => 'Suppliers',
+
+    // Accountant
+    'dashboard.accounts_receivable' => 'Accounts Receivable',
+    'dashboard.outstanding_invoices' => 'Outstanding invoices',
+    'dashboard.total_received' => 'Total Received',
+    'dashboard.record_payment' => '+ Record payment',
+    'dashboard.record_expense' => '+ Record expense',
+    'dashboard.financial_report' => 'Financial report',
+
+    // Customer
+    'dashboard.registered_vehicles' => 'Registered Vehicles',
+    'dashboard.upcoming_appointments' => 'Upcoming Appointments',
+    'dashboard.active_repairs' => 'Active Repairs',
+    'dashboard.outstanding_balance' => 'Outstanding Balance',
+    'dashboard.book_new_service' => '+ Book New Service',
+
+    // -------------------------------------------------------------------------
+    // PUBLIC & LANDING
+    // -------------------------------------------------------------------------
+    'landing.hero_title' => 'Confident care for every drive.',
+    'landing.hero_eyebrow' => 'Expert care. Clear choices.',
+    'landing.hero_lead' => 'Find the right service, book your visit, and stay informed while your vehicle is in our care.',
+    'landing.cta_book' => 'Book Service Consultation',
+    'landing.cta_explore' => 'Explore Services',
+    'landing.cta_contact' => 'Contact Support',
+    'landing.about_title' => 'A better kind of workshop experience',
+    'landing.about_desc' => 'Meet the people, practical expertise, and customer-first approach behind Alpha Garage.',
+    'landing.our_approach' => 'Our approach',
+    'landing.our_approach_title' => 'Good service starts with listening.',
+    'landing.our_approach_desc' => 'Every vehicle arrives with its own story. We start by understanding your concerns, inspecting the details, and explaining the options in language you can use to make an informed decision.',
+    'landing.footer_copyright' => 'All rights reserved. Professional Automotive Service & Repair.',
+
+    // -------------------------------------------------------------------------
+    // MODULES & FORMS
+    // -------------------------------------------------------------------------
+    'appointments.title' => 'Service Appointments',
+    'appointments.subtitle' => 'Customer service bookings, scheduled workshop visits, and work order conversion',
+    'customers.title' => 'Customers',
+    'customers.subtitle' => 'Client records, verified accounts, contact details, and vehicle ownership history',
+    'vehicles.title' => 'Vehicles',
+    'vehicles.subtitle' => 'Registered fleet, model profiles, license plates, and maintenance history',
+    'job_cards.title' => 'Job Cards',
+    'job_cards.subtitle' => 'Workshop repair orders, technician assignments, diagnosis, and workflow tracking',
+    'services.title' => 'Workshop Services',
+    'services.subtitle' => 'Maintenance catalog, standard labor rates, and service categories',
+    'mechanics.title' => 'Technicians & Mechanics',
+    'mechanics.subtitle' => 'Workshop staff, skill specialties, active task loads, and performance metrics',
+    'suppliers.title' => 'Parts Suppliers',
+    'suppliers.subtitle' => 'Approved vendors, procurement terms, parts catalog, and contact records',
+    'inventory.title' => 'Inventory & Parts',
+    'inventory.subtitle' => 'Warehouse stock, physical counts, minimum thresholds, and procurement alerts',
+    'invoices.title' => 'Invoices & Billing',
+    'invoices.subtitle' => 'Client billing, repair charges, tax calculations, and payment tracking',
+    'payments.title' => 'Payments & Receipts',
+    'payments.subtitle' => 'Collected payments, tender methods, cash receipts, and audit trail',
+    'expenses.title' => 'Operating Expenses',
+    'expenses.subtitle' => 'Workshop overhead, operational expenses, categories, and payment vouchers',
+    'reports.title' => 'Business Reports',
+    'reports.subtitle' => 'Financial ledgers, tax filings, workshop throughput, and inventory analytics',
+    'users.title' => 'System Users',
+    'users.subtitle' => 'Staff accounts, role assignments, security credentials, and system access',
+    'roles.title' => 'Roles & Permissions',
+    'roles.subtitle' => 'Role-based access control matrix and operational security boundaries',
+    'settings.title' => 'Garage Settings',
+    'settings.subtitle' => 'Company profile, currency, tax rates, contact channels, and system configuration',
+    'audit.title' => 'Audit Log Ledger',
+    'audit.subtitle' => 'Cryptographic SHA-256 Merkle audit trail recording every state-changing operational event',
+
+    // -------------------------------------------------------------------------
+    // JAVASCRIPT & MESSAGES
+    // -------------------------------------------------------------------------
+    'msg.success' => 'Success',
+    'msg.error' => 'Error',
+    'msg.warning' => 'Warning',
+    'msg.info' => 'Information',
+    'msg.saved_successfully' => 'Saved successfully.',
+    'msg.item_deleted' => 'Item deleted successfully.',
+    'msg.welcome_back' => 'Welcome back to :name.',
+    'msg.password_updated' => 'Password updated successfully.',
+    'msg.appointment_booked' => 'Your appointment has been booked successfully!',
+    'msg.inquiry_received' => 'Thank you! Your inquiry has been received. Our support team will respond shortly.',
+
+    // Video Management & Gallery
+    'videos.title' => 'Video Management',
+    'videos.subtitle' => 'Manage workshop showcase videos, YouTube embeds, uploads, and media gallery',
+    'videos.gallery_title' => 'Video Gallery',
+    'videos.gallery_subtitle' => 'Explore our state-of-the-art workshop, diagnostics, and repairs in action',
+    'videos.add' => '+ Add Video',
+    'videos.source_youtube' => 'YouTube Embed',
+    'videos.source_upload' => 'Local Video Upload',
+    'videos.published' => 'Published',
+    'videos.draft' => 'Draft',
+
+    // Customer In-Place Booking
+    'booking.modal_title' => 'Book Premium Service Visit',
+    'booking.modal_sub' => 'Schedule certified technician inspection & maintenance',
+    'booking.existing_veh' => 'My Registered Vehicle',
+    'booking.add_new_veh' => '+ Add New Vehicle',
+    'booking.confirm_btn' => 'Confirm & Book Service',
+
+];

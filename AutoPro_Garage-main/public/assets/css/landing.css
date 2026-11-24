@@ -231,13 +231,13 @@ body.landing-page {
   bottom: 0;
   background: radial-gradient(
     circle at center,
-    rgba(16, 41, 31, 0.68) 0%,
-    rgba(24, 59, 43, 0.82) 50%,
-    rgba(10, 27, 20, 0.94) 100%
+    rgba(16, 41, 31, 0.38) 0%,
+    rgba(24, 59, 43, 0.48) 50%,
+    rgba(10, 27, 20, 0.65) 100%
   );
   z-index: 2;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 @keyframes heroSlowZoom {
@@ -1450,8 +1450,8 @@ body.landing-page {
 
 .landing-hero .luxury-slider-overlay {
   background:
-    linear-gradient(90deg, rgba(5, 15, 11, 0.94) 0%, rgba(7, 22, 15, 0.84) 48%, rgba(10, 27, 20, 0.62) 100%),
-    radial-gradient(ellipse at 80% 45%, rgba(212, 175, 55, 0.13), transparent 48%);
+    linear-gradient(90deg, rgba(5, 15, 11, 0.65) 0%, rgba(7, 22, 15, 0.46) 48%, rgba(10, 27, 20, 0.28) 100%),
+    radial-gradient(ellipse at 80% 45%, rgba(212, 175, 55, 0.08), transparent 55%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -1592,7 +1592,7 @@ body.landing-page {
 .section-services .section-desc { color: #536258; }
 .section-services .section-eyebrow { color: #92741f; }
 .home-services-showcase { position: relative; isolation: isolate; overflow: hidden; background: #081710 url("https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=2200&q=85") center 48% / cover no-repeat; color: #f5f2e9; }
-.home-services-showcase::before { position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 17, 11, 0.94), rgba(5, 17, 11, 0.86) 50%, rgba(5, 17, 11, 0.91)), linear-gradient(0deg, rgba(8, 23, 16, 0.72), rgba(8, 23, 16, 0.52)); content: ""; pointer-events: none; }
+.home-services-showcase::before { position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 17, 11, 0.72), rgba(5, 17, 11, 0.55) 50%, rgba(5, 17, 11, 0.68)), linear-gradient(0deg, rgba(8, 23, 16, 0.45), rgba(8, 23, 16, 0.30)); content: ""; pointer-events: none; }
 .home-services-showcase > .container { position: relative; }
 .home-services-showcase .section-title { color: #f5f2e9; }
 .home-services-showcase .section-desc { color: rgba(245, 242, 233, 0.76); }
@@ -1630,19 +1630,173 @@ body.landing-page {
 .step-card { padding: 2rem 1.5rem; }
 
 .journey-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.service-journey-section { position: relative; isolation: isolate; overflow: hidden; background: #081710 url("https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=2200&q=85") center 48% / cover no-repeat; }
-.service-journey-section::before { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 17, 11, 0.94), rgba(5, 17, 11, 0.82) 52%, rgba(5, 17, 11, 0.78)), linear-gradient(0deg, rgba(8, 23, 16, 0.82), rgba(8, 23, 16, 0.45)); pointer-events: none; }
-.service-journey-section > .container { position: relative; }
-.workflow-showcase { position: relative; isolation: isolate; overflow: hidden; background: #081710 url("https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=2200&q=85") center 52% / cover no-repeat; }
-.workflow-showcase::before { position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 17, 11, 0.88), rgba(5, 17, 11, 0.72) 50%, rgba(5, 17, 11, 0.86)), linear-gradient(0deg, rgba(8, 23, 16, 0.78), rgba(8, 23, 16, 0.4)); content: ""; pointer-events: none; }
-.workflow-showcase > .container { position: relative; }
-.workflow-showcase .step-card { border-color: rgba(232, 205, 131, 0.24); background: linear-gradient(145deg, rgba(17, 45, 32, 0.88), rgba(8, 23, 16, 0.8)); box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2); backdrop-filter: blur(5px); }
-.workflow-showcase .step-card:hover { border-color: rgba(232, 205, 131, 0.62); background: linear-gradient(145deg, rgba(22, 57, 40, 0.94), rgba(8, 23, 16, 0.88)); }
-.workflow-showcase .step-number { color: rgba(232, 205, 131, 0.38); }
-.workflow-showcase .step-title { color: #f2d781; }
-.workflow-showcase .feature-desc { color: rgba(245, 242, 233, 0.75); line-height: 1.65; }
+.service-journey-section { 
+  position: relative; 
+  isolation: isolate; 
+  overflow: hidden; 
+  background: #06150e url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2400&q=85") center 50% / cover no-repeat; 
+  padding: 6rem 0;
+}
+.service-journey-section::before { 
+  content: ""; 
+  position: absolute; 
+  z-index: -1; 
+  inset: 0; 
+  background: 
+    radial-gradient(ellipse at 50% 30%, rgba(13, 40, 30, 0.42) 0%, rgba(5, 18, 12, 0.88) 100%),
+    linear-gradient(180deg, rgba(6, 20, 13, 0.90) 0%, rgba(6, 20, 13, 0.58) 38%, rgba(5, 18, 12, 0.76) 72%, rgba(4, 15, 10, 0.94) 100%),
+    linear-gradient(90deg, rgba(4, 15, 10, 0.82) 0%, rgba(4, 15, 10, 0.32) 25%, rgba(4, 15, 10, 0.32) 75%, rgba(4, 15, 10, 0.82) 100%); 
+  pointer-events: none; 
+}
+.service-journey-section > .container { position: relative; z-index: 1; }
+.service-journey-section .section-header { text-align: center; max-width: 760px; margin: 0 auto 3.5rem; }
+.service-journey-section .section-eyebrow { 
+  display: inline-block; 
+  color: var(--gold-champagne, #E8CD83); 
+  font-weight: 700; 
+  font-size: 0.82rem; 
+  letter-spacing: 0.14em; 
+  text-transform: uppercase; 
+  padding: 0.35rem 1.1rem; 
+  background: rgba(212, 175, 55, 0.14); 
+  border: 1px solid rgba(212, 175, 55, 0.4); 
+  border-radius: 999px; 
+  margin-bottom: 0.85rem; 
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.service-journey-section .section-title { 
+  color: #FFFFFF; 
+  font-weight: 800; 
+  font-size: clamp(2rem, 3.5vw, 2.75rem); 
+  letter-spacing: -0.02em; 
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.9); 
+  margin: 0.5rem 0 0.85rem; 
+}
+.service-journey-section .section-desc { 
+  color: rgba(248, 246, 240, 0.94); 
+  font-size: 1.05rem; 
+  line-height: 1.7; 
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85); 
+  max-width: 680px; 
+  margin: 0 auto; 
+}
+.workflow-showcase { 
+  position: relative; 
+  isolation: isolate; 
+  overflow: hidden; 
+  background: #06150e url("https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&w=2400&q=85") center 48% / cover no-repeat; 
+  padding: 6rem 0;
+}
+.workflow-showcase::before { 
+  position: absolute; 
+  z-index: 0; 
+  inset: 0; 
+  background: 
+    radial-gradient(ellipse at 50% 25%, rgba(13, 40, 30, 0.40) 0%, rgba(5, 18, 12, 0.88) 100%),
+    linear-gradient(180deg, rgba(6, 20, 13, 0.92) 0%, rgba(6, 20, 13, 0.68) 35%, rgba(5, 18, 12, 0.78) 70%, rgba(4, 15, 10, 0.95) 100%),
+    linear-gradient(90deg, rgba(4, 15, 10, 0.85) 0%, rgba(4, 15, 10, 0.35) 25%, rgba(4, 15, 10, 0.35) 75%, rgba(4, 15, 10, 0.85) 100%); 
+  content: ""; 
+  pointer-events: none; 
+}
+.workflow-showcase > .container { position: relative; z-index: 1; }
+.workflow-showcase .section-header { text-align: center; max-width: 760px; margin: 0 auto 3.5rem; }
+.workflow-showcase .section-eyebrow { 
+  display: inline-block; 
+  color: var(--gold-champagne, #E8CD83); 
+  font-weight: 700; 
+  font-size: 0.82rem; 
+  letter-spacing: 0.14em; 
+  text-transform: uppercase; 
+  padding: 0.35rem 1.1rem; 
+  background: rgba(212, 175, 55, 0.14); 
+  border: 1px solid rgba(212, 175, 55, 0.4); 
+  border-radius: 999px; 
+  margin-bottom: 0.85rem; 
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.workflow-showcase .section-title { 
+  color: #FFFFFF; 
+  font-weight: 800; 
+  font-size: clamp(2rem, 3.5vw, 2.75rem); 
+  letter-spacing: -0.02em; 
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.9); 
+  margin: 0.5rem 0 0.85rem; 
+}
+.workflow-showcase .section-desc { 
+  color: rgba(248, 246, 240, 0.94); 
+  font-size: 1.05rem; 
+  line-height: 1.7; 
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.85); 
+  max-width: 680px; 
+  margin: 0 auto; 
+}
+.workflow-showcase .step-card { 
+  position: relative; 
+  overflow: hidden; 
+  border: 1px solid rgba(212, 175, 55, 0.32); 
+  border-radius: 18px; 
+  background: linear-gradient(150deg, rgba(16, 46, 32, 0.94) 0%, rgba(8, 24, 17, 0.96) 100%); 
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.48), 0 0 24px rgba(212, 175, 55, 0.08); 
+  backdrop-filter: blur(14px); 
+  -webkit-backdrop-filter: blur(14px); 
+  padding: 2.25rem 1.75rem 2rem; 
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.32s ease, box-shadow 0.32s ease, background 0.32s ease; 
+}
+.workflow-showcase .step-card::before { 
+  content: ""; 
+  position: absolute; 
+  top: 0; 
+  left: 20%; 
+  right: 20%; 
+  height: 2px; 
+  background: linear-gradient(90deg, transparent, rgba(232, 205, 131, 0.85), transparent); 
+  transition: left 0.35s ease, right 0.35s ease, opacity 0.35s ease; 
+  pointer-events: none; 
+}
+.workflow-showcase .step-card:hover { 
+  transform: translateY(-6px); 
+  border-color: rgba(232, 205, 131, 0.75); 
+  background: linear-gradient(150deg, rgba(22, 60, 42, 0.98) 0%, rgba(10, 30, 21, 0.98) 100%); 
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.6), 0 0 32px rgba(212, 175, 55, 0.22); 
+}
+.workflow-showcase .step-card:hover::before { 
+  left: 5%; 
+  right: 5%; 
+}
+.workflow-showcase .step-number { 
+  font-size: 2.75rem; 
+  font-weight: 900; 
+  line-height: 1; 
+  position: absolute; 
+  top: 1.25rem; 
+  right: 1.25rem; 
+  color: rgba(232, 205, 131, 0.32); 
+  letter-spacing: -0.02em; 
+  transition: color 0.3s ease, transform 0.3s ease; 
+}
+.workflow-showcase .step-card:hover .step-number { 
+  color: rgba(232, 205, 131, 0.75); 
+  transform: scale(1.08); 
+}
+.workflow-showcase .step-title { 
+  color: #F8E5A0; 
+  font-size: 1.22rem; 
+  font-weight: 700; 
+  margin: 0 0 0.85rem; 
+  letter-spacing: -0.01em; 
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); 
+}
+.workflow-showcase .feature-desc { 
+  color: rgba(248, 246, 240, 0.92); 
+  font-size: 0.95rem; 
+  line-height: 1.68; 
+  margin: 0; 
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); 
+}
 .trust-promise-section { position: relative; isolation: isolate; overflow: hidden; background: #0a1b14 url("https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=2200&q=85") center 48% / cover no-repeat; }
-.trust-promise-section::before { position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 17, 11, 0.76), rgba(5, 17, 11, 0.62) 50%, rgba(5, 17, 11, 0.74)), linear-gradient(0deg, rgba(8, 23, 16, 0.62), rgba(8, 23, 16, 0.3)); content: ""; pointer-events: none; }
+.trust-promise-section::before { position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 17, 11, 0.55), rgba(5, 17, 11, 0.40) 50%, rgba(5, 17, 11, 0.50)), linear-gradient(0deg, rgba(8, 23, 16, 0.38), rgba(8, 23, 16, 0.18)); content: ""; pointer-events: none; }
 .trust-promise-section > .container { position: relative; }
 .journey-card { position: relative; display: flex; flex-direction: column; min-height: 270px; padding: 1.6rem; border: 1px solid rgba(212, 175, 55, 0.18); border-radius: 18px; background: linear-gradient(150deg, rgba(24, 59, 43, 0.62), rgba(10, 27, 20, 0.7)); overflow: hidden; }
 .journey-card-featured { border-color: rgba(232, 205, 131, 0.48); background: linear-gradient(150deg, rgba(44, 75, 53, 0.88), rgba(20, 53, 38, 0.86)); }

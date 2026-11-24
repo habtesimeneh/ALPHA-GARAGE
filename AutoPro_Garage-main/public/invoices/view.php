@@ -2,18 +2,40 @@
 declare(strict_types=1);
 require __DIR__ . '/../../app/bootstrap.php';
 require_once APP_ROOT . '/app/views/layout.php';
-require_login();
-require_permission('invoices.view');
+$user = require_login();
 
 $id = get_int('id');
 $inv = InvoiceService::find($id);
 if (!$inv) { abort(404, 'Invoice not found.'); }
+
+// Authorization check: Staff require 'invoices.view'; Customers require verified ownership
+if (($user['role_name'] ?? '') === 'customer') {
+    $cust = CustomerIdentityService::resolveCustomer($user);
+    $linkedCustIds = CustomerIdentityService::getLinkedCustomerIds((int) $user['id']);
+    if (!in_array((int) $cust['id'], $linkedCustIds, true)) {
+        $linkedCustIds[] = (int) $cust['id'];
+    }
+    if (!in_array((int) $inv['customer_id'], $linkedCustIds, true)) {
+        AuditLogger::logSafe('idor_invoice_view_blocked', 'invoices', $id, null, [
+            'actor_user_id' => $user['id'],
+            'actor_customer_id' => $cust['id'],
+            'target_invoice_customer' => $inv['customer_id'],
+        ], 'denied');
+        abort(403, 'You do not have authorization to view this invoice.');
+    }
+} else {
+    require_permission('invoices.view');
+}
 $items = InvoiceService::items($id);
 $pays = Database::all('SELECT p.*, u.full_name AS by_name FROM payments p LEFT JOIN users u ON u.id = p.recorded_by WHERE p.invoice_id = ? ORDER BY p.id', [$id]);
+$submissions = Database::all('SELECT ps.*, pm.name AS method_name FROM payment_submissions ps JOIN payment_methods pm ON pm.id = ps.payment_method_id WHERE ps.invoice_id = ? ORDER BY ps.id DESC', [$id]);
 $net = InvoiceService::netPaid($id);
 $stampClass = ['Paid' => 'paid', 'Partially Paid' => 'partial', 'Unpaid' => 'unpaid', 'Refunded' => 'unpaid'][$inv['payment_status']];
 $acts = '<button class="btn btn-ghost" type="button" data-print>Print / PDF</button>';
-if (can('payments.record') && $inv['payment_status'] !== 'Refunded' && (float) $inv['balance'] > 0) { $acts .= '<a class="btn btn-primary" href="' . e(url('payments/record.php?invoice_id=' . $id)) . '">Record payment</a>'; }
+if ($inv['payment_status'] !== 'Refunded' && (float) $inv['balance'] > 0) {
+    $acts .= ' <a class="btn btn-outline" style="border-color:var(--gold,#D4AF37);color:var(--gold,#D4AF37);" href="' . e(url('payments/pay.php?invoice_id=' . $id)) . '">Pay via Bank/Telebirr</a>';
+}
+if (can('payments.record') && $inv['payment_status'] !== 'Refunded' && (float) $inv['balance'] > 0) { $acts .= ' <a class="btn btn-primary" href="' . e(url('payments/record.php?invoice_id=' . $id)) . '">Record payment</a>'; }
 ui_header($inv['invoice_number'], 'invoices');
 page_header($inv['invoice_number'], 'Job card ' . $inv['job_number'], $acts);
 ?>
@@ -36,6 +58,59 @@ page_header($inv['invoice_number'], 'Job card ' . $inv['job_number'], $acts);
 <div class="card"><h3>Payment history</h3><div class="table-wrap"><table class="table stack"><thead><tr><th>Receipt</th><th>Date</th><th>Type</th><th>Method</th><th>Reference</th><th class="num">Amount</th><th>By</th><th></th></tr></thead><tbody>
 <?php foreach ($pays as $p): ?><tr><td class="mono"><?= e($p['receipt_number']) ?></td><td class="nowrap"><?= e(fmt_datetime($p['paid_at'])) ?></td><td><?= $p['kind'] === 'refund' ? badge('Refund', 'badge-refunded') : badge('Payment', 'badge-paid') ?></td><td><?= e($p['method']) ?></td><td><?= e($p['reference'] ?: ($p['kind'] === 'refund' ? $p['notes'] : '—')) ?></td><td class="num"><?= $p['kind'] === 'refund' ? '−' : '' ?><?= e(money($p['amount'], false)) ?></td><td><?= e($p['by_name'] ?: '—') ?></td><td><a class="btn btn-ghost btn-sm" href="<?= e(url('payments/receipt.php?id=' . $p['id'])) ?>">Receipt</a></td></tr><?php endforeach; ?>
 <?php if (!$pays): ?><tr><td colspan="8" class="empty">No payments yet.</td></tr><?php endif; ?></tbody></table></div></div>
+<?php endif; ?>
+
+<?php if ($submissions): ?>
+<div class="card">
+  <h3><?= e(t('Manual Payment Submissions', 'የእጅ ክፍያ ማረጋገጫዎች')) ?></h3>
+  <div class="table-wrap">
+    <table class="table stack">
+      <thead>
+        <tr>
+          <th><?= e(t('Submission #', 'ማረጋገጫ ቁጥር')) ?></th>
+          <th><?= e(t('Date', 'ቀን')) ?></th>
+          <th><?= e(t('Provider', 'አቅራቢ')) ?></th>
+          <th><?= e(t('Reference', 'ሪፈረንስ')) ?></th>
+          <th class="num"><?= e(t('Amount', 'መጠን')) ?></th>
+          <th><?= e(t('Status', 'ሁኔታ')) ?></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($submissions as $s): ?>
+          <tr>
+            <td class="mono"><strong><?= e($s['submission_number']) ?></strong></td>
+            <td class="nowrap"><?= e(fmt_date($s['transaction_date'])) ?></td>
+            <td><?= e($s['method_name']) ?></td>
+            <td class="mono small"><?= e($s['transaction_reference']) ?></td>
+            <td class="num"><strong><?= e(money($s['amount'])) ?></strong></td>
+            <td>
+              <?php
+              $statusBadges = [
+                'pending_verification' => '<span class="badge badge-pending">' . e(t('Pending', 'በመጠባበቅ ላይ')) . '</span>',
+                'under_review' => '<span class="badge" style="background:rgba(59,130,246,0.15);color:#3B82F6;border:1px solid rgba(59,130,246,0.3);">' . e(t('Under Review', 'በግምገማ ላይ')) . '</span>',
+                'verified' => '<span class="badge badge-paid">' . e(t('Verified', 'ተረጋግጧል')) . '</span>',
+                'rejected' => '<span class="badge badge-rejected">' . e(t('Rejected', 'ውድቅ ሆኗል')) . '</span>',
+              ];
+              echo $statusBadges[$s['status']] ?? '<span class="badge">' . e($s['status']) . '</span>';
+              if ($s['status'] === 'rejected' && $s['rejection_reason']) {
+                echo '<div class="muted small text-danger" style="margin-top:2px;">' . e($s['rejection_reason']) . '</div>';
+              }
+              ?>
+            </td>
+            <td>
+              <?php if (can('payments.verify')): ?>
+                <a class="btn btn-ghost btn-sm" href="<?= e(url('payments/verification.php?review=' . $s['id'])) ?>"><?= e(t('Review', 'ግምገማ')) ?></a>
+              <?php elseif (!empty($s['proof_file_path'])): ?>
+                <a class="btn btn-ghost btn-sm" href="<?= e(url('payments/proof.php?id=' . $s['id'])) ?>" target="_blank"><?= e(t('Proof', 'ማረጋገጫ')) ?></a>
+              <?php endif; ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
 <?php endif; ?>
 
 <div class="grid grid-2 no-print">

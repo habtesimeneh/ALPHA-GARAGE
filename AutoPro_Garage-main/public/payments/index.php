@@ -9,8 +9,8 @@ $q = get('q'); $method = get('method'); $from = get('from'); $to = get('to');
 $where = ['1=1']; $params = [];
 if ($q !== '') { $where[] = '(p.receipt_number LIKE ? OR i.invoice_number LIKE ? OR c.full_name LIKE ? OR p.reference LIKE ?)'; $l = like_escape($q); array_push($params, $l, $l, $l, $l); }
 if ($method !== '') { $where[] = 'p.method = ?'; $params[] = $method; }
-if ($from !== '' && !validate(['d' => $from], ['d' => 'date'])) { $where[] = 'DATE(p.paid_at) >= ?'; $params[] = $from; }
-if ($to !== '' && !validate(['d' => $to], ['d' => 'date'])) { $where[] = 'DATE(p.paid_at) <= ?'; $params[] = $to; }
+if ($from !== '' && !validate(['d' => $from], ['d' => 'date'])) { $where[] = 'p.paid_at >= ?'; $params[] = $from . ' 00:00:00'; }
+if ($to !== '' && !validate(['d' => $to], ['d' => 'date'])) { $where[] = 'p.paid_at <= ?'; $params[] = $to . ' 23:59:59'; }
 $w = implode(' AND ', $where);
 $base = 'FROM payments p JOIN invoices i ON i.id = p.invoice_id JOIN customers c ON c.id = i.customer_id LEFT JOIN users u ON u.id = p.recorded_by';
 $pg = paginate((int) Database::value("SELECT COUNT(*) $base WHERE $w", $params), $GLOBALS['config']['per_page'], get_int('page') ?: 1);
@@ -18,7 +18,36 @@ $rows = Database::all("SELECT p.*, i.invoice_number, c.full_name AS customer, u.
 $net = Database::value("SELECT COALESCE(SUM(CASE WHEN p.kind='payment' THEN p.amount ELSE -p.amount END),0) $base WHERE $w", $params);
 ui_header('Payments', 'payments');
 page_header('Payments', 'Payment and refund history (records are immutable)');
+$pendingBadge = ManualPaymentService::getPendingCount();
 ?>
+<div class="tabs mb2" style="display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border-color,#334155);padding-bottom:12px;margin-bottom:24px;">
+    <a href="<?= e(url('payments/')) ?>" class="btn btn-primary btn-sm">
+        <?= e(t('Payment History', 'የክፍያ ታሪክ')) ?>
+    </a>
+    <?php if (can('payments.verify')): ?>
+    <a href="<?= e(url('payments/verification.php')) ?>" class="btn btn-ghost btn-sm" style="position:relative;">
+        <?= e(t('Verification Queue', 'የማረጋገጫ ረድፍ')) ?>
+        <?php if ($pendingBadge > 0): ?>
+            <span style="background:#EF4444;color:#fff;font-size:0.75rem;font-weight:700;padding:2px 7px;border-radius:9999px;margin-left:6px;"><?= $pendingBadge ?></span>
+        <?php endif; ?>
+    </a>
+    <?php endif; ?>
+    <?php if (can('payments.methods')): ?>
+    <a href="<?= e(url('payments/methods.php')) ?>" class="btn btn-ghost btn-sm">
+        <?= e(t('Payment Methods', 'የክፍያ መንገዶች')) ?>
+    </a>
+    <?php endif; ?>
+    <?php if (can_any('payments.view', 'reports.financial')): ?>
+    <a href="<?= e(url('payments/reports.php')) ?>" class="btn btn-ghost btn-sm">
+        <?= e(t('Payment Reports', 'የክፍያ ሪፖርቶች')) ?>
+    </a>
+    <?php endif; ?>
+    <?php if (can('payments.record')): ?>
+    <a href="<?= e(url('payments/record.php')) ?>" class="btn btn-ghost btn-sm">
+        <?= e(t('Record Manual Payment', 'ክፍያ ይመዝግቡ')) ?>
+    </a>
+    <?php endif; ?>
+</div>
 <div class="stats"><div class="stat green"><div class="label">Net received (filtered)</div><div class="value"><?= e(money($net)) ?></div></div></div>
 <form class="filters" method="get">
 <div class="field grow"><label for="q">Search</label><input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="Receipt, invoice, customer, reference"></div>

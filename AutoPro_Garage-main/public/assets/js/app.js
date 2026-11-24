@@ -62,7 +62,10 @@
       const icon = $('span[aria-hidden="true"]', toggle);
       if (icon) icon.textContent = dark ? '☼' : '◐';
       const label = $('.theme-toggle-label', toggle);
-      if (label) label.textContent = dark ? 'Light mode' : 'Dark mode';
+      if (label) {
+        const isAm = document.documentElement.lang === 'am';
+        label.textContent = dark ? (isAm ? 'ብሩህ ገጽታ' : 'Light mode') : (isAm ? 'ጨለማ ገጽታ' : 'Dark mode');
+      }
     });
   };
   applyTheme(savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : (systemPrefersDark ? 'dark' : 'light'));

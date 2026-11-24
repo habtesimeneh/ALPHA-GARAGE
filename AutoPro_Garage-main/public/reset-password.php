@@ -45,7 +45,7 @@ $sliderImages = [
 ];
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= e(current_lang()) ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -53,6 +53,7 @@ $sliderImages = [
 <link rel="icon" href="<?= e(asset('images/logo.svg')) ?>" type="image/svg+xml">
 <link rel="stylesheet" href="<?= e(asset('css/variables.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/luxury-auth.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset('css/scroll-animations.css')) ?>">
 </head>
 <body class="luxury-auth-body">
 
@@ -76,8 +77,9 @@ $sliderImages = [
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </span>
-      <span class="btn-back-text">Return to Sign In</span>
+      <span class="btn-back-text"><?= e(t('Return to Sign In', 'Return to Sign In')) ?></span>
     </a>
+    <?= lang_switcher_html() ?>
     <div class="luxury-badge-portal">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -87,7 +89,7 @@ $sliderImages = [
     </div>
   </div>
 
-  <main class="luxury-auth-centered-card">
+  <main class="luxury-auth-centered-card reveal-scale card-interactive">
     <div class="luxury-card-brand">
       <div class="luxury-card-logo-wrap">
         <img src="<?= e(asset('images/logo.svg')) ?>" alt="" width="44" height="44">
@@ -163,7 +165,7 @@ $sliderImages = [
           </div>
         </div>
 
-        <button class="btn-luxury-gold auth-submit-spaced" type="submit">
+        <button class="btn-luxury-gold auth-submit-spaced btn-interactive btn-shimmer" type="submit">
           Update Password &amp; Sign In
         </button>
       </form>
@@ -177,5 +179,7 @@ $sliderImages = [
 </div>
 
 <script src="<?= e(asset('js/luxury.js')) ?>"></script>
+<script src="<?= e(asset('js/i18n.js')) ?>"></script>
+<script src="<?= e(asset('js/scroll-animations.js')) ?>"></script>
 </body>
 </html>

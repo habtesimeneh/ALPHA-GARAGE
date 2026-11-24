@@ -48,8 +48,8 @@
 
 .services-hero-overlay {
   background:
-    linear-gradient(90deg, rgba(4, 17, 11, 0.94), rgba(4, 17, 11, 0.78) 48%, rgba(4, 17, 11, 0.25)),
-    linear-gradient(0deg, var(--services-bg), transparent 34%, rgba(8, 23, 16, 0.26));
+    linear-gradient(90deg, rgba(4, 17, 11, 0.68), rgba(4, 17, 11, 0.48) 48%, rgba(4, 17, 11, 0.18)),
+    linear-gradient(0deg, var(--services-bg), transparent 34%, rgba(8, 23, 16, 0.18));
 }
 
 .services-hero-content {
@@ -678,7 +678,7 @@
 
   .services-hero-overlay {
     background:
-      linear-gradient(90deg, rgba(4, 17, 11, 0.9), rgba(4, 17, 11, 0.62)),
+      linear-gradient(90deg, rgba(4, 17, 11, 0.65), rgba(4, 17, 11, 0.42)),
       linear-gradient(0deg, var(--services-bg), transparent 55%);
   }
 

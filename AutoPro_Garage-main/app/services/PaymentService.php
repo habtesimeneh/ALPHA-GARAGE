@@ -16,14 +16,14 @@ final class PaymentService
         // If an idempotency key is provided, evaluate through the idempotency engine
         if ($idempotencyKey !== null && $idempotencyKey !== '') {
             $key = PaymentIdempotencyService::validateKey($idempotencyKey);
-            $acquire = PaymentIdempotencyService::acquire($key, $userId, $invoiceId, 'payment', from_cents($cents), $method, $reference);
+            $acquire = PaymentIdempotencyService::acquire($key, $userId, $invoiceId, 'payment', from_cents($cents), $method, $reference, $notes);
             if ($acquire['status'] === 'completed') {
                 return (int) $acquire['payment_id'];
             }
         }
 
         try {
-            $id = (int) Database::transaction(function () use ($invoiceId, $cents, $method, $reference, $notes) {
+            $id = (int) Database::transaction(function () use ($invoiceId, $cents, $method, $reference, $notes, $idempotencyKey) {
                 $inv = InvoiceService::lock($invoiceId);
                 if ($inv['payment_status'] === 'Refunded') { throw new DomainException('This invoice was fully refunded and is closed.'); }
                 $balance = to_cents($inv['balance']);
@@ -32,19 +32,20 @@ final class PaymentService
                 $t = InvoiceService::recalculate($invoiceId);
                 AuditLogger::log('payment_recorded', 'payments', $pid, ['payment_status' => $inv['payment_status'], 'balance' => $inv['balance']],
                     ['invoice' => $inv['invoice_number'], 'amount' => from_cents($cents), 'method' => $method, 'payment_status' => $t['payment_status'], 'balance' => $t['balance']]);
+
+                // Atomically complete idempotency record within the exact same database transaction
+                if ($idempotencyKey !== null && $idempotencyKey !== '') {
+                    PaymentIdempotencyService::complete($idempotencyKey, $pid, [
+                        'payment_id' => $pid,
+                        'invoice_id' => $invoiceId,
+                        'amount' => from_cents($cents),
+                        'balance' => $t['balance'],
+                        'payment_status' => $t['payment_status'],
+                    ]);
+                }
+
                 return $pid;
             });
-
-            if ($idempotencyKey !== null && $idempotencyKey !== '') {
-                $inv = InvoiceService::find($invoiceId);
-                PaymentIdempotencyService::complete($idempotencyKey, $id, [
-                    'payment_id' => $id,
-                    'invoice_id' => $invoiceId,
-                    'amount' => from_cents($cents),
-                    'balance' => $inv['balance'] ?? '0.00',
-                    'payment_status' => $inv['payment_status'] ?? '',
-                ]);
-            }
 
             return $id;
         } catch (Throwable $e) {
@@ -67,14 +68,14 @@ final class PaymentService
 
         if ($idempotencyKey !== null && $idempotencyKey !== '') {
             $key = PaymentIdempotencyService::validateKey($idempotencyKey);
-            $acquire = PaymentIdempotencyService::acquire($key, $userId, $invoiceId, 'refund', from_cents($cents), $method, $reason);
+            $acquire = PaymentIdempotencyService::acquire($key, $userId, $invoiceId, 'refund', from_cents($cents), $method, '', $reason);
             if ($acquire['status'] === 'completed') {
                 return (int) $acquire['payment_id'];
             }
         }
 
         try {
-            $id = (int) Database::transaction(function () use ($invoiceId, $cents, $method, $reason) {
+            $id = (int) Database::transaction(function () use ($invoiceId, $cents, $method, $reason, $idempotencyKey) {
                 $inv = InvoiceService::lock($invoiceId);
                 $net = InvoiceService::netPaid($invoiceId)['net'];
                 if ($cents > $net) { throw new DomainException('A refund cannot exceed the net amount paid (' . money(from_cents($net)) . ').'); }
@@ -82,19 +83,20 @@ final class PaymentService
                 $t = InvoiceService::recalculate($invoiceId);
                 AuditLogger::log('payment_refunded', 'payments', $pid, ['payment_status' => $inv['payment_status'], 'amount_paid' => $inv['amount_paid']],
                     ['invoice' => $inv['invoice_number'], 'refund' => from_cents($cents), 'reason' => $reason, 'payment_status' => $t['payment_status'], 'amount_paid' => $t['amount_paid']]);
+
+                // Atomically complete idempotency record within the exact same database transaction
+                if ($idempotencyKey !== null && $idempotencyKey !== '') {
+                    PaymentIdempotencyService::complete($idempotencyKey, $pid, [
+                        'payment_id' => $pid,
+                        'invoice_id' => $invoiceId,
+                        'amount' => from_cents($cents),
+                        'amount_paid' => $t['amount_paid'],
+                        'payment_status' => $t['payment_status'],
+                    ]);
+                }
+
                 return $pid;
             });
-
-            if ($idempotencyKey !== null && $idempotencyKey !== '') {
-                $inv = InvoiceService::find($invoiceId);
-                PaymentIdempotencyService::complete($idempotencyKey, $id, [
-                    'payment_id' => $id,
-                    'invoice_id' => $invoiceId,
-                    'amount' => from_cents($cents),
-                    'amount_paid' => $inv['amount_paid'] ?? '0.00',
-                    'payment_status' => $inv['payment_status'] ?? '',
-                ]);
-            }
 
             return $id;
         } catch (Throwable $e) {

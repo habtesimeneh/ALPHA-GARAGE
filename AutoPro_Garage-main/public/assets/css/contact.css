@@ -47,8 +47,8 @@
 
 .contact-hero-shade {
   background:
-    linear-gradient(90deg, rgba(4, 17, 11, 0.92) 0%, rgba(4, 17, 11, 0.76) 42%, rgba(4, 17, 11, 0.24) 100%),
-    linear-gradient(0deg, #081710 0%, transparent 36%, rgba(8, 23, 16, 0.26) 100%);
+    linear-gradient(90deg, rgba(4, 17, 11, 0.65) 0%, rgba(4, 17, 11, 0.45) 42%, rgba(4, 17, 11, 0.16) 100%),
+    linear-gradient(0deg, #081710 0%, transparent 36%, rgba(8, 23, 16, 0.18) 100%);
 }
 
 .contact-hero::before {
@@ -381,7 +381,7 @@
 
   .contact-hero-shade {
     background:
-      linear-gradient(90deg, rgba(4, 17, 11, 0.88), rgba(4, 17, 11, 0.58)),
+      linear-gradient(90deg, rgba(4, 17, 11, 0.62), rgba(4, 17, 11, 0.38)),
       linear-gradient(0deg, #081710 0%, transparent 55%);
   }
 

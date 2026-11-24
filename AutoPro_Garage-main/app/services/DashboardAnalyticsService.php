@@ -313,20 +313,68 @@ final class DashboardAnalyticsService
     public static function sparkline(string $kind, DateTimeImmutable $end): array
     {
         $points = [];
+        $monthKeys = [];
         for ($i = 5; $i >= 0; $i--) {
-            $mStart = $end->modify("first day of -$i months")->format('Y-m-d');
-            $mEnd = $end->modify("first day of -$i months")->modify('first day of next month')->format('Y-m-d');
-            $val = 0.0;
-            if ($kind === 'revenue' && function_exists('can') && can('payments.view')) {
-                $val = (float) Database::value("SELECT COALESCE(SUM(CASE WHEN kind='payment' THEN amount ELSE -amount END),0) FROM payments WHERE paid_at >= ? AND paid_at < ?", [$mStart, $mEnd]);
-            } elseif ($kind === 'expenses' && self::expenseLedgerReady() && function_exists('can') && can('expenses.view')) {
-                $m = (float) Database::value('SELECT COALESCE(SUM(amount),0) FROM expenses WHERE expense_date >= ? AND expense_date < ?', [$mStart, $mEnd]);
-                $p = (float) Database::value("SELECT COALESCE(SUM(quantity*unit_cost),0) FROM inventory_transactions WHERE txn_type='purchase' AND COALESCE(reference,'') <> 'Opening stock' AND created_at >= ? AND created_at < ?", [$mStart, $mEnd]);
-                $val = $m + $p;
-            } elseif ($kind === 'jobs') {
-                $val = (float) Database::value("SELECT COUNT(*) FROM job_cards WHERE date_received >= ? AND date_received < ?", [$mStart, $mEnd]);
+            $monthKeys[] = $end->modify("first day of -$i months")->format('Y-m');
+        }
+        $windowStart = $end->modify('first day of -5 months')->format('Y-m-d');
+        $windowEnd = $end->modify('first day of next month')->format('Y-m-d');
+
+        if ($kind === 'revenue' && function_exists('can') && can('payments.view')) {
+            $rows = Database::all(
+                "SELECT DATE_FORMAT(paid_at, '%Y-%m') AS ym,
+                        COALESCE(SUM(CASE WHEN kind='payment' THEN amount ELSE -amount END),0) AS total
+                 FROM payments
+                 WHERE paid_at >= ? AND paid_at < ?
+                 GROUP BY ym",
+                [$windowStart, $windowEnd]
+            );
+            $map = array_column($rows, 'total', 'ym');
+            foreach ($monthKeys as $ym) {
+                $points[] = round((float) ($map[$ym] ?? 0.0), 2);
             }
-            $points[] = round($val, 2);
+        } elseif ($kind === 'expenses' && self::expenseLedgerReady() && function_exists('can') && can('expenses.view')) {
+            $expRows = Database::all(
+                "SELECT DATE_FORMAT(expense_date, '%Y-%m') AS ym,
+                        COALESCE(SUM(amount),0) AS total
+                 FROM expenses
+                 WHERE expense_date >= ? AND expense_date < ?
+                 GROUP BY ym",
+                [$windowStart, $windowEnd]
+            );
+            $expMap = array_column($expRows, 'total', 'ym');
+
+            $invRows = Database::all(
+                "SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
+                        COALESCE(SUM(quantity * unit_cost),0) AS total
+                 FROM inventory_transactions
+                 WHERE txn_type='purchase' AND COALESCE(reference,'') <> 'Opening stock' AND created_at >= ? AND created_at < ?
+                 GROUP BY ym",
+                [$windowStart, $windowEnd]
+            );
+            $invMap = array_column($invRows, 'total', 'ym');
+
+            foreach ($monthKeys as $ym) {
+                $val = (float) ($expMap[$ym] ?? 0.0) + (float) ($invMap[$ym] ?? 0.0);
+                $points[] = round($val, 2);
+            }
+        } elseif ($kind === 'jobs') {
+            $rows = Database::all(
+                "SELECT DATE_FORMAT(date_received, '%Y-%m') AS ym,
+                        COUNT(*) AS total
+                 FROM job_cards
+                 WHERE date_received >= ? AND date_received < ?
+                 GROUP BY ym",
+                [$windowStart, $windowEnd]
+            );
+            $map = array_column($rows, 'total', 'ym');
+            foreach ($monthKeys as $ym) {
+                $points[] = round((float) ($map[$ym] ?? 0.0), 2);
+            }
+        } else {
+            foreach ($monthKeys as $ym) {
+                $points[] = 0.0;
+            }
         }
         return $points;
     }

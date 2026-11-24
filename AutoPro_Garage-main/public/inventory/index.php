@@ -23,7 +23,7 @@ if (can('inventory.stock')) { $acts .= '<a class="btn btn-ghost" href="' . e(url
 if (can('inventory.manage')) { $acts .= '<a class="btn btn-primary" href="' . e(url('inventory/form.php')) . '">+ Add part</a>'; }
 ui_header('Inventory', 'inventory');
 page_header('Spare parts & inventory', 'Stock levels, pricing and reorder alerts', $acts);
-if ($low): ?><div class="alert alert-warn"><strong>Low-stock alert:</strong> <?= e(implode(', ', array_map(fn($p) => $p['name'] . ' (' . $p['quantity'] . ')', $low))) ?><?= count(InventoryService::lowStock(500)) > 5 ? ' and more…' : '' ?> — <a href="<?= e(url('inventory/?stock=low')) ?>">review</a></div><?php endif; ?>
+if ($low): ?><div class="alert alert-warn"><strong>Low-stock alert:</strong> <?= e(implode(', ', array_map(fn($p) => $p['name'] . ' (' . $p['quantity'] . ')', $low))) ?><?= count(InventoryService::lowStock(6)) > 5 ? ' and more…' : '' ?> — <a href="<?= e(url('inventory/?stock=low')) ?>">review</a></div><?php endif; ?>
 <form class="filters" method="get">
   <div class="field grow"><label for="q">Search</label><input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="SKU, name or supplier"></div>
   <div class="field"><label for="category">Category</label><select class="input" id="category" name="category" data-autosubmit><option value="">All</option><?php foreach ($cats as $c): ?><option<?= $cat === $c ? ' selected' : '' ?>><?= e($c) ?></option><?php endforeach; ?></select></div>

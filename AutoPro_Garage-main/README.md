@@ -46,51 +46,53 @@ In strict compliance with assignment instructions, **no external frameworks or t
 ## 3. Quick Start on Windows MAMP (5 Minutes)
 
 ### Step 1: Copy Codebase to MAMP
-Copy the project folder to your MAMP web root:
+Clone or copy the project folder into your MAMP web root:
 ```
-C:\MAMP\htdocs\garage-management-system (1)\garage-management-systems\
+C:\MAMP\htdocs\ALPHA-GARAGE\AutoPro_Garage-main\
 ```
 
 ### Step 2: Start MAMP Servers
-Launch MAMP for Windows and start Apache and MySQL (both status dots green). Ensure MySQL is running on port **3306**.
+Launch MAMP for Windows and start Apache and MySQL (both status indicators green). Ensure MySQL is running on port **3306**.
 
 ### Step 3: Import Database Schema
 1. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
 2. Create database `garage_management_system` with collation `utf8mb4_unicode_ci`.
-3. Import `database/database.sql` into the new, empty database. **This is a destructive baseline script; never import it over a database containing data.**
+3. Import `database/database.sql` into the new, empty database. **This is a baseline schema script; never import it over an existing database containing data.**
 
 ### Step 4: Configure Database Access
-The application does not load `.env.example` automatically. For local setup, copy `app/config/local.php.example` to the git-ignored `app/config/local.php` and set the database connection there, or configure `GMS_DB_HOST`, `GMS_DB_PORT`, `GMS_DB_NAME`, `GMS_DB_USER`, and `GMS_DB_PASS` in the Apache runtime environment. Environment variables take precedence. Do not use the MySQL root account for web requests.
+The application does not load `.env.example` automatically. For local setup, copy `app/config/local.php.example` to the git-ignored `app/config/local.php` and set the database connection there, or configure `GMS_DB_HOST`, `GMS_DB_PORT`, `GMS_DB_NAME`, `GMS_DB_USER`, and `GMS_DB_PASS` in the web server environment. Environment variables take precedence. Do not use the MySQL root account for web requests.
 
-After importing the baseline, create separate runtime and migration accounts using `database/least_privilege.sql`. Replace its password placeholders with different, strong secrets before running it as a database administrator. Configure `GMS_MIGRATION_DB_USER` and `GMS_MIGRATION_DB_PASS` only in the environment used for administrative CLI migrations; never expose them to the web runtime.
+After importing the baseline, create separate runtime and migration accounts using `database/least_privilege.sql`. Replace its password placeholders with strong, unique secrets before executing it as DBA. Configure `GMS_MIGRATION_DB_USER` and `GMS_MIGRATION_DB_PASS` only in the administrative CLI environment; never expose them to the web runtime.
 
-Run subsequent forward-only schema changes from the project directory:
+Run forward-only schema changes from the project directory:
 ```powershell
 & "C:\MAMP\bin\php\php8.3.1\php.exe" "database\migrate.php"
 ```
-The CLI migration command also needs the `GMS_DB_HOST`, `GMS_DB_PORT`, and `GMS_DB_NAME` values. It records migration checksums and rejects edited migrations; create a new migration rather than changing an applied one. There is no automatic rollback. The `20261108_expense_ledger.sql` migration adds the non-destructive expense ledger and accountant/admin permissions; apply it before using expense entry or dashboard profit/loss metrics. On an existing installation with per-table runtime grants, have a database administrator run `GRANT SELECT, INSERT ON garage_management_system.expenses TO 'garage_app'@'localhost';` after the migration. Do not rerun the full credential script just to apply this grant.
 
 ### Step 5: Launch the Application
 Open your browser and navigate to:
 ```
-http://localhost/garage-management-systems/public/login.php
+http://localhost/ALPHA-GARAGE/
 ```
+(Or directly: `http://localhost/ALPHA-GARAGE/AutoPro_Garage-main/public/login.php`)
 
 ---
 
-## 4. Default Demo Accounts
+## 4. Secure Initial Administrator Provisioning
 
-These are demo credentials only. Change or disable every seeded account before exposing the application beyond a trusted local environment.
+In accordance with strict security policies, **no default or hardcoded credentials are baked into production or staging environments**.
 
-| Role | Username | Default Password | Primary Dashboard & Capabilities |
-|---|---|---|---|
-| **Super Administrator** | `admin` | `Admin#2026!` | Full administrative control, user provisioning, cryptographic audit chain verification |
-| **Garage Manager** | `manager` | `Manager#2026!` | Workshop oversight, performance reports, financial supervision |
-| **Receptionist** | `receptionist` | `Recept#2026!` | Customer onboarding, appointments, vehicle intake, job card creation |
-| **Mechanic 1** | `mechanic1` | `Mechanic#2026!` | Assigned repair queue, diagnostic logging, service checklist |
-| **Mechanic 2** | `mechanic2` | `Mechanic#2026!` | Assigned repair queue, electrical & brake tasks |
-| **Inventory Manager** | `inventory` | `Inventory#2026!` | Parts stock, supplier purchases, issuing parts to jobs |
-| **Accountant** | `accountant` | `Account#2026!` | Invoicing, payment collection, printable receipts, financial reports |
+To provision the initial administrator account, execute the authorized CLI initialization command:
+```powershell
+& "C:\MAMP\bin\php\php8.3.1\php.exe" "scripts\provision_test_db.php"
+```
+Or execute a dedicated administrator creation script providing:
+- **Administrator Username** (alphanumeric, min 4 characters)
+- **Administrator Email** (valid corporate email)
+- **Strong Master Password** (minimum 10 characters, mixed case, numbers, special characters)
+- **Secure Bcrypt Hashing** (`PASSWORD_BCRYPT` with cost factor 12)
+
+All subsequent users (Managers, Receptionists, Mechanics, Inventory Managers, Accountants) are created and managed by the authorized Administrator via the **Staff Management Console** (`public/users/index.php`). Self-service customer registration is available at `public/register.php`.
 
 ---
 

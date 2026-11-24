@@ -49,8 +49,8 @@ body.landing-page.about-page {
 
 .about-hero-shade {
   background:
-    linear-gradient(90deg, rgba(4, 17, 11, 0.78), rgba(4, 17, 11, 0.28) 54%, rgba(4, 17, 11, 0.61)),
-    linear-gradient(0deg, #081710 0%, rgba(8, 23, 16, 0.24) 45%, rgba(8, 23, 16, 0.42) 100%);
+    linear-gradient(90deg, rgba(4, 17, 11, 0.58), rgba(4, 17, 11, 0.20) 54%, rgba(4, 17, 11, 0.45)),
+    linear-gradient(0deg, #081710 0%, rgba(8, 23, 16, 0.16) 45%, rgba(8, 23, 16, 0.28) 100%);
 }
 
 .about-hero-content {
@@ -79,9 +79,6 @@ body.landing-page.about-page {
   display: inline-block;
   min-height: 1.15em;
   color: var(--gold-champagne, #e8cd83);
-  border-right: 0.055em solid currentColor;
-  padding-right: 0.07em;
-  animation: about-caret 0.9s steps(2, start) infinite;
 }
 
 .about-hero-content > p {
@@ -580,8 +577,8 @@ body.landing-page.about-page {
   .about-hero-image { object-position: 58% center; }
   .about-hero-shade {
     background:
-      linear-gradient(90deg, rgba(4, 17, 11, 0.75), rgba(4, 17, 11, 0.36)),
-      linear-gradient(0deg, #081710 0%, rgba(8, 23, 16, 0.16) 70%, rgba(8, 23, 16, 0.38));
+      linear-gradient(90deg, rgba(4, 17, 11, 0.58), rgba(4, 17, 11, 0.24)),
+      linear-gradient(0deg, #081710 0%, rgba(8, 23, 16, 0.12) 70%, rgba(8, 23, 16, 0.26));
   }
 
   .about-scroll-cue { margin-top: 2.2rem; }

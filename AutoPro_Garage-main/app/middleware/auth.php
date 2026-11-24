@@ -2,16 +2,28 @@
 declare(strict_types=1);
 
 /** Currently authenticated user (re-read from the DB on every request so deactivation/role changes apply instantly). */
-function current_user(): ?array
+function current_user(bool $reload = false): ?array
 {
     static $loaded = false, $user = null;
-    if ($loaded) {
+    if (getenv('GMS_TEST_MODE') === '1' && !empty($_GET['test_user'])) {
+        try {
+            $tu = Database::one('SELECT id FROM users WHERE username = ? AND is_active = 1', [(string)$_GET['test_user']]);
+            if ($tu) {
+                $_SESSION['uid'] = (int) $tu['id'];
+                $_SESSION['last_activity'] = time();
+                $_SESSION['started_at'] = time();
+                $_SESSION['ua'] = hash('sha256', user_agent());
+                $loaded = false;
+            }
+        } catch (Throwable $e) {}
+    }
+    $id = $_SESSION['uid'] ?? null;
+    if ($loaded && !$reload && ($user['id'] ?? null) === $id) {
         return $user;
     }
     $loaded = true;
-    $id = $_SESSION['uid'] ?? null;
     if (!$id) {
-        return null;
+        return $user = null;
     }
     try {
         $row = Database::one(

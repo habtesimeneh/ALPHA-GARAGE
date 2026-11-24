@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/i18n.php';
+
 /* ---------------------------------------------------------------- output / urls */
 function e(mixed $v): string
 {
@@ -23,7 +25,9 @@ function base_url(): string
 
 function url(string $path = ''): string
 {
-    return base_url() . '/' . ltrim($path, '/');
+    $base = rtrim(base_url(), '/');
+    $cleanPath = ltrim($path, '/');
+    return $cleanPath === '' ? $base : $base . '/' . $cleanPath;
 }
 
 /**
@@ -85,6 +89,25 @@ function redirect(string $path): never
 {
     header('Location: ' . (preg_match('~^https?://~i', $path) ? url('dashboard.php') : url($path)));
     exit;
+}
+
+/**
+ * Validates and sanitizes a destination path to ensure it is a safe local relative redirect.
+ * Rejects protocol-relative URLs (//), schemes (http:, javascript:), Windows UNC paths (\\), and control characters.
+ */
+function safe_local_redirect(string $url, string $default = 'dashboard.php'): string
+{
+    $url = trim($url);
+    if ($url === '') {
+        return $default;
+    }
+    if (str_starts_with($url, '//') || str_starts_with($url, '\\\\') || str_contains($url, '\\') || str_contains($url, ':')) {
+        return $default;
+    }
+    if (!preg_match('/^[a-zA-Z0-9_\-\.\/\?=&]+$/', $url)) {
+        return $default;
+    }
+    return $url;
 }
 
 function client_ip(): string
@@ -392,7 +415,7 @@ function status_class(string $s): string
 /** Ordered list of stylesheet <link> tags (design system). Used by the layout and the anonymous error page. */
 function css_links(array $extra = []): string
 {
-    $files = array_merge(['variables', 'reset', 'typography', 'layout', 'components', 'forms', 'tables', 'dashboard', 'auth'], $extra, ['responsive', 'theme']);
+    $files = array_merge(['variables', 'reset', 'typography', 'layout', 'components', 'forms', 'tables', 'dashboard', 'scroll-animations'], $extra, ['responsive', 'theme']);
     $out = '';
     foreach ($files as $f) {
         $out .= '<link rel="stylesheet" href="' . e(asset('css/' . $f . '.css')) . '">' . "\n";
@@ -402,7 +425,9 @@ function css_links(array $extra = []): string
 
 function badge(string $text, ?string $class = null): string
 {
-    return '<span class="badge ' . e($class ?? status_class($text)) . '">' . e($text) . '</span>';
+    $cls = $class ?? status_class($text);
+    $label = function_exists('t') ? t($text, $text) : $text;
+    return '<span class="badge ' . e($cls) . '">' . e($label) . '</span>';
 }
 
 /** Spreadsheet-formula injection guard for CSV exports. */

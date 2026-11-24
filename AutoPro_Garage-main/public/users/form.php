@@ -34,6 +34,9 @@ if (is_post()) {
             foreach ($roles as $r) { if ((int) $r['id'] === (int) $v['role_id']) { $roleName = $r['name']; } }
             if ($u) {
                 Database::run('UPDATE users SET full_name=?, email=?, role_id=?, is_active=? WHERE id=?', [$v['full_name'], $v['email'], $v['role_id'], $v['is_active'], $id]);
+                if (strtolower(trim($v['email'])) !== strtolower(trim($u['email']))) {
+                    CustomerIdentityService::invalidateTokensForUser((int) $id);
+                }
                 if ($pw !== '') { Database::run('UPDATE users SET password_hash=?, must_change_password=1 WHERE id=?', [AuthService::hash($pw), $id]); }
                 $act = ((int) $u['role_id'] !== (int) $v['role_id']) ? 'user_role_changed' : ($u['is_active'] != $v['is_active'] ? ($v['is_active'] ? 'user_activated' : 'user_deactivated') : 'user_updated');
                 AuditLogger::log($act, 'users', $id, ['full_name' => $u['full_name'], 'email' => $u['email'], 'role_id' => $u['role_id'], 'is_active' => $u['is_active']],

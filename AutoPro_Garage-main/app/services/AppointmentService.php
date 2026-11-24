@@ -91,7 +91,7 @@ final class AppointmentService
             $srvId = !empty($d['service_id']) ? (int) $d['service_id'] : null;
             $date = $d['appointment_date'];
             $time = $d['appointment_time'];
-            $prob = trim($d['problem_description'] ?? '');
+            $prob = trim((string)($d['problem_description'] ?? ($d['notes'] ?? '')));
 
             $cust = Database::one('SELECT id, is_active FROM customers WHERE id = ?', [$custId]);
             $veh = Database::one('SELECT id, customer_id, is_active FROM vehicles WHERE id = ?', [$vehId]);
@@ -150,6 +150,9 @@ final class AppointmentService
             }
             if ($apt['converted_job_id']) {
                 throw new DomainException('This appointment has already been converted to Job Card #' . $apt['converted_job_number']);
+            }
+            if ($apt['status'] === 'cancelled') {
+                throw new DomainException('A cancelled appointment cannot be converted to a job card.');
             }
 
             // Create job card

@@ -1,29 +1,47 @@
 /* ==========================================================================
    tables.css — data tables, pagination, empty states
-   Automotive Enterprise: Electric Blue (#2563EB) & Clean Contrast
+   Luxury Automotive: Deep Forest Green (#0D281E) & Warm Champagne Gold (#D4AF37)
    ========================================================================== */
-.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  background-image: 
+    linear-gradient(to right, #fff, #fff),
+    linear-gradient(to right, #fff, #fff),
+    linear-gradient(to right, rgba(7, 23, 17, .08), rgba(7, 23, 17, 0)),
+    linear-gradient(to left, rgba(7, 23, 17, .08), rgba(7, 23, 17, 0));
+  background-position: left center, right center, left center, right center;
+  background-repeat: no-repeat;
+  background-color: var(--surface);
+  background-size: 20px 100%, 20px 100%, 10px 100%, 10px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
 table.table { width: 100%; border-collapse: collapse; }
 .table th {
   position: sticky; top: 0; background: linear-gradient(180deg, #F8FAFC, #F1F5F9); color: var(--navy-primary);
   text-align: left; font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-  padding: .85rem 1rem; white-space: nowrap; border-bottom: 2px solid var(--blue-primary);
+  padding: .85rem 1rem; white-space: nowrap; border-bottom: 2px solid var(--gold-primary);
 }
 .table td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-primary); font-size: var(--text-sm); }
 .table tbody tr { transition: background var(--t-fast); }
 .table tbody tr:nth-child(even) { background: rgba(248, 250, 252, .75); }
-.table tbody tr:hover { background: rgba(37, 99, 235, .04); box-shadow: inset 3px 0 0 var(--blue-primary); }
+.table tbody tr:hover { background: var(--gold-subtle); box-shadow: inset 3px 0 0 var(--gold-primary); }
 .table tr:last-child td { border-bottom: 0; }
 .table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .table tfoot td { font-weight: 750; background: var(--surface-alt); border-top: 2px solid var(--border-strong); color: var(--navy-primary); }
-.table td a { font-weight: 600; color: var(--blue-primary); }
-.table td a:hover { color: var(--blue-hover); text-decoration: underline; }
+.table td a { font-weight: 600; color: var(--forest-dark); }
+.table td a:hover { color: var(--gold-dark); text-decoration: underline; }
 .table .btn-sm + .btn-sm, .table .inline-form + .inline-form, .table .btn-sm + .inline-form, .table .inline-form + .btn-sm { margin-left: 4px; }
+.table .btn-sm, .table .btn { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; }
 .empty { padding: var(--space-10) var(--space-5); text-align: center; color: var(--text-secondary); }
 
 .pagination { display: flex; gap: var(--space-1); align-items: center; margin-top: var(--space-4); flex-wrap: wrap; }
-.page { display: inline-grid; place-items: center; min-width: 38px; height: 38px; padding: 0 .75rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background: #fff; color: var(--blue-primary); font-weight: 600; font-size: var(--text-sm); transition: all var(--t-fast); }
-a.page:hover { text-decoration: none; background: var(--blue-subtle); border-color: var(--blue-primary); transform: translateY(-1px); }
-.page.active { background: var(--grad-primary); border-color: var(--blue-primary); color: #fff; box-shadow: var(--shadow-xs); }
+.page { display: inline-grid; place-items: center; min-width: 38px; height: 38px; padding: 0 .75rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background: #fff; color: var(--forest-dark); font-weight: 600; font-size: var(--text-sm); transition: all var(--t-fast); }
+a.page:hover { text-decoration: none; background: var(--gold-subtle); border-color: var(--gold-primary); color: var(--forest-darkest); transform: translateY(-1px); }
+.page.active { background: var(--grad-gold); border-color: var(--gold-primary); color: #071711; font-weight: 700; box-shadow: var(--shadow-xs); }
 .page.disabled { opacity: .45; cursor: not-allowed; }
 .page-info { margin-left: var(--space-3); font-size: var(--text-sm); color: var(--text-secondary); }

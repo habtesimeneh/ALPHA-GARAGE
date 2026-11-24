@@ -1,0 +1,72 @@
+# Root Environment & Configuration Secrets
+.env
+.env.*
+!.env.example
+app/config/local.php
+storage/installed.lock
+
+# Storage Directories & Backups
+storage/backups/
+storage/staging/
+storage/sessions/
+storage/rate_limits/
+storage/mail_spool/
+storage/testing/*
+!storage/testing/.gitignore
+
+# Nested subproject storage (FIND-16-01)
+AutoPro_Garage-main/storage/backups/
+AutoPro_Garage-main/storage/staging/
+AutoPro_Garage-main/storage/sessions/
+AutoPro_Garage-main/storage/rate_limits/
+AutoPro_Garage-main/storage/mail_spool/
+AutoPro_Garage-main/storage/testing/*
+!AutoPro_Garage-main/storage/testing/.gitignore
+AutoPro_Garage-main/storage/uploads/*
+!AutoPro_Garage-main/storage/uploads/.gitkeep
+!AutoPro_Garage-main/storage/uploads/.htaccess
+
+# Private Storage & Sensitive Files
+storage/private/*
+!storage/private/.htaccess
+storage/private/encryption.key
+storage/private/*.key
+storage/private/*.generated.sql
+AutoPro_Garage-main/storage/private/*
+!AutoPro_Garage-main/storage/private/.htaccess
+AutoPro_Garage-main/storage/private/encryption.key
+AutoPro_Garage-main/storage/private/*.key
+AutoPro_Garage-main/storage/private/*.generated.sql
+
+# Uploads
+storage/uploads/*
+!storage/uploads/.gitkeep
+!storage/uploads/.htaccess
+
+# Logs
+storage/logs/*
+!storage/logs/.gitkeep
+AutoPro_Garage-main/storage/logs/*
+!AutoPro_Garage-main/storage/logs/.gitkeep
+*.log
+*.sqlite
+
+# SQL Dumps outside database/ directory
+storage/**/*.sql
+AutoPro_Garage-main/storage/**/*.sql
+*.dump.sql
+*.backup.sql
+
+# OS & Editor Artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.tmp
+.idea/
+.vscode/
+
+# Dependencies
+/vendor/
+node_modules/

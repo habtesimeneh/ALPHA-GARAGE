@@ -22,11 +22,8 @@ $databaseFailureMessage = static function (Throwable $e): string {
 try {
     $user = current_user();
     if ($user) {
-        if ($user['role_name'] === 'customer') {
-            redirect('index.php');
-        }
         $redirect = get('redirect');
-        redirect(!empty($redirect) && !str_starts_with($redirect, 'http') ? $redirect : 'dashboard.php');
+        redirect(safe_local_redirect((string) $redirect, 'dashboard.php'));
     }
     $installed = (int) Database::value('SELECT COUNT(*) FROM users') > 0;
 } catch (Throwable $e) {
@@ -36,7 +33,7 @@ try {
 
 $error = '';
 $username = '';
-$redirectParam = get('redirect', '');
+$redirectParam = safe_local_redirect((string) get('redirect', ''), '');
 
 if (is_post() && !$dbError) {
     $username = post('username');
@@ -51,11 +48,8 @@ if (is_post() && !$dbError) {
     }
     if ($res !== null && $res['ok']) {
         flash('success', 'Welcome back to ' . $garageName . '.');
-        if ($res['role_name'] === 'customer') {
-            redirect('index.php');
-        }
         $dest = post('redirect_url');
-        redirect(!empty($dest) && !str_starts_with($dest, 'http') ? $dest : 'dashboard.php');
+        redirect(safe_local_redirect((string) $dest, 'dashboard.php'));
     }
     if ($res !== null) {
         $error = $res['error'];
@@ -75,7 +69,7 @@ $sliderImages = [
 $flashes = pull_flash();
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= e(current_lang()) ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -83,6 +77,7 @@ $flashes = pull_flash();
 <link rel="icon" href="<?= e(asset('images/logo.svg')) ?>" type="image/svg+xml">
 <link rel="stylesheet" href="<?= e(asset('css/variables.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/luxury-auth.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset('css/scroll-animations.css')) ?>">
 </head>
 <body class="luxury-auth-body">
 
@@ -106,18 +101,19 @@ $flashes = pull_flash();
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </span>
-      <span class="btn-back-text">Back to Homepage</span>
+      <span class="btn-back-text"><?= e(t('Back to Homepage', 'Back to Homepage')) ?></span>
     </a>
+    <?= lang_switcher_html() ?>
     <div class="luxury-badge-portal">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
       </svg>
-      <span>Secure Portal</span>
+      <span><?= e(t('Secure Portal', 'Secure Portal')) ?></span>
     </div>
   </div>
 
-  <main class="luxury-auth-centered-card">
+  <main class="luxury-auth-centered-card reveal-scale card-interactive">
     <div class="luxury-card-brand">
       <div class="luxury-card-logo-wrap">
         <img src="<?= e(asset('images/logo.svg')) ?>" alt="" width="44" height="44">
@@ -132,8 +128,8 @@ $flashes = pull_flash();
     </div>
 
     <div class="luxury-form-header auth-form-header">
-      <h2 class="luxury-form-title auth-form-title">Welcome Back</h2>
-      <p class="luxury-form-desc">Sign in to access your garage account</p>
+      <h2 class="luxury-form-title auth-form-title"><?= e(t('Welcome Back', 'Welcome Back')) ?></h2>
+      <p class="luxury-form-desc"><?= e(t('Sign in to access your garage account', 'Sign in to access your garage account')) ?></p>
     </div>
 
     <?php foreach ($flashes as $f): ?>
@@ -170,12 +166,12 @@ $flashes = pull_flash();
       <!-- Username or Email -->
       <div class="luxury-field">
         <label class="luxury-label" for="username">
-          <span>Username or Email <span class="req">*</span></span>
+          <span><?= e(t('Username or Email', 'Username or Email')) ?> <span class="req">*</span></span>
         </label>
         <div class="luxury-input-wrapper">
           <input class="luxury-input" id="username" name="username" type="text"
                  value="<?= e($username) ?>" required maxlength="150" autofocus
-                 autocomplete="username" placeholder="Enter username or email"
+                 autocomplete="username" placeholder="<?= e(t('Enter username or email', 'Enter username or email')) ?>"
                  <?= $dbError ? 'disabled' : '' ?>>
         </div>
       </div>
@@ -183,22 +179,22 @@ $flashes = pull_flash();
       <!-- Password -->
       <div class="luxury-field">
         <div class="luxury-label">
-          <label for="password">Password <span class="req">*</span></label>
-          <a href="<?= e(url('forgot-password.php')) ?>" class="luxury-label-link">Forgot password?</a>
+          <label for="password"><?= e(t('Password', 'Password')) ?> <span class="req">*</span></label>
+          <a href="<?= e(url('forgot-password.php')) ?>" class="luxury-label-link"><?= e(t('Forgot password?', 'Forgot password?')) ?></a>
         </div>
         <div class="luxury-input-wrapper">
           <input class="luxury-input has-toggle" id="password" name="password"
                  type="password" required autocomplete="current-password"
-                 placeholder="Enter your account password"
+                 placeholder="<?= e(t('Enter your account password', 'Enter your account password')) ?>"
                  <?= $dbError ? 'disabled' : '' ?>>
           <button type="button" class="toggle-password" data-target="password"
-                  aria-label="Toggle password visibility" title="Show password">👁</button>
+                 aria-label="Toggle password visibility" title="Show password">👁</button>
         </div>
       </div>
 
       <!-- Submit Button -->
-      <button class="btn-luxury-gold" type="submit" <?= $dbError ? 'disabled' : '' ?>>
-        Sign In
+      <button class="btn-luxury-gold btn-interactive btn-shimmer" type="submit" <?= $dbError ? 'disabled' : '' ?>>
+        <?= e(t('Sign In', 'Sign In')) ?>
       </button>
 
       <!-- Remember Me -->
@@ -206,24 +202,26 @@ $flashes = pull_flash();
         <label class="luxury-checkbox-label">
           <input type="checkbox" name="remember" value="1"
                  class="luxury-checkbox" <?= $dbError ? 'disabled' : '' ?>>
-          <span>Remember me on this device</span>
+          <span><?= e(t('Remember me on this device', 'Remember me on this device')) ?></span>
         </label>
       </div>
     </form>
 
     <div class="luxury-form-footer">
-      Don&rsquo;t have an account yet?
-      <a href="<?= e(url('register.php')) ?>">Create an account</a>
+      <?= e(t("Don't have an account yet?", "Don't have an account yet?")) ?>
+      <a href="<?= e(url('register.php')) ?>"><?= e(t('Create an account', 'Create an account')) ?></a>
     </div>
   </main>
 
   <footer class="auth-legal-footer">
-    <a href="<?= e(url('terms.php')) ?>" class="auth-legal-link">Terms of Service</a> &bull;
-    <a href="<?= e(url('privacy.php')) ?>" class="auth-legal-link">Privacy Policy</a> &bull;
-    <a href="<?= e(url('contact.php')) ?>" class="auth-legal-link">Support &amp; Telegram</a>
+    <a href="<?= e(url('terms.php')) ?>" class="auth-legal-link"><?= e(t('Terms of Service', 'Terms of Service')) ?></a> &bull;
+    <a href="<?= e(url('privacy.php')) ?>" class="auth-legal-link"><?= e(t('Privacy Policy', 'Privacy Policy')) ?></a> &bull;
+    <a href="<?= e(url('contact.php')) ?>" class="auth-legal-link"><?= e(t('Support & Telegram', 'Support & Telegram')) ?></a>
   </footer>
 </div>
 
 <script src="<?= e(asset('js/luxury.js')) ?>"></script>
+<script src="<?= e(asset('js/i18n.js')) ?>"></script>
+<script src="<?= e(asset('js/scroll-animations.js')) ?>"></script>
 </body>
 </html>

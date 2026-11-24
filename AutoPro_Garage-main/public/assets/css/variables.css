@@ -1,17 +1,20 @@
 /* ==========================================================================
    variables.css — Luxury Automotive Enterprise Design System
-   Primary Palette: Dark Forest Green (#10291F), Deep Emerald (#183B2B),
-   Luxury Gold (#D4AF37), Champagne Gold (#E8CD83), Warm Ivory (#F5F2E9)
+   Primary Palette: Deep Forest Green (#0D281E), Warm Champagne Gold (#D4AF37)
+   Supporting: Obsidian Green (#071711), Deep Emerald (#153A2D), Champagne (#E8CD83)
    ========================================================================== */
 :root {
   /* Luxury Automotive Core Palette */
-  --forest-dark: #10291F;
-  --forest-deep: #183B2B;
-  --forest-surface: #143526;
-  --forest-darkest: #0A1B14;
+  --forest-darkest: #071711;
+  --forest-dark: #0D281E;
+  --forest-deep: #153A2D;
+  --forest-surface: #1E4E3D;
+  --gold-primary: #D4AF37;
   --gold-luxury: #D4AF37;
   --gold-champagne: #E8CD83;
+  --gold-dark: #7A5C00;
   --gold-light: #FBF4DC;
+  --gold: #D4AF37;
   --ivory-warm: #F5F2E9;
   --pure-white: #FFFFFF;
   --gray-muted: #A7B0AA;
@@ -19,65 +22,65 @@
   
   --gold-subtle: rgba(212, 175, 55, 0.12);
   --gold-glow: rgba(212, 175, 55, 0.35);
-  --forest-glass: rgba(16, 41, 31, 0.78);
-  --forest-glass-card: rgba(24, 59, 43, 0.85);
+  --forest-glass: rgba(13, 40, 30, 0.82);
+  --forest-glass-card: rgba(21, 58, 45, 0.88);
 
   --grad-gold: linear-gradient(135deg, #D4AF37 0%, #E8CD83 100%);
   --grad-gold-hover: linear-gradient(135deg, #E8CD83 0%, #D4AF37 100%);
-  --grad-forest: linear-gradient(135deg, #10291F 0%, #183B2B 100%);
-  --grad-forest-dark: linear-gradient(180deg, #10291F 0%, #0A1B14 100%);
-  --grad-overlay: linear-gradient(180deg, rgba(16, 41, 31, 0.82) 0%, rgba(10, 27, 20, 0.94) 100%);
-  --grad-overlay-side: linear-gradient(90deg, rgba(16, 41, 31, 0.95) 0%, rgba(16, 41, 31, 0.7) 60%, rgba(16, 41, 31, 0.9) 100%);
+  --grad-forest: linear-gradient(135deg, #071711 0%, #0D281E 50%, #153A2D 100%);
+  --grad-forest-dark: linear-gradient(180deg, #0D281E 0%, #071711 100%);
+  --grad-overlay: linear-gradient(180deg, rgba(13, 40, 30, 0.55) 0%, rgba(7, 23, 17, 0.72) 100%);
+  --grad-overlay-side: linear-gradient(90deg, rgba(13, 40, 30, 0.68) 0%, rgba(13, 40, 30, 0.42) 60%, rgba(13, 40, 30, 0.62) 100%);
 
-  /* Automotive Enterprise Core Palette */
-  --navy-primary: #101827;
-  --navy-sidebar: #111C2E;
-  --navy-sidebar-dark: #0B1320;
-  --blue-primary: #2563EB;
-  --blue-hover: #1D4ED8;
-  --blue-light: #DBEAFE;
-  --blue-subtle: rgba(37, 99, 235, 0.08);
-  --cyan-accent: #06B6D4;
-  --cyan-hover: #0891B2;
-  --cyan-light: #CFFAFE;
+  /* Automotive Enterprise Core Palette — Aligned to Forest Green & Gold */
+  --navy-primary: #0D281E;
+  --navy-sidebar: #071711;
+  --navy-sidebar-dark: #05100B;
+  --blue-primary: #0D281E;
+  --blue-hover: #153A2D;
+  --blue-light: #E6EFEA;
+  --blue-subtle: rgba(13, 40, 30, 0.08);
+  --cyan-accent: #D4AF37;
+  --cyan-hover: #B38D16;
+  --cyan-light: #FBF4DC;
   
   /* Brand mappings */
-  --primary: #2563EB;
-  --primary-hover: #1D4ED8;
-  --accent: #06B6D4;
-  --accent-hover: #0891B2;
-  --background: #F1F5F9;
+  --primary: #0D281E;
+  --primary-hover: #153A2D;
+  --accent: #D4AF37;
+  --accent-hover: #E8CD83;
+  --background: #F4F6F4;
   --surface: #FFFFFF;
   --surface-alt: #F8FAFC;
   --text-primary: #0F172A;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
+  --text-secondary: #5A6A60;
+  --text-muted: #8FA69B;
   --text-inverse: #F8FAFC;
-  --border: #E2E8F0;
-  --border-strong: #CBD5E1;
+  --border: #DEE4DF;
+  --border-strong: #CBD5CD;
   
   /* Sidebar Specific */
-  --sidebar-bg: #111C2E;
-  --sidebar-bg-2: #0B1320;
+  --sidebar-bg: #071711;
+  --sidebar-bg-2: #0D281E;
   --sidebar-text: #E2E8F0;
   --sidebar-text-muted: #94A3B8;
-  --sidebar-active-bg: rgba(37, 99, 235, 0.16);
-  --sidebar-active-text: #38BDF8;
-  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-active-bg: rgba(212, 175, 55, 0.15);
+  --sidebar-active-text: #E8CD83;
+  --sidebar-hover: rgba(212, 175, 55, 0.08);
 
   /* Semantic status colors (meeting WCAG AA contrast) */
   --ok: #16A34A;          --ok-bg: #DCFCE7;     --ok-border: #86EFAC;
   --warn: #D97706;        --warn-bg: #FEF3C7;   --warn-border: #FCD34D;
   --danger: #DC2626;      --danger-bg: #FEE2E2; --danger-border: #FCA5A5;
-  --info: #0284C7;        --info-bg: #E0F2FE;   --info-border: #7DD3FC;
+  --info: #0D281E;        --info-bg: #E6EFEA;   --info-border: #B2D0C3;
   --neutral: #475569;     --neutral-bg: #F1F5F9; --neutral-border: #CBD5E1;
 
   /* Gradients */
-  --grad-primary: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-  --grad-navy: linear-gradient(135deg, #111C2E 0%, #101827 100%);
-  --grad-cyan: linear-gradient(135deg, #06B6D4 0%, #0284C7 100%);
-  --grad-hero: linear-gradient(135deg, #111C2E 0%, #1E293B 50%, #0F172A 100%);
-  --grad-accent: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+  --grad-primary: linear-gradient(135deg, #0D281E 0%, #153A2D 100%);
+  --grad-navy: linear-gradient(135deg, #071711 0%, #0D281E 100%);
+  --grad-cyan: linear-gradient(135deg, #D4AF37 0%, #E8CD83 100%);
+  --grad-hero: linear-gradient(135deg, #071711 0%, #0D281E 50%, #153A2D 100%);
+  --grad-accent: linear-gradient(135deg, #0D281E 0%, #D4AF37 100%);
 
   /* Spacing scale */
   --space-1: .25rem; --space-2: .5rem;  --space-3: .75rem; --space-4: 1rem;
@@ -88,14 +91,15 @@
   --radius-sm: 6px; --radius: 10px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 22px; --radius-pill: 999px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(16, 24, 39, .05);
-  --shadow-sm: 0 1px 3px rgba(16, 24, 39, .08), 0 1px 2px rgba(16, 24, 39, .04);
-  --shadow: 0 4px 6px -1px rgba(16, 24, 39, .08), 0 2px 4px -2px rgba(16, 24, 39, .06);
-  --shadow-md: 0 10px 15px -3px rgba(16, 24, 39, .08), 0 4px 6px -4px rgba(16, 24, 39, .04);
-  --shadow-lg: 0 20px 25px -5px rgba(16, 24, 39, .10), 0 8px 10px -6px rgba(16, 24, 39, .06);
-  --shadow-blue: 0 6px 20px rgba(37, 99, 235, .28);
-  --shadow-cyan: 0 6px 20px rgba(6, 182, 212, .25);
-  --ring: 0 0 0 3px rgba(37, 99, 235, .28);
+  --shadow-xs: 0 1px 2px rgba(7, 23, 17, .05);
+  --shadow-sm: 0 1px 3px rgba(7, 23, 17, .08), 0 1px 2px rgba(7, 23, 17, .04);
+  --shadow: 0 4px 6px -1px rgba(7, 23, 17, .08), 0 2px 4px -2px rgba(7, 23, 17, .06);
+  --shadow-md: 0 10px 15px -3px rgba(7, 23, 17, .08), 0 4px 6px -4px rgba(7, 23, 17, .04);
+  --shadow-lg: 0 20px 25px -5px rgba(7, 23, 17, .10), 0 8px 10px -6px rgba(7, 23, 17, .06);
+  --shadow-gold: 0 6px 20px rgba(212, 175, 55, .28);
+  --shadow-blue: 0 6px 20px rgba(13, 40, 30, .28);
+  --shadow-cyan: 0 6px 20px rgba(212, 175, 55, .25);
+  --ring: 0 0 0 3px rgba(212, 175, 55, .35);
 
   /* Typography */
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -115,4 +119,161 @@
   /* Z-index layers */
   --z-base: 1; --z-sticky: 20; --z-dropdown: 30; --z-backdrop: 35; --z-sidebar: 40;
   --z-modal: 90; --z-loader: 95; --z-toast: 100;
+}
+
+/* Amharic / Ethiopic Typography System */
+html[lang="am"] {
+  --font: "Nyala", "Segoe UI", "Noto Sans Ethiopic", "Abyssinica SIL", system-ui, sans-serif;
+  --font-display: "Nyala", "Segoe UI Semibold", "Noto Sans Ethiopic", system-ui, sans-serif;
+}
+
+/* ==========================================================================
+   Universal Bilingual Language Switcher Component (Available Everywhere)
+   ========================================================================== */
+.lang-switcher-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  position: relative !important;
+  background: linear-gradient(180deg, #0E2E20 0%, #061810 100%) !important;
+  border: 1.5px solid #D4AF37 !important;
+  border-radius: var(--radius-pill, 999px) !important;
+  padding: 3px 4px !important;
+  gap: 3px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(212, 175, 55, 0.25) !important;
+  vertical-align: middle !important;
+  user-select: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  flex-shrink: 0 !important;
+  pointer-events: auto !important;
+  z-index: 25 !important;
+}
+
+.lang-switcher-pill:hover {
+  border-color: #F3DB83 !important;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+.lang-switch-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  min-width: 44px !important;
+  height: 30px !important;
+  padding: 0 11px !important;
+  border-radius: var(--radius-pill, 999px) !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  font-family: 'Segoe UI', 'Nyala', 'Noto Sans Ethiopic', var(--font-sans, system-ui, sans-serif) !important;
+  font-size: 0.88rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  z-index: 1 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.lang-switch-btn:hover {
+  color: #FFE896 !important;
+  background: rgba(212, 175, 55, 0.25) !important;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.5) !important;
+}
+
+.lang-switch-btn:active {
+  transform: scale(0.96) !important;
+}
+
+.lang-switch-btn:focus-visible {
+  outline: 2px solid #E8CD83 !important;
+  outline-offset: 2px !important;
+}
+
+.lang-switch-btn.active {
+  background: linear-gradient(135deg, #FFE896 0%, #D4AF37 50%, #B88E18 100%) !important;
+  color: #04140E !important;
+  font-weight: 850 !important;
+  border: 1px solid #FFF3C4 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), 0 0 8px rgba(212, 175, 55, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+  text-shadow: none !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.lang-switch-btn.active:hover {
+  background: linear-gradient(135deg, #FFF0B3 0%, #DDB847 50%, #C49822 100%) !important;
+  color: #04140E !important;
+}
+
+/* Elegant hairline separator */
+.lang-switch-sep {
+  display: inline-block !important;
+  width: 1.5px !important;
+  height: 16px !important;
+  background: #D4AF37 !important;
+  opacity: 0.65 !important;
+  margin: 0 2px !important;
+  overflow: hidden !important;
+  text-indent: -9999px !important;
+  flex-shrink: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================================
+   Typewriter Auto-Typing Animation Styles
+   ========================================================================== */
+.typewriter-cursor {
+  display: inline-block !important;
+  color: var(--gold-primary, #D4AF37) !important;
+  font-weight: 300 !important;
+  margin-left: 2px !important;
+  animation: typewriter-blink 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+  vertical-align: baseline !important;
+}
+
+@keyframes typewriter-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hero-typewriter-highlight {
+  background: var(--grad-gold) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  display: inline !important;
+  font-weight: 850 !important;
+}
+
+.contact-typewriter-wrap {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  padding: 0.35rem 0.95rem;
+  border-radius: var(--radius-pill, 999px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.contact-typewriter-icon {
+  color: #D4AF37;
+  font-size: 0.85rem;
+}
+
+.contact-typewriter-kicker {
+  color: #FBF4DC;
+  font-weight: 650;
+  font-size: 0.98rem;
+  letter-spacing: 0.02em;
 }

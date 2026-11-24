@@ -83,10 +83,14 @@ final class AuthService
                     self::clearRememberToken((int) $user['id']);
                 }
             });
+            $pendingLinkToken = $_SESSION['pending_link_token'] ?? null;
             if (!session_regenerate_id(true)) {
                 throw new RuntimeException('Could not regenerate session ID after authentication.');
             }
             $_SESSION = $authenticatedSession;
+            if ($pendingLinkToken !== null && is_string($pendingLinkToken) && preg_match('/^[a-f0-9]{64}$/i', $pendingLinkToken)) {
+                $_SESSION['pending_link_token'] = $pendingLinkToken;
+            }
             return ['ok' => true, 'error' => null, 'role_name' => $user['role_name']];
         }
 

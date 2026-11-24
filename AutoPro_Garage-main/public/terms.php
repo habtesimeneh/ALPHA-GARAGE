@@ -9,7 +9,7 @@ try {
 } catch (Throwable) {}
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= e(current_lang()) ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,6 +17,7 @@ try {
 <link rel="icon" href="<?= e(asset('images/logo.svg')) ?>" type="image/svg+xml">
 <link rel="stylesheet" href="<?= e(asset('css/variables.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/landing.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset('css/scroll-animations.css')) ?>">
 </head>
 <body class="landing-page">
 
@@ -44,22 +45,23 @@ try {
     </a>
 
     <ul class="nav-menu-links" id="primary-navigation">
-      <li><a href="<?= e(url('index.php')) ?>" class="nav-link">Home</a></li>
-      <li><a href="<?= e(url('about.php')) ?>" class="nav-link">About Us</a></li>
-      <li><a href="<?= e(url('services.php')) ?>" class="nav-link">Our Services</a></li>
-      <li><a href="<?= e(url('index.php#why-us')) ?>" class="nav-link">Why Choose Us</a></li>
-      <li><a href="<?= e(url('contact.php')) ?>" class="nav-link">Contact</a></li>
-      <?php if (!current_user()): ?><li class="mobile-nav-login"><a href="<?= e(url('login.php')) ?>" class="nav-link">Client sign in</a></li><?php endif; ?>
+      <li><a href="<?= e(url('index.php')) ?>" class="nav-link"><?= e(t('Home', 'Home')) ?></a></li>
+      <li><a href="<?= e(url('about.php')) ?>" class="nav-link"><?= e(t('About Us', 'About Us')) ?></a></li>
+      <li><a href="<?= e(url('services.php')) ?>" class="nav-link"><?= e(t('Our Services', 'Our Services')) ?></a></li>
+      <li><a href="<?= e(url('index.php#why-us')) ?>" class="nav-link"><?= e(t('Why Choose Us', 'Why Choose Us')) ?></a></li>
+      <li><a href="<?= e(url('contact.php')) ?>" class="nav-link"><?= e(t('Contact', 'Contact')) ?></a></li>
+      <?php if (!current_user()): ?><li class="mobile-nav-login"><a href="<?= e(url('login.php')) ?>" class="nav-link"><?= e(t('Client sign in', 'Client sign in')) ?></a></li><?php endif; ?>
     </ul>
 
     <div class="nav-actions">
+      <?= lang_switcher_html() ?>
       <?php if (current_user() && can('dashboard.view')): ?>
-        <a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta">Dashboard</a>
+        <a href="<?= e(url('dashboard.php')) ?>" class="btn-nav-cta"><?= e(t('Dashboard', 'Dashboard')) ?></a>
       <?php elseif (current_user()): ?>
-        <a href="<?= e(url('profile.php')) ?>" class="btn-nav-cta">My Account</a>
+        <a href="<?= e(url('profile.php')) ?>" class="btn-nav-cta"><?= e(t('My Account', 'My Account')) ?></a>
       <?php else: ?>
-        <a href="<?= e(url('login.php')) ?>" class="btn-nav-login">Sign In</a>
-        <a href="<?= e(url('register.php')) ?>" class="btn-nav-cta">Get Started</a>
+        <a href="<?= e(url('login.php')) ?>" class="btn-nav-login"><?= e(t('Sign In', 'Sign In')) ?></a>
+        <a href="<?= e(url('register.php')) ?>" class="btn-nav-cta"><?= e(t('Get Started', 'Get Started')) ?></a>
       <?php endif; ?>
       <button class="nav-toggle-btn" type="button" aria-label="Open navigation menu" aria-controls="primary-navigation" aria-expanded="false"><span aria-hidden="true">&#9776;</span></button>
     </div>
@@ -69,7 +71,7 @@ try {
 <!-- -----------------------------------------------------------------------
      Inner Page Hero Header
      ----------------------------------------------------------------------- -->
-<header class="inner-hero">
+<header class="inner-hero reveal-up reveal-hero">
   <div class="container">
     <nav class="breadcrumb-nav" aria-label="Breadcrumb">
       <a href="<?= e(url('index.php')) ?>">Home</a>
@@ -88,7 +90,7 @@ try {
      ----------------------------------------------------------------------- -->
 <section class="section section-dark">
   <div class="container">
-    <div class="legal-card">
+    <div class="legal-card reveal-up card-interactive">
 
       <div class="legal-section">
         <h2 class="legal-heading">1. Introduction and Agreement</h2>
@@ -177,7 +179,7 @@ try {
 <!-- -----------------------------------------------------------------------
      Luxury Footer
      ----------------------------------------------------------------------- -->
-<footer class="landing-footer">
+<footer class="landing-footer reveal-fade">
   <div class="footer-top">
     <div>
       <div class="footer-brand"><?= e($garageName) ?></div>
@@ -219,5 +221,7 @@ try {
 </footer>
 
 <script src="<?= e(asset('js/luxury.js')) ?>"></script>
+<script src="<?= e(asset('js/i18n.js')) ?>"></script>
+<script src="<?= e(asset('js/scroll-animations.js')) ?>"></script>
 </body>
 </html>

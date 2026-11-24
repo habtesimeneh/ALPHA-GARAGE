@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduled Maintenance | Alpha Garage</title>
+  <style>
+    :root {
+      --forest-dark: #0D281E;
+      --forest-darkest: #071711;
+      --gold-primary: #D4AF37;
+      --gold-champagne: #E8CD83;
+      --ivory-warm: #F5F2E9;
+      --text-muted: #8FA69B;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #153A2D 0%, #071711 80%);
+      color: var(--ivory-warm);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Nyala", "Noto Sans Ethiopic", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .maintenance-card {
+      background: rgba(13, 40, 30, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.15);
+      max-width: 580px;
+      width: 100%;
+      padding: 2.75rem 2rem;
+      backdrop-filter: blur(8px);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-champagne);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+    h2.amharic {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--gold-champagne);
+      margin-bottom: 1.25rem;
+    }
+    p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.85rem;
+    }
+    p.amharic {
+      color: #CBD5CD;
+      font-size: 0.95rem;
+      margin-bottom: 1.75rem;
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+      margin: 1.5rem 0;
+    }
+    .contact-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .contact-info strong {
+      color: var(--gold-champagne);
+    }
+  </style>
+</head>
+<body>
+  <div class="maintenance-card" role="alert" aria-live="assertive">
+    <div class="badge">Workshop Platform Maintenance</div>
+    <h1>Scheduled Platform Maintenance</h1>
+    <h2 class="amharic">የታቀደ የመድረክ ጥገና በሂደት ላይ ነው</h2>
+    <p>Alpha Garage is currently undergoing scheduled platform upgrades to optimize performance and security. Service will resume shortly.</p>
+    <p class="amharic">አልፋ ጋራዥ የአገልግሎት ቅልጥፍናን እና ደህንነትን ለማሻሻል የታቀደ የቴክኒክ ማሻሻያ እያደረገ ይገኛል። በቅርቡ ወደ አገልግሎት እንመለሳለን።</p>
+    <div class="divider"></div>
+    <div class="contact-info">
+      Emergency Inquiries: <strong>+251 911 000 000</strong> &middot; Telegram: <strong>@AlphaGarageCare</strong>
+    </div>
+  </div>
+</body>
+</html>
