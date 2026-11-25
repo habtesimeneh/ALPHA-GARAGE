@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/i18n.php';
+require_once __DIR__ . '/ethiopian_calendar.php';
 
 /* ---------------------------------------------------------------- output / urls */
 function e(mixed $v): string
@@ -391,12 +392,22 @@ function fmt_date(?string $d, string $format = 'd M Y'): string
 {
     if (!$d || str_starts_with($d, '0000')) { return '—'; }
     $t = strtotime($d);
-    return $t ? date($format, $t) : '—';
+    if (!$t) { return '—'; }
+    if (function_exists('is_amharic') && is_amharic()) {
+        return ethiopian_format($t, 'date', 'am');
+    }
+    return date($format, $t);
 }
 
 function fmt_datetime(?string $d): string
 {
-    return fmt_date($d, 'd M Y, H:i');
+    if (!$d || str_starts_with($d, '0000')) { return '—'; }
+    $t = strtotime($d);
+    if (!$t) { return '—'; }
+    if (function_exists('is_amharic') && is_amharic()) {
+        return ethiopian_format($t, 'datetime', 'am');
+    }
+    return date('d M Y, H:i', $t);
 }
 
 /* ---------------------------------------------------------------- pagination */

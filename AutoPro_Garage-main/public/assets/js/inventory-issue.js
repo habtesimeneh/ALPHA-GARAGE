@@ -5,6 +5,12 @@
   function qs(s, r) { return (r || document).querySelector(s); }
   function qsa(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
   function esc(s) { return String(s == null ? '' : s); }
+  function t(k, d) {
+    if (window.GMS_I18N && typeof window.GMS_I18N.t === 'function') {
+      return window.GMS_I18N.t(k, d);
+    }
+    return d !== undefined ? d : k;
+  }
 
   var dataEl = document.getElementById('issue-form-data');
   var data = {};
@@ -30,7 +36,7 @@
       var qq = esc(q).toLowerCase().trim();
       var filtered = jobs.filter(function (j) { return !qq || esc(j.label).toLowerCase().indexOf(qq) !== -1; });
       if (!filtered.length) {
-        status.textContent = jobs.length ? 'No matching open job cards.' : 'No open job cards available to issue parts to.';
+        status.textContent = jobs.length ? t('No matching open job cards.', 'No matching open job cards.') : t('No open job cards available to issue parts to.', 'No open job cards available to issue parts to.');
         status.hidden = false;
         status.className = 'combobox-status';
         return;
@@ -89,7 +95,7 @@
 
     var form = input.closest('form');
     if (form) form.addEventListener('submit', function (e) {
-      if (!hiddenJob.value) { e.preventDefault(); if (err) err.textContent = 'Select a job card.'; input.focus(); }
+      if (!hiddenJob.value) { e.preventDefault(); if (err) err.textContent = t('Select a job card.', 'Select a job card.'); input.focus(); }
     });
   }
 
@@ -130,7 +136,7 @@
       var filtered = options.filter(function (o) { return !qq || o.search.indexOf(qq) !== -1 || o.label.toLowerCase().indexOf(qq) !== -1; });
       activeIndex = -1;
       if (!filtered.length) {
-        status.textContent = options.length ? 'No matching parts found.' : 'No available parts.';
+        status.textContent = options.length ? t('No matching parts found.', 'No matching parts found.') : t('No available parts.', 'No available parts.');
         status.hidden = false;
         return;
       }
@@ -201,8 +207,8 @@
       var text = opt ? (opt.getAttribute('data-unit') || (opt.textContent.match(/\d+\s+([^\s]+)\s+available/) || [])[1] || '') : '';
       if (unit) unit.textContent = select.value ? (text || 'units') : '—';
       if (warn) {
-        if (select.value && val > stock) { warn.hidden = false; warn.textContent = 'Quantity exceeds available stock.'; warn.className = 'stock-warn is-error'; }
-        else if (select.value && stock > 0 && stock <= reorder) { warn.hidden = false; warn.textContent = 'Low stock alert.'; warn.className = 'stock-warn is-warn'; }
+        if (select.value && val > stock) { warn.hidden = false; warn.textContent = t('Quantity exceeds available stock.', 'Quantity exceeds available stock.'); warn.className = 'stock-warn is-error'; }
+        else if (select.value && stock > 0 && stock <= reorder) { warn.hidden = false; warn.textContent = t('Low stock alert.', 'Low stock alert.'); warn.className = 'stock-warn is-warn'; }
         else { warn.hidden = true; warn.textContent = ''; }
       }
     });

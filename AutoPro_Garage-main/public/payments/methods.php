@@ -52,11 +52,11 @@ if ($editId > 0) {
 $allMethods = ManualPaymentService::getAllMethods();
 $pendingBadge = ManualPaymentService::getPendingCount();
 
-ui_header(t('Payment Methods', 'የክፍያ መንገዶች'), 'payments');
+ui_header(t('Bank & Telebirr Accounts Management', 'የባንክ እና የቴሌብር ሂሳቦች አስተዳደር'), 'payment_methods');
 page_header(
-    t('Payment Methods & Account Management', 'የክፍያ መንገዶች እና የሂሳብ አያያዝ'),
-    t('Configure Ethiopian commercial banks, mobile money wallets, merchant till numbers, and active/inactive status',
-      'የኢትዮጵያ የንግድ ባንኮች፣ የሞባይል ዋሌቶች፣ የነጋዴ ቲል ቁጥሮች እና የስራ ላይ ሁኔታዎችን ያዋቅሩ')
+    t('Bank & Telebirr Accounts Management', 'የባንክ እና የቴሌብር ሂሳቦች አስተዳደር'),
+    t('Directly configure Ethiopian commercial bank account numbers (CBE, Awash, Dashen), Telebirr merchant till numbers, account holder names, and active status.',
+      'የኢትዮጵያ የንግድ ባንክ ሂሳብ ቁጥሮችን (ንግድ ባንክ፣ አዋሽ፣ ዳሽን)፣ የቴሌብር ነጋዴ ቲል ቁጥሮችን፣ የሂሳብ ባለቤት ስሞችን እና የስራ ላይ ሁኔታዎችን በቀጥታ ያዋቅሩ።')
 );
 ?>
 
@@ -74,7 +74,7 @@ page_header(
     </a>
     <?php endif; ?>
     <a href="<?= e(url('payments/methods.php')) ?>" class="btn btn-primary btn-sm">
-        <?= e(t('Payment Methods', 'የክፍያ መንገዶች')) ?>
+        <?= e(t('Bank & Telebirr Accounts', 'የባንክ እና ቴሌብር ሂሳቦች')) ?>
     </a>
     <?php if (can_any('payments.view', 'reports.financial')): ?>
     <a href="<?= e(url('payments/reports.php')) ?>" class="btn btn-ghost btn-sm">
@@ -88,17 +88,77 @@ page_header(
     <?php endif; ?>
 </div>
 
+<!-- Primary Garage Accounts Quick Cards -->
+<?php
+$featuredCodes = ['cbe', 'telebirr', 'awash', 'dashen', 'boa', 'cash'];
+$featuredMap = [];
+foreach ($allMethods as $m) {
+    if (in_array($m['code'], $featuredCodes, true)) {
+        $featuredMap[$m['code']] = $m;
+    }
+}
+?>
+<div class="card mb3" style="border:1px solid rgba(212,175,55,0.3);background:rgba(212,175,55,0.02);padding:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+        <div>
+            <strong style="color:var(--gold,#D4AF37);font-size:1.05rem;display:flex;align-items:center;gap:6px;">
+                <span>⚡</span> <?= e(t('Quick Edit: Primary Garage Accounts', 'ፈጣን ማስተካከያ: ዋና የጋራዡ ሂሳቦች')) ?>
+            </strong>
+            <span class="muted small"><?= e(t('Direct 1-click editing for your most essential commercial bank and mobile money accounts.', 'ለዋና ዋናዎቹ የባንክ እና የሞባይል ገንዘብ ሂሳቦችዎ የቀጥታ የ1-ጠቅታ ማስተካከያ።')) ?></span>
+        </div>
+        <span class="badge badge-active"><?= e(t('Administrator Access Only', 'የአድሚን ፈቃድ ብቻ')) ?></span>
+    </div>
+
+    <div class="grid-3" style="gap:14px;">
+        <?php foreach ($featuredCodes as $fCode):
+            if (!isset($featuredMap[$fCode])) continue;
+            $fm = $featuredMap[$fCode];
+            $rawVal = $fm['account_number'] ?: ($fm['merchant_number'] ?: ($fm['till_number'] ?: ($fm['phone_number'] ?: '')));
+            $idBadge = $fm['type'] === 'bank' ? t('Bank A/C:', 'የባንክ ሂሳብ:') : ($fm['type'] === 'mobile_money' ? t('Phone / Till:', 'ስልክ / ቲል:') : t('Payment Channel:', 'የክፍያ ቻናል:'));
+        ?>
+        <div style="background:var(--card-bg,#1E293B);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <strong style="font-size:0.95rem;color:var(--gold,#D4AF37);">
+                        <?= e(current_lang() === 'am' && !empty($fm['name_am']) ? $fm['name_am'] : $fm['name']) ?>
+                    </strong>
+                    <span class="badge <?= !empty($fm['is_active']) ? 'badge-active' : 'badge-inactive' ?>" style="font-size:0.7rem;">
+                        <?= !empty($fm['is_active']) ? e(t('Active', 'ንቁ')) : e(t('Inactive', 'ቦዝኗል')) ?>
+                    </span>
+                </div>
+                <div class="muted small" style="margin-bottom:4px;">
+                    <span><?= e(t('Account Name:', 'የሂሳብ ባለቤት:')) ?></span>
+                    <strong style="color:var(--text,#fff);"><?= e($fm['account_name'] ?: 'ALPHA GARAGE PLC') ?></strong>
+                </div>
+                <div style="font-size:0.85rem;margin-bottom:6px;">
+                    <span class="muted small"><?= e($idBadge) ?></span>
+                    <span class="mono" style="font-weight:700;color:var(--text,#fff);"><?= e($rawVal ?: '—') ?></span>
+                </div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;margin-top:6px;display:flex;justify-content:flex-end;">
+                <a href="<?= e(url('payments/methods.php?edit=' . (int)$fm['id'] . '#account-form')) ?>" class="btn btn-ghost btn-sm" style="font-size:0.8rem;padding:3px 8px;">
+                    ✏️ <?= e(t('Edit Account', 'ሂሳብ አስተካክል')) ?>
+                </a>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
 <?php if (!empty($errors['general'])): ?>
     <div class="alert alert-danger mb2"><?= e($errors['general']) ?></div>
 <?php endif; ?>
 
 <!-- Provider Form (Edit or Add) -->
 <?php if ($editMethod || get('new') === '1'): ?>
-<div class="card mb3" style="border:1px solid var(--gold,#D4AF37);background:var(--card-bg,#1E293B);">
+<div class="card mb3" id="account-form" style="border:1px solid var(--gold,#D4AF37);background:var(--card-bg,#1E293B);">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="margin:0;color:var(--gold,#D4AF37);">
-            <?= $editMethod ? e(t('Edit Payment Provider: ', 'የክፍያ አቅራቢ ያርትዑ: ') . $editMethod['name']) : e(t('Add New Payment Provider', 'አዲስ የክፍያ አቅራቢ ያክሉ')) ?>
-        </h3>
+        <div>
+            <h3 style="margin:0;color:var(--gold,#D4AF37);">
+                <?= $editMethod ? e(t('Edit Account Details: ', 'የሂሳብ መረጃ ያርትዑ: ') . ($editMethod['name_am'] ?? $editMethod['name'])) : e(t('Add New Payment Provider', 'አዲስ የክፍያ አቅራቢ ያክሉ')) ?>
+            </h3>
+            <span class="muted small"><?= e(t('Changes made here immediately update customer invoices, online payment portals, and receptionist records.', 'እዚህ የሚደረጉ ለውጦች ወዲያውኑ በደንበኛ ደረሰኞች፣ በኦንላይን መክፈያ እና በሪሴፕሽን መዝገብ ላይ ይዘምናሉ።')) ?></span>
+        </div>
         <a href="<?= e(url('payments/methods.php')) ?>" class="btn btn-ghost btn-sm"><?= e(t('Close Form', 'ዝጋ')) ?></a>
     </div>
 
@@ -214,23 +274,23 @@ page_header(
         <div style="display:flex;gap:24px;align-items:center;margin:16px 0;flex-wrap:wrap;">
             <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
                 <input type="checkbox" name="is_active" value="1"
-                       <?= post('is_active', $editMethod['is_active'] ?? 1) ? 'checked' : '' ?>>
+                       <?= post_int('is_active', (int)($editMethod['is_active'] ?? 1)) ? 'checked' : '' ?>>
                 <span><strong><?= e(t('Active (Available to Customers)', 'ንቁ (ለደንበኞች ክፍት)')) ?></strong></span>
             </label>
             <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
                 <input type="checkbox" name="requires_reference" value="1"
-                       <?= post('requires_reference', $editMethod['requires_reference'] ?? 1) ? 'checked' : '' ?>>
+                       <?= post_int('requires_reference', (int)($editMethod['requires_reference'] ?? 1)) ? 'checked' : '' ?>>
                 <span><?= e(t('Require Transaction Reference', 'የግብይት ቁጥር ያስፈልጋል')) ?></span>
             </label>
             <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
                 <input type="checkbox" name="requires_screenshot" value="1"
-                       <?= post('requires_screenshot', $editMethod['requires_screenshot'] ?? 1) ? 'checked' : '' ?>>
+                       <?= post_int('requires_screenshot', (int)($editMethod['requires_screenshot'] ?? 1)) ? 'checked' : '' ?>>
                 <span><?= e(t('Require Proof Screenshot / Receipt', 'የደረሰኝ ስክሪንሾት ያስፈልጋል')) ?></span>
             </label>
             <div style="display:inline-flex;align-items:center;gap:8px;">
                 <label for="display_order" style="margin:0;"><?= e(t('Display Order:', 'ቅደም ተከተል:')) ?></label>
                 <input class="input" type="number" id="display_order" name="display_order" style="width:80px;"
-                       value="<?= (int)post('display_order', $editMethod['display_order'] ?? 0) ?>">
+                       value="<?= post_int('display_order', (int)($editMethod['display_order'] ?? 0)) ?>">
             </div>
         </div>
 

@@ -20,17 +20,17 @@ $rows = Database::all("SELECT c.*, (SELECT COUNT(*) FROM vehicles v WHERE v.cust
 
 ui_header('Customers', 'customers');
 page_header('Customers', 'Registered customers and their contact details',
-    can('customers.manage') ? '<a class="btn btn-primary" href="' . e(url('customers/form.php')) . '">+ Add customer</a>' : '');
+    can('customers.manage') ? '<a class="btn btn-primary" href="' . e(url('customers/form.php')) . '">' . e(t('+ Add customer', '+ Add customer')) . '</a>' : '');
 ?>
 <form class="filters" method="get">
-  <div class="field grow"><label for="q">Search</label><input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="Name, phone, email or customer ID"></div>
-  <div class="field"><label for="status">Status</label>
-    <select class="input" id="status" name="status" data-autosubmit><?php foreach (['active' => 'Active', 'inactive' => 'Inactive', 'all' => 'All'] as $k => $l): ?><option value="<?= e($k) ?>"<?= $status === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select></div>
-  <button class="btn btn-primary" type="submit">Search</button>
-  <?php if ($q !== '' || $status !== 'active'): ?><a class="btn btn-ghost" href="<?= e(url('customers/')) ?>">Reset</a><?php endif; ?>
+  <div class="field grow"><label for="q"><?= e(t('Search', 'Search')) ?></label><input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="<?= e(t('Search by name, phone, email or customer ID', 'Search by name, phone, email or customer ID')) ?>"></div>
+  <div class="field"><label for="status"><?= e(t('Status', 'Status')) ?></label>
+    <select class="input" id="status" name="status" data-autosubmit><?php foreach (['active' => t('Active', 'Active'), 'inactive' => t('Inactive', 'Inactive'), 'all' => t('All', 'All')] as $k => $l): ?><option value="<?= e($k) ?>"<?= $status === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select></div>
+  <button class="btn btn-primary" type="submit"><?= e(t('Search', 'Search')) ?></button>
+  <?php if ($q !== '' || $status !== 'active'): ?><a class="btn btn-ghost" href="<?= e(url('customers/')) ?>"><?= e(t('Reset', 'Reset')) ?></a><?php endif; ?>
 </form>
 <div class="table-wrap"><table class="table stack">
-  <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th class="num">Vehicles</th><th class="num">Jobs</th><th>Registered</th><th>Status</th><th></th></tr></thead>
+  <thead><tr><th>ID</th><th><?= e(t('Name', 'Name')) ?></th><th><?= e(t('Phone', 'Phone')) ?></th><th><?= e(t('Email', 'Email')) ?></th><th class="num"><?= e(t('Vehicles', 'Vehicles')) ?></th><th class="num"><?= e(t('Jobs', 'Jobs')) ?></th><th><?= e(t('Registered', 'Registered')) ?></th><th><?= e(t('Status', 'Status')) ?></th><th></th></tr></thead>
   <tbody>
   <?php foreach ($rows as $c): ?>
     <tr><td class="mono">CUS-<?= str_pad((string) $c['id'], 5, '0', STR_PAD_LEFT) ?></td>
@@ -39,9 +39,9 @@ page_header('Customers', 'Registered customers and their contact details',
       <td class="num"><?= (int) $c['vehicles'] ?></td><td class="num"><?= (int) $c['jobs'] ?></td>
       <td class="nowrap"><?= e(fmt_date($c['registered_at'])) ?></td>
       <td><?= $c['is_active'] ? badge('Active') : badge('Inactive') ?></td>
-      <td class="nowrap"><a class="btn btn-ghost btn-sm" href="<?= e(url('customers/view.php?id=' . $c['id'])) ?>">View</a>
-        <?php if (can('customers.manage')): ?><a class="btn btn-ghost btn-sm" href="<?= e(url('customers/form.php?id=' . $c['id'])) ?>">Edit</a><?php endif; ?></td></tr>
+      <td class="nowrap"><a class="btn btn-ghost btn-sm" href="<?= e(url('customers/view.php?id=' . $c['id'])) ?>"><?= e(t('View', 'View')) ?></a>
+        <?php if (can('customers.manage')): ?><a class="btn btn-ghost btn-sm" href="<?= e(url('customers/form.php?id=' . $c['id'])) ?>"><?= e(t('Edit', 'Edit')) ?></a><?php endif; ?></td></tr>
   <?php endforeach; ?>
-  <?php if (!$rows): ?><tr><td colspan="9" class="empty">No customers found.</td></tr><?php endif; ?>
+  <?php if (!$rows): ?><tr><td colspan="9" class="empty"><?= e(t('No customers found.', 'No customers found.')) ?></td></tr><?php endif; ?>
   </tbody></table></div>
 <?php pagination_links($pg, ['q' => $q, 'status' => $status]); ui_footer();

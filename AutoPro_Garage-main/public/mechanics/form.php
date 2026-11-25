@@ -31,5 +31,5 @@ page_header('Edit mechanic', $m['full_name']);
 <?php form_input('full_name', 'Full name', $v['full_name'], $errors, ['required' => true, 'maxlength' => 120]); form_input('phone', 'Phone', $v['phone'], $errors, ['maxlength' => 20]); form_input('specialty', 'Specialty', $v['specialty'], $errors, ['maxlength' => 100]);
 form_select('availability', 'Availability', ['available' => 'Available', 'busy' => 'Busy', 'off_duty' => 'Off duty'], $v['availability'], $errors); ?>
 <div class="full field"><label class="check"><input type="checkbox" name="is_active" value="1" <?= $v['is_active'] ? 'checked' : '' ?>> Active</label><div class="field-error"><?= e($errors['is_active'] ?? '') ?></div></div></div>
-<div class="form-actions"><button class="btn btn-primary" type="submit">Save</button><a class="btn btn-ghost" href="<?= e(url('mechanics/')) ?>">Cancel</a></div></form></div>
+<div class="form-actions"><button class="btn btn-primary" type="submit"><?= e(t('Save', 'Save')) ?></button><a class="btn btn-ghost" href="<?= e(url('mechanics/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a></div></form></div>
 <?php ui_footer();

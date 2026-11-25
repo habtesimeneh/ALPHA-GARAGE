@@ -70,9 +70,9 @@ page_header('Book Service Appointment', 'Schedule vehicle check-in and workshop 
 
       <div class="full">
         <div class="field<?= !empty($errors['vehicle_id']) ? ' has-error' : '' ?>">
-          <label for="f_vehicle_id">Vehicle <span class="req">*</span></label>
+          <label for="f_vehicle_id"><?= e(t('Vehicle', 'Vehicle')) ?> <span class="req">*</span></label>
           <select class="input" id="f_vehicle_id" name="vehicle_id" required>
-            <option value="">— Select owner first —</option>
+            <option value=""><?= e(t('— Select owner first —', '— Select owner first —')) ?></option>
             <?php foreach ($vehicles as $v): ?>
               <option value="<?= (int) $v['id'] ?>" data-customer="<?= (int) $v['customer_id'] ?>"<?= (string) $v['id'] === (string) $data['vehicle_id'] ? ' selected' : '' ?>>
                 <?= e($v['plate_number']) ?> · <?= e($v['make'] . ' ' . $v['model']) ?>
@@ -101,8 +101,8 @@ page_header('Book Service Appointment', 'Schedule vehicle check-in and workshop 
     </div>
 
     <div class="form-actions">
-      <button class="btn btn-primary" type="submit">Confirm Appointment</button>
-      <a class="btn btn-ghost" href="<?= e(url('appointments/')) ?>">Cancel</a>
+      <button class="btn btn-primary" type="submit"><?= e(t('Confirm Appointment', 'Confirm Appointment')) ?></button>
+      <a class="btn btn-ghost" href="<?= e(url('appointments/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a>
     </div>
   </form>
 </div>

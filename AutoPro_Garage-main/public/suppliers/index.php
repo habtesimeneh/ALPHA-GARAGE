@@ -12,15 +12,15 @@ ui_header('Suppliers', 'suppliers');
 page_header(
     'Parts Suppliers',
     'Manage external spare parts vendors, purchase contacts, and catalogs',
-    $canManage ? '<a class="btn btn-primary" href="' . e(url('suppliers/form.php')) . '">+ New supplier</a>' : ''
+    $canManage ? '<a class="btn btn-primary" href="' . e(url('suppliers/form.php')) . '">' . e(t('+ New supplier', '+ New supplier')) . '</a>' : ''
 );
 ?>
 
 <div class="card card-flat">
   <div class="filters">
     <div class="field grow">
-      <label for="sup-filter">Filter suppliers</label>
-      <input type="search" id="sup-filter" class="input" placeholder="Type supplier name, code, contact or phone…" data-table-filter="sup-table" autocomplete="off">
+      <label for="sup-filter"><?= e(t('Filter suppliers', 'Filter suppliers')) ?></label>
+      <input type="search" id="sup-filter" class="input" placeholder="<?= e(t('Type supplier name, code, contact or phone…', 'Type supplier name, code, contact or phone…')) ?>" data-table-filter="sup-table" autocomplete="off">
     </div>
   </div>
 </div>
@@ -29,19 +29,19 @@ page_header(
   <table class="table stack" id="sup-table">
     <thead>
       <tr>
-        <th>Code</th>
-        <th>Supplier Name</th>
-        <th>Contact Person</th>
-        <th>Phone</th>
-        <th>Email</th>
-        <th>Parts Supplied</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th><?= e(t('Code', 'Code')) ?></th>
+        <th><?= e(t('Supplier Name', 'Supplier Name')) ?></th>
+        <th><?= e(t('Contact Person', 'Contact Person')) ?></th>
+        <th><?= e(t('Phone', 'Phone')) ?></th>
+        <th><?= e(t('Email', 'Email')) ?></th>
+        <th><?= e(t('Parts Supplied', 'Parts Supplied')) ?></th>
+        <th><?= e(t('Status', 'Status')) ?></th>
+        <th><?= e(t('Actions', 'Actions')) ?></th>
       </tr>
     </thead>
     <tbody>
       <?php if (empty($suppliers)): ?>
-        <tr><td colspan="8" class="empty">No suppliers registered yet.</td></tr>
+        <tr><td colspan="8" class="empty"><?= e(t('No suppliers registered yet.', 'No suppliers registered yet.')) ?></td></tr>
       <?php else: foreach ($suppliers as $s): ?>
         <tr>
           <td><code><?= e($s['code']) ?></code></td>
@@ -49,12 +49,12 @@ page_header(
           <td><?= e($s['contact_person'] ?: '—') ?></td>
           <td><?= e($s['phone'] ?: '—') ?></td>
           <td><?= e($s['email'] ?: '—') ?></td>
-          <td><span class="badge"><?= (int) $s['parts_count'] ?> parts</span></td>
+          <td><span class="badge"><?= (int) $s['parts_count'] ?> <?= e(t('parts', 'parts')) ?></span></td>
           <td><?= badge($s['is_active'] ? 'active' : 'inactive') ?></td>
           <td>
-            <a class="btn btn-ghost btn-sm" href="<?= e(url('suppliers/view.php?id=' . $s['id'])) ?>">View</a>
+            <a class="btn btn-ghost btn-sm" href="<?= e(url('suppliers/view.php?id=' . $s['id'])) ?>"><?= e(t('View', 'View')) ?></a>
             <?php if ($canManage): ?>
-              <a class="btn btn-ghost btn-sm" href="<?= e(url('suppliers/form.php?id=' . $s['id'])) ?>">Edit</a>
+              <a class="btn btn-ghost btn-sm" href="<?= e(url('suppliers/form.php?id=' . $s['id'])) ?>"><?= e(t('Edit', 'Edit')) ?></a>
               <?= post_button(url('suppliers/toggle.php'), ['id' => $s['id']], $s['is_active'] ? 'Deactivate' : 'Activate', 'btn btn-ghost btn-sm', $s['is_active'] ? 'Deactivate this supplier?' : 'Reactivate this supplier?') ?>
             <?php endif; ?>
           </td>

@@ -17,8 +17,9 @@ putenv('GMS_DB_PASS=root');
 
 require_once __DIR__ . '/../app/bootstrap.php';
 
-$phpBinary = 'C:\\MAMP\\bin\\php\\php8.3.1\\php.exe';
-$phpIni = 'C:\\MAMP\\conf\\php8.3.1\\php.ini';
+$phpBinary = PHP_BINARY;
+$phpIni = 'C:\\MAMP\\conf\\php8.2.14\\php.ini';
+$extDir = 'C:\\MAMP\\bin\\php\\php8.2.14\\ext';
 
 $testCount = 0;
 $passedCount = 0;
@@ -97,6 +98,31 @@ assert_test("Malicious script injection in ?lang is rejected and defaults to 'en
 $_GET['lang'] = '../../etc/passwd';
 assert_test("Directory traversal in ?lang is rejected and defaults to 'en'", init_language() === 'en');
 
+// Ethiopian Calendar & Time Verification
+$ethDate = gregorian_to_ethiopian(2026, 11, 24);
+assert_test("gregorian_to_ethiopian(2026, 11, 24) converts to 2019-03-15", $ethDate === ['year' => 2019, 'month' => 3, 'day' => 15], json_encode($ethDate));
+
+$gregReconverted = ethiopian_to_gregorian(2019, 3, 15);
+assert_test("ethiopian_to_gregorian(2019, 3, 15) roundtrips back to 2026-11-24", $gregReconverted === ['year' => 2026, 'month' => 11, 'day' => 24], json_encode($gregReconverted));
+
+$ethTime = gregorian_to_ethiopian_time(14, 30);
+assert_test("gregorian_to_ethiopian_time(14, 30) converts 2:30 PM to 08:30 ከሰዓት", $ethTime['hour'] === 8 && $ethTime['minute'] === 30 && $ethTime['period'] === 'ከሰዓት', json_encode($ethTime));
+
+// Amharic formatting
+$_GET['lang'] = 'am';
+init_language();
+$formattedEthDate = fmt_date('2026-11-24');
+assert_test("fmt_date('2026-11-24') in Amharic returns 'ኅዳር 15, 2019 ዓ.ም'", $formattedEthDate === 'ኅዳር 15, 2019 ዓ.ም', "Got: $formattedEthDate");
+
+$formattedEthTime = fmt_datetime('2026-11-24 14:30:00');
+assert_test("fmt_datetime('2026-11-24 14:30:00') in Amharic returns 'ኅዳር 15, 2019 ዓ.ም፣ 08:30 ከሰዓት'", $formattedEthTime === 'ኅዳር 15, 2019 ዓ.ም፣ 08:30 ከሰዓት', "Got: $formattedEthTime");
+
+// English formatting preserved
+$_GET['lang'] = 'en';
+init_language();
+$formattedEnDate = fmt_date('2026-11-24');
+assert_test("fmt_date('2026-11-24') in English returns '24 Nov 2026'", $formattedEnDate === '24 Nov 2026', "Got: $formattedEnDate");
+
 // -------------------------------------------------------------------------
 // Section 2: Language Switcher UI Component Integrity
 // -------------------------------------------------------------------------
@@ -115,42 +141,49 @@ assert_test("Switcher HTML has aria-label", str_contains($switcherHtml, 'aria-la
 echo "\n--- Section 3: Live Web Server HTTP Bilingual Verification ---\n";
 
 $serverPort = 8089;
-$serverBase = "http://127.0.0.1:$serverPort/";
-$serverLog = sys_get_temp_dir() . '/test-server-i18n-' . getmypid() . '.log';
+$apacheCheck = @get_headers('http://127.0.0.1/ALPHA-GARAGE/AutoPro_Garage-main/public/index.php');
+if ($apacheCheck && (str_contains($apacheCheck[0], '200') || str_contains($apacheCheck[0], '302'))) {
+    $serverBase = 'http://127.0.0.1/ALPHA-GARAGE/AutoPro_Garage-main/public/';
+    $proc = null;
+    $serverLog = '';
+} else {
+    $serverBase = "http://127.0.0.1:$serverPort/";
+    $serverLog = sys_get_temp_dir() . '/test-server-i18n-' . getmypid() . '.log';
 
-$descriptors = [
-    0 => ['pipe', 'r'],
-    1 => ['file', $serverLog, 'a'],
-    2 => ['file', $serverLog, 'a'],
-];
+    $descriptors = [
+        0 => ['pipe', 'r'],
+        1 => ['file', $serverLog, 'a'],
+        2 => ['file', $serverLog, 'a'],
+    ];
 
-$serverEnv = array_merge($_ENV, getenv(), [
-    'GMS_TEST_MODE' => '1',
-    'GMS_ALLOW_DESTRUCTIVE_TESTS' => '1',
-    'GMS_DB_NAME' => 'garage_management_system_test',
-    'GMS_STORAGE_PATH' => APP_ROOT . '/storage/testing',
-    'GMS_DB_USER' => 'root',
-    'GMS_DB_PASS' => 'root',
-]);
+    $serverEnv = array_merge($_ENV, getenv(), [
+        'GMS_TEST_MODE' => '1',
+        'GMS_ALLOW_DESTRUCTIVE_TESTS' => '1',
+        'GMS_DB_NAME' => 'garage_management_system_test',
+        'GMS_STORAGE_PATH' => APP_ROOT . '/storage/testing',
+        'GMS_DB_USER' => 'root',
+        'GMS_DB_PASS' => 'root',
+    ]);
 
-$serverCmd = escapeshellarg($phpBinary) . ' -c ' . escapeshellarg($phpIni) . ' -S 127.0.0.1:' . $serverPort . ' -t ' . escapeshellarg(APP_ROOT . '/public');
-$proc = proc_open($serverCmd, $descriptors, $pipes, APP_ROOT, $serverEnv);
+    $serverCmd = escapeshellarg($phpBinary) . ' -d extension_dir=' . escapeshellarg($extDir) . ' -d extension=pdo_mysql -d extension=openssl -d extension=mbstring -c ' . escapeshellarg($phpIni) . ' -S 127.0.0.1:' . $serverPort . ' -t ' . escapeshellarg(APP_ROOT . '/public');
+    $proc = proc_open($serverCmd, $descriptors, $pipes, APP_ROOT, $serverEnv);
 
-if (!is_resource($proc)) {
-    echo "  [FAIL] Failed to start test web server on port $serverPort\n";
-    exit(1);
-}
-
-register_shutdown_function(function () use ($proc, $serverLog) {
-    if (is_resource($proc)) {
-        proc_terminate($proc);
-        proc_close($proc);
+    if (!is_resource($proc)) {
+        echo "  [FAIL] Failed to start test web server on port $serverPort\n";
+        exit(1);
     }
-    @unlink($serverLog);
-});
 
-// Wait for server to bind
-usleep(650000);
+    register_shutdown_function(function () use ($proc, $serverLog) {
+        if (is_resource($proc)) {
+            proc_terminate($proc);
+            proc_close($proc);
+        }
+        @unlink($serverLog);
+    });
+
+    // Wait for server to bind
+    usleep(650000);
+}
 
 function curl_get(string $url, array $cookies = []): array {
     $ch = curl_init();
@@ -409,6 +442,101 @@ assert_test("Profile page translates 'የእኔ መገለጫ'", str_contains($pr
 assert_test("Profile page translates 'የይለፍ ቃል ቀይር'", str_contains($profileAm['body'], 'የይለፍ ቃል ቀይር'));
 
 @unlink($custJar);
+
+// -------------------------------------------------------------------------
+// Section 5: Admin & Staff Subpages Bilingual Verification
+// -------------------------------------------------------------------------
+echo "\n--- Section 5: Admin & Staff Subpages Bilingual Verification ---\n";
+
+$adminJar = curl_auth_login('admin', 'Admin#TestPass2026');
+
+// Services index
+$srvAm = http_test_request('GET', 'services/index.php?lang=am', [], $adminJar);
+assert_test("services/index.php?lang=am loads HTTP 200", $srvAm['code'] === 200, "Code: " . $srvAm['code']);
+assert_test("services/index.php translates 'የአገልግሎት ስም'", str_contains($srvAm['body'], 'የአገልግሎት ስም'));
+assert_test("services/index.php translates '+ አዲስ አገልግሎት'", str_contains($srvAm['body'], '+ አዲስ አገልግሎት'));
+
+// Users index
+$usrAm = http_test_request('GET', 'users/index.php?lang=am', [], $adminJar);
+assert_test("users/index.php?lang=am loads HTTP 200", $usrAm['code'] === 200, "Code: " . $usrAm['code']);
+assert_test("users/index.php translates 'የተጠቃሚ ስም'", str_contains($usrAm['body'], 'የተጠቃሚ ስም'));
+assert_test("users/index.php translates '+ ተጠቃሚ መዝግብ'", str_contains($usrAm['body'], '+ ተጠቃሚ መዝግብ'));
+
+// Vehicles index
+$vehAm = http_test_request('GET', 'vehicles/index.php?lang=am', [], $adminJar);
+assert_test("vehicles/index.php?lang=am loads HTTP 200", $vehAm['code'] === 200, "Code: " . $vehAm['code']);
+assert_test("vehicles/index.php translates 'የሰሌዳ ቁጥር'", str_contains($vehAm['body'], 'የሰሌዳ ቁጥር'));
+assert_test("vehicles/index.php translates '+ ተሽከርካሪ መዝግብ'", str_contains($vehAm['body'], '+ ተሽከርካሪ መዝግብ'));
+
+// Customers index
+$cusAm = http_test_request('GET', 'customers/index.php?lang=am', [], $adminJar);
+assert_test("customers/index.php?lang=am loads HTTP 200", $cusAm['code'] === 200, "Code: " . $cusAm['code']);
+assert_test("customers/index.php translates 'ደንበኞች'", str_contains($cusAm['body'], 'ደንበኞች'));
+assert_test("customers/index.php translates '+ ደንበኛ መዝግብ'", str_contains($cusAm['body'], '+ ደንበኛ መዝግብ'));
+
+// Inventory index
+$invAm = http_test_request('GET', 'inventory/index.php?lang=am', [], $adminJar);
+assert_test("inventory/index.php?lang=am loads HTTP 200", $invAm['code'] === 200, "Code: " . $invAm['code']);
+assert_test("inventory/index.php translates 'መለዋወጫ ዕቃዎች እና ክምችት'", str_contains($invAm['body'], 'መለዋወጫ ዕቃዎች እና ክምችት'));
+assert_test("inventory/index.php translates '+ ዕቃ መዝግብ'", str_contains($invAm['body'], '+ ዕቃ መዝግብ'));
+
+// Inventory form (Add / Edit Part)
+$invFormAm = http_test_request('GET', 'inventory/form.php?lang=am', [], $adminJar);
+assert_test("inventory/form.php?lang=am loads HTTP 200", $invFormAm['code'] === 200, "Code: " . $invFormAm['code']);
+assert_test("inventory/form.php translates 'መለዋወጫ ዕቃ መዝግብ'", str_contains($invFormAm['body'], 'መለዋወጫ ዕቃ መዝግብ'));
+assert_test("inventory/form.php translates 'የመጀመሪያ ክምችት'", str_contains($invFormAm['body'], 'የመጀመሪያ ክምችት'));
+assert_test("inventory/form.php translates 'ዕቃ አስቀምጥ'", str_contains($invFormAm['body'], 'ዕቃ አስቀምጥ'));
+
+// Inventory stock in / adjust
+$invStockAm = http_test_request('GET', 'inventory/stock.php?lang=am', [], $adminJar);
+assert_test("inventory/stock.php?lang=am loads HTTP 200", $invStockAm['code'] === 200, "Code: " . $invStockAm['code']);
+assert_test("inventory/stock.php translates 'የዕቃ ግዢ መዝግብ (ገቢ)'", str_contains($invStockAm['body'], 'የዕቃ ግዢ መዝግብ (ገቢ)'));
+assert_test("inventory/stock.php translates 'የክምችት ማስተካከያ (ወጪ / እርማት)'", str_contains($invStockAm['body'], 'የክምችት ማስተካከያ (ወጪ / እርማት)'));
+
+// Inventory stock movement history
+$invHistAm = http_test_request('GET', 'inventory/history.php?lang=am', [], $adminJar);
+assert_test("inventory/history.php?lang=am loads HTTP 200", $invHistAm['code'] === 200, "Code: " . $invHistAm['code']);
+assert_test("inventory/history.php translates 'የክምችት ዝውውር ታሪክ'", str_contains($invHistAm['body'], 'የክምችት ዝውውር ታሪክ'));
+assert_test("inventory/history.php translates filter button 'አጣራ'", str_contains($invHistAm['body'], 'አጣራ'));
+
+// Inventory issue parts to job cards
+$invIssueAm = http_test_request('GET', 'inventory/issue.php?lang=am', [], $adminJar);
+assert_test("inventory/issue.php?lang=am loads HTTP 200", $invIssueAm['code'] === 200, "Code: " . $invIssueAm['code']);
+assert_test("inventory/issue.php translates 'መለዋወጫዎችን በቀጥታ አውጣ'", str_contains($invIssueAm['body'], 'መለዋወጫዎችን በቀጥታ አውጣ'));
+assert_test("inventory/issue.php translates 'በመጠባበቅ ላይ ያሉ የመካኒክ የዕቃ ጥያቄዎች'", str_contains($invIssueAm['body'], 'በመጠባበቅ ላይ ያሉ የመካኒክ የዕቃ ጥያቄዎች'));
+
+// Mechanics index
+$mecAm = http_test_request('GET', 'mechanics/index.php?lang=am', [], $adminJar);
+assert_test("mechanics/index.php?lang=am loads HTTP 200", $mecAm['code'] === 200, "Code: " . $mecAm['code']);
+assert_test("mechanics/index.php translates 'ልዩ ሙያ'", str_contains($mecAm['body'], 'ልዩ ሙያ'));
+
+// Suppliers index
+$supAm = http_test_request('GET', 'suppliers/index.php?lang=am', [], $adminJar);
+assert_test("suppliers/index.php?lang=am loads HTTP 200", $supAm['code'] === 200, "Code: " . $supAm['code']);
+assert_test("suppliers/index.php translates 'የመለዋወጫ አቅራቢዎች'", str_contains($supAm['body'], 'የመለዋወጫ አቅራቢዎች'));
+assert_test("suppliers/index.php translates '+ አዲስ አቅራቢ'", str_contains($supAm['body'], '+ አዲስ አቅራቢ'));
+
+// Expenses index
+$expAm = http_test_request('GET', 'expenses/index.php?lang=am', [], $adminJar);
+assert_test("expenses/index.php?lang=am loads HTTP 200", $expAm['code'] === 200, "Code: " . $expAm['code']);
+assert_test("expenses/index.php translates 'የስራ ማስኬጃ ወጪዎች'", str_contains($expAm['body'], 'የስራ ማስኬጃ ወጪዎች'));
+
+// Reports index
+$repAm = http_test_request('GET', 'reports/index.php?lang=am', [], $adminJar);
+assert_test("reports/index.php?lang=am loads HTTP 200", $repAm['code'] === 200, "Code: " . $repAm['code']);
+assert_test("reports/index.php translates 'ሪፖርቶች እና ትንታኔዎች'", str_contains($repAm['body'], 'ሪፖርቶች እና ትንታኔዎች'));
+
+// Audit logs index
+$audAm = http_test_request('GET', 'audit-logs/index.php?lang=am', [], $adminJar);
+assert_test("audit-logs/index.php?lang=am loads HTTP 200", $audAm['code'] === 200, "Code: " . $audAm['code']);
+assert_test("audit-logs/index.php translates 'የቁጥጥር መዝገቦች'", str_contains($audAm['body'], 'የቁጥጥር መዝገቦች'));
+
+// SMS audit logs index
+$smsAm = http_test_request('GET', 'notifications/sms-logs.php?lang=am', [], $adminJar);
+assert_test("notifications/sms-logs.php?lang=am loads HTTP 200", $smsAm['code'] === 200, "Code: " . $smsAm['code']);
+assert_test("notifications/sms-logs.php translates 'አጠቃላይ የተላኩ የሞባይል ኤስኤምኤሶች'", str_contains($smsAm['body'], 'አጠቃላይ የተላኩ የሞባይል ኤስኤምኤሶች'));
+
+@unlink($adminJar);
 
 // Stop the test server
 if (is_resource($proc)) {

@@ -41,6 +41,6 @@ page_header($cust ? 'Edit customer' : 'Register customer', $cust ? 'CUS-' . str_
     <?php form_input('email', 'Email', $v['email'], $errors, ['type' => 'email', 'maxlength' => 150]); ?>
     <div class="full"><?php form_input('address', 'Address', $v['address'], $errors, ['maxlength' => 255]); ?></div>
   </div>
-  <div class="form-actions"><button class="btn btn-primary" type="submit">Save customer</button><a class="btn btn-ghost" href="<?= e(url($cust ? 'customers/view.php?id=' . $id : 'customers/')) ?>">Cancel</a></div>
+  <div class="form-actions"><button class="btn btn-primary" type="submit"><?= e(t('Save customer', 'Save customer')) ?></button><a class="btn btn-ghost" href="<?= e(url($cust ? 'customers/view.php?id=' . $id : 'customers/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a></div>
 </form></div>
 <?php ui_footer();

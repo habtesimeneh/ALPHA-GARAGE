@@ -51,6 +51,21 @@ $pendingCount = $canInvoices ? (int) Database::value(
 ) : 0;
 $pendingVerificationCount = can('payments.verify') ? ManualPaymentService::getPendingCount() : 0;
 $inv = $canInventory ? DashboardAnalyticsService::inventorySummary() : ['items'=>0,'available'=>0,'low'=>0,'out'=>0,'value'=>0.0,'top_used'=>[], 'by_category'=>[]];
+$adminPendingParts = $canInventory ? Database::all(
+    "SELECT pr.*, sp.name AS part_name, sp.sku, sp.quantity AS in_stock, sp.unit,
+            j.job_number, j.status AS job_status,
+            c.full_name AS customer_name, v.plate_number, v.make, v.model,
+            u.full_name AS requester_name
+     FROM part_requests pr
+     JOIN spare_parts sp ON sp.id = pr.part_id
+     JOIN job_cards j ON j.id = pr.job_id
+     JOIN customers c ON c.id = j.customer_id
+     JOIN vehicles v ON v.id = j.vehicle_id
+     LEFT JOIN users u ON u.id = pr.requested_by
+     WHERE pr.status = 'pending'
+     ORDER BY pr.id ASC
+     LIMIT 15"
+) : [];
 $jobCounts = $canJobs ? DashboardAnalyticsService::jobStatusCounts($jobWhere, [$rangeStartSql, $rangeEndExclusiveSql]) : [];
 $activeJobs = ($jobCounts['Pending'] ?? 0) + ($jobCounts['Diagnosing'] ?? 0) + ($jobCounts['Waiting for Parts'] ?? 0) + ($jobCounts['In Progress'] ?? 0);
 $completedJobs = ($jobCounts['Completed'] ?? 0) + ($jobCounts['Delivered'] ?? 0);
@@ -111,7 +126,7 @@ if (!function_exists('dash_progress')) {
         $display = $format === 'percent' ? number_format((float)$actual,1) . '%' : $cur . ' ' . number_format((float)$actual,2);
         $tDisplay = $format === 'percent' ? number_format((float)$target,1) . '%' : $cur . ' ' . number_format((float)$target,2);
         $tone = $inverted ? ($pctRaw > 100 ? 'danger' : ($pctRaw > 80 ? 'warn' : 'ok')) : ($pctRaw >= 100 ? 'ok' : ($pctRaw >= 60 ? 'warn' : 'info'));
-        $note = $over ? ($inverted ? 'Over budget' : 'Target exceeded') : number_format($pctRaw,1) . '% of target';
+        $note = $over ? ($inverted ? t('Over budget', 'Over budget') : t('Target exceeded', 'Target exceeded')) : number_format($pctRaw,1) . '% ' . t('of target', 'of target');
         $meter = dash_meter($pct);
         return '<div class="dash-progress"><div class="dash-progress-head"><span>' . e(t($label, $label)) . '</span><span>' . e($display) . ' / ' . e($tDisplay) . '</span></div><div class="dash-progress-track"><div class="dash-progress-fill tone-' . $tone . ' ' . $meter . '"></div></div><small class="muted">' . e($note) . '</small></div>';
     }
@@ -152,6 +167,12 @@ ui_header('Dashboard', 'dashboard');
       <?= e(t('Back to Home', 'Back to Home')) ?>
     </a>
     <button class="btn btn-ghost theme-toggle dashboard-theme-toggle btn-interactive" type="button" aria-label="Switch theme" aria-pressed="false" title="Switch theme"><span aria-hidden="true">◐</span><span class="theme-toggle-label"><?= e(t('Theme', 'Theme')) ?></span></button>
+    <?php if (can('payments.methods')): ?>
+      <a class="btn btn-ghost btn-interactive" href="<?= e(url('payments/methods.php')) ?>" title="<?= e(t('Configure garage bank accounts and Telebirr', 'የጋራዡን የባንክ እና ቴሌብር ሂሳቦች ያዋቅሩ')) ?>">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:text-bottom;margin-right:4px;"><path fill="currentColor" d="M11.5 1L2 6v2h19V6m-17 4v7h3v-7m4 0v7h3v-7m4 0v7h3v-7M2 19v2h19v-2H2z"/></svg>
+        <?= e(t('Bank & Telebirr Accounts', 'የባንክ እና ቴሌብር ሂሳቦች')) ?>
+      </a>
+    <?php endif; ?>
     <?php if (can('jobs.create')): ?><a class="btn btn-primary btn-interactive" href="<?= e(url('job-cards/form.php')) ?>"><?= e(t('+ New job card', '+ New job card')) ?></a><?php endif; ?>
     <?php if ($canExpenses && can('expenses.manage')): ?><a class="btn btn-ghost btn-interactive" href="<?= e(url('expenses/')) ?>"><?= e(t('+ Record expense', '+ Record expense')) ?></a><?php endif; ?>
   </div>
@@ -173,44 +194,104 @@ ui_header('Dashboard', 'dashboard');
   <?php if ($rangeError!==''): ?><p class="dashboard-filter-error" role="alert"><?= e($rangeError) ?></p><?php endif; ?>
 </form>
 
-<div class="dashboard-section-head reveal-up"><div><span class="dashboard-eyebrow"><?= e(t('FINANCIAL KPIs', 'FINANCIAL KPIs')) ?></span><h3 tabindex="-1"><?= e(t('Revenue, expenses & profit', 'Revenue, expenses & profit')) ?></h3></div><span class="muted small">Real database records · cash-basis management view</span></div>
+<div class="dashboard-section-head reveal-up"><div><span class="dashboard-eyebrow"><?= e(t('FINANCIAL KPIs', 'FINANCIAL KPIs')) ?></span><h3 tabindex="-1"><?= e(t('Revenue, expenses & profit', 'Revenue, expenses & profit')) ?></h3></div><span class="muted small"><?= e(t('Real database records · cash-basis management view', 'Real database records · cash-basis management view')) ?></span></div>
 <div class="kpi-grid">
 <?php if ($canPayments): ?>
-  <a class="kpi-card tone-green reveal-up card-interactive stagger-1" href="<?= e(url('payments/?from='.$rangeStartSql.'&to='.$rangeEndSql)) ?>"><div class="kpi-label"><?= e(t('Total Revenue', 'Total Revenue')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= e($currency.' '.number_format($revenue['total'],2)) ?></div><div class="kpi-sub">Collected payments less refunds · <?= e($rangeLabel) ?></div><div class="kpi-cmp <?= e($revCmp['class']) ?>"><?= e($revCmp['text']) ?></div><?= $sparkRevenue ?></a>
+  <a class="kpi-card tone-green reveal-up card-interactive stagger-1" href="<?= e(url('payments/?from='.$rangeStartSql.'&to='.$rangeEndSql)) ?>"><div class="kpi-label"><?= e(t('Total Revenue', 'Total Revenue')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= e($currency.' '.number_format($revenue['total'],2)) ?></div><div class="kpi-sub"><?= e(t('Collected payments less refunds', 'Collected payments less refunds')) ?> · <?= e($rangeLabel) ?></div><div class="kpi-cmp <?= e($revCmp['class']) ?>"><?= e($revCmp['text']) ?></div><?= $sparkRevenue ?></a>
 <?php endif; ?>
 <?php if ($canExpenses): ?>
-  <a class="kpi-card tone-red reveal-up card-interactive stagger-2" href="<?= e(url('expenses/')) ?>"><div class="kpi-label"><?= e(t('Total Expenses', 'Total Expenses')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= $expenses['ready'] ? e($currency.' '.number_format($expenses['total'],2)) : 'Not available' ?></div><div class="kpi-sub"><?= $expenses['ready'] ? 'Operating costs + stock purchases (excl. opening stock)' : 'Apply expense-ledger migration / grant permission' ?></div><?php if ($expenses['ready']): ?><div class="kpi-cmp <?= e($expCmp['class']) ?>"><?= e($expCmp['text']) ?></div><?= $sparkExpenses ?><?php endif; ?></a>
+  <a class="kpi-card tone-red reveal-up card-interactive stagger-2" href="<?= e(url('expenses/')) ?>"><div class="kpi-label"><?= e(t('Total Expenses', 'Total Expenses')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= $expenses['ready'] ? e($currency.' '.number_format($expenses['total'],2)) : e(t('Not available', 'Not available')) ?></div><div class="kpi-sub"><?= $expenses['ready'] ? e(t('Operating costs + stock purchases (excl. opening stock)', 'Operating costs + stock purchases (excl. opening stock)')) : e(t('Apply expense-ledger migration / grant permission', 'Apply expense-ledger migration / grant permission')) ?></div><?php if ($expenses['ready']): ?><div class="kpi-cmp <?= e($expCmp['class']) ?>"><?= e($expCmp['text']) ?></div><?= $sparkExpenses ?><?php endif; ?></a>
 <?php endif; ?>
 <?php if ($canPayments): ?>
-  <a class="kpi-card <?= $expenses['ready'] ? ($netProfit>=0?'tone-green':'tone-red') : 'tone-muted' ?> reveal-up card-interactive stagger-3" href="<?= e(url('expenses/')) ?>"><div class="kpi-label"><?= e(t('Net Profit / Loss', 'Net Profit / Loss')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= $expenses['ready'] ? e($currency.' '.number_format($netProfit,2)) : 'Requires expense ledger' ?></div><div class="kpi-sub"><?= $expenses['ready'] ? 'Revenue − recorded expenses (cash-basis estimate)' : 'Expenses not yet recorded in ledger' ?></div><?php if ($expenses['ready']): ?><div class="kpi-cmp <?= e($profitCmp['class']) ?>"><?= e($profitCmp['text']) ?></div><?= $sparkProfit ?><?php endif; ?></a>
+  <a class="kpi-card <?= $expenses['ready'] ? ($netProfit>=0?'tone-green':'tone-red') : 'tone-muted' ?> reveal-up card-interactive stagger-3" href="<?= e(url('expenses/')) ?>"><div class="kpi-label"><?= e(t('Net Profit / Loss', 'Net Profit / Loss')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= $expenses['ready'] ? e($currency.' '.number_format($netProfit,2)) : e(t('Requires expense ledger', 'Requires expense ledger')) ?></div><div class="kpi-sub"><?= $expenses['ready'] ? e(t('Revenue − recorded expenses (cash-basis estimate)', 'Revenue − recorded expenses (cash-basis estimate)')) : e(t('Expenses not yet recorded in ledger', 'Expenses not yet recorded in ledger')) ?></div><?php if ($expenses['ready']): ?><div class="kpi-cmp <?= e($profitCmp['class']) ?>"><?= e($profitCmp['text']) ?></div><?= $sparkProfit ?><?php endif; ?></a>
 <?php endif; ?>
-  <div class="kpi-card tone-gold reveal-up card-interactive stagger-4"><div class="kpi-label"><?= e(t('Profit Margin', 'Profit Margin')) ?> (%)</div><div class="kpi-value"><?= ($profitMargin !== null) ? e(number_format($profitMargin,1).'%') : ($expenses['ready'] ? 'N/A' : '—') ?></div><div class="kpi-sub"><?= ($profitMargin !== null) ? 'Net profit ÷ collected revenue' : ($expenses['ready'] ? 'No revenue in period' : 'Expense ledger not ready') ?></div><?php if ($marginCmp): ?><div class="kpi-cmp <?= e($marginCmp['class']) ?>"><?= e($marginCmp['text']) ?></div><?php endif; ?></div>
+  <div class="kpi-card tone-gold reveal-up card-interactive stagger-4"><div class="kpi-label"><?= e(t('Profit Margin', 'Profit Margin')) ?> (%)</div><div class="kpi-value"><?= ($profitMargin !== null) ? e(number_format($profitMargin,1).'%') : ($expenses['ready'] ? 'N/A' : '—') ?></div><div class="kpi-sub"><?= ($profitMargin !== null) ? e(t('Net profit ÷ collected revenue', 'Net profit ÷ collected revenue')) : ($expenses['ready'] ? e(t('No revenue in period', 'No revenue in period')) : e(t('Expense ledger not ready', 'Expense ledger not ready'))) ?></div><?php if ($marginCmp): ?><div class="kpi-cmp <?= e($marginCmp['class']) ?>"><?= e($marginCmp['text']) ?></div><?php endif; ?></div>
 <?php if ($canInvoices): ?>
-  <a class="kpi-card tone-amber reveal-up card-interactive stagger-5" href="<?= e(url('invoices/?status=outstanding')) ?>"><div class="kpi-label"><?= e(t('Pending Payments', 'Pending Payments')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= e($currency.' '.number_format($pendingPayments,2)) ?></div><div class="kpi-sub"><?= $pendingCount ?> unpaid/partially paid invoices (outstanding balance)</div><div class="kpi-cmp trend-flat"><?= e(t('Not collected cash', 'Not collected cash')) ?></div></a>
+  <a class="kpi-card tone-amber reveal-up card-interactive stagger-5" href="<?= e(url('invoices/?status=outstanding')) ?>"><div class="kpi-label"><?= e(t('Pending Payments', 'Pending Payments')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= e($currency.' '.number_format($pendingPayments,2)) ?></div><div class="kpi-sub"><?= $pendingCount ?> <?= e(t('unpaid/partially paid invoices (outstanding balance)', 'unpaid/partially paid invoices (outstanding balance)')) ?></div><div class="kpi-cmp trend-flat"><?= e(t('Not collected cash', 'Not collected cash')) ?></div></a>
 <?php endif; ?>
 <?php if ($pendingVerificationCount > 0): ?>
   <a class="kpi-card tone-amber reveal-up card-interactive" style="border-left:4px solid #F59E0B;" href="<?= e(url('payments/verification.php')) ?>"><div class="kpi-label"><?= e(t('Verification Queue', 'የማረጋገጫ ረድፍ')) ?></div><div class="kpi-value" style="color:#F59E0B;"><?= $pendingVerificationCount ?></div><div class="kpi-sub"><?= e(t('Customer submissions awaiting review', 'Customer submissions awaiting review')) ?></div><div class="kpi-cmp trend-down"><?= e(t('Needs Audit', 'Needs Audit')) ?></div></a>
 <?php endif; ?>
 <?php if ($canInventory): ?>
-  <a class="kpi-card tone-blue reveal-up card-interactive stagger-6" href="<?= e(url('inventory/')) ?>"><div class="kpi-label"><?= e(t('Inventory Value', 'Inventory Value')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= e($currency.' '.number_format($inv['value'],2)) ?></div><div class="kpi-sub">Active stock at recorded unit cost · <?= $inv['items'] ?> item types</div><div class="kpi-cmp trend-flat"><?= $inv['available'] ?> in stock · <?= $inv['low'] ?> low · <?= $inv['out'] ?> out</div></a>
+  <a class="kpi-card tone-blue reveal-up card-interactive stagger-6" href="<?= e(url('inventory/')) ?>"><div class="kpi-label"><?= e(t('Inventory Value', 'Inventory Value')) ?> (<?= e($currency) ?>)</div><div class="kpi-value"><?= e($currency.' '.number_format($inv['value'],2)) ?></div><div class="kpi-sub"><?= e(t('Active stock at recorded unit cost', 'Active stock at recorded unit cost')) ?> · <?= $inv['items'] ?> <?= e(t('item types', 'item types')) ?></div><div class="kpi-cmp trend-flat"><?= $inv['available'] ?> <?= e(t('in stock', 'in stock')) ?> · <?= $inv['low'] ?> <?= e(t('low', 'low')) ?> · <?= $inv['out'] ?> <?= e(t('out', 'out')) ?></div></a>
 <?php endif; ?>
 <?php if ($canJobs): ?>
   <a class="kpi-card tone-blue reveal-up card-interactive stagger-7" href="<?= e(url('job-cards/?scope=open')) ?>"><div class="kpi-label"><?= e(t('Active Job Cards', 'Active Job Cards')) ?></div><div class="kpi-value"><?= $activeJobs ?></div><div class="kpi-sub"><?= e(t('Open jobs received in selected period', 'Open jobs received in selected period')) ?></div><?php if ($jobsCmp): ?><div class="kpi-cmp <?= e($jobsCmp['class']) ?>"><?= e($jobsCmp['text']) ?></div><?php endif; ?><?= $sparkJobs ?></a>
-  <a class="kpi-card tone-green reveal-up card-interactive stagger-8" href="<?= e(url('job-cards/?status=Completed')) ?>"><div class="kpi-label"><?= e(t('Completed Jobs', 'Completed Jobs')) ?></div><div class="kpi-value"><?= $completedJobs ?></div><div class="kpi-sub">Completed/delivered · completion rate <?= e(number_format($completionRate,1)) ?>%</div><?php if ($completedCmp): ?><div class="kpi-cmp <?= e($completedCmp['class']) ?>"><?= e($completedCmp['text']) ?></div><?php endif; ?></a>
+  <a class="kpi-card tone-green reveal-up card-interactive stagger-8" href="<?= e(url('job-cards/?status=Completed')) ?>"><div class="kpi-label"><?= e(t('Completed Jobs', 'Completed Jobs')) ?></div><div class="kpi-value"><?= $completedJobs ?></div><div class="kpi-sub"><?= e(t('Completed/delivered', 'Completed/delivered')) ?> · <?= e(t('completion rate', 'completion rate')) ?> <?= e(number_format($completionRate,1)) ?>%</div><?php if ($completedCmp): ?><div class="kpi-cmp <?= e($completedCmp['class']) ?>"><?= e($completedCmp['text']) ?></div><?php endif; ?></a>
 <?php endif; ?>
 </div>
 
 <div class="dash-progress-grid card reveal-up card-interactive">
   <div class="card-head"><h3><?= e(t('Financial & operations progress', 'Financial & operations progress')) ?></h3><span class="muted small"><?= e(t('Monthly targets compare to current calendar month actuals', 'Monthly targets compare to current calendar month actuals')) ?></span></div>
   <div class="dash-progress-list">
-    <?= dash_progress($canPayments ? $monthRevenue : null, $targets['monthly_revenue_target'], 'Monthly revenue target') ?>
-    <?= dash_progress($expenses['ready'] ? $monthProfit : null, $targets['monthly_profit_target'], 'Monthly profit target') ?>
-    <?= dash_progress($expenses['ready'] ? $monthExpenses : null, $targets['monthly_expense_budget'], 'Expense budget utilization', 'money', true) ?>
-    <?= dash_progress($completionRate, 100.0, 'Job completion rate (selected period)', 'percent') ?>
-    <?= dash_progress($inv['items'] > 0 ? (($inv['items'] - $inv['out']) / $inv['items'] * 100) : null, $inv['items'] > 0 ? 100.0 : null, 'Inventory availability', 'percent') ?>
+    <?= dash_progress($canPayments ? $monthRevenue : null, $targets['monthly_revenue_target'], t('Monthly revenue target', 'Monthly revenue target')) ?>
+    <?= dash_progress($expenses['ready'] ? $monthProfit : null, $targets['monthly_profit_target'], t('Monthly profit target', 'Monthly profit target')) ?>
+    <?= dash_progress($expenses['ready'] ? $monthExpenses : null, $targets['monthly_expense_budget'], t('Expense budget utilization', 'Expense budget utilization'), 'money', true) ?>
+    <?= dash_progress($completionRate, 100.0, t('Job completion rate (selected period)', 'Job completion rate (selected period)'), 'percent') ?>
+    <?= dash_progress($inv['items'] > 0 ? (($inv['items'] - $inv['out']) / $inv['items'] * 100) : null, $inv['items'] > 0 ? 100.0 : null, t('Inventory availability', 'Inventory availability'), 'percent') ?>
   </div>
-  <?php if (can('settings.manage')): ?><p class="muted small dash-settings-note">Configure targets in <a href="<?= e(url('users/settings.php')) ?>">Garage Settings</a>.</p><?php endif; ?>
+  <?php if (can('settings.manage')): ?><p class="muted small dash-settings-note"><?= e(t('Configure targets in', 'Configure targets in')) ?> <a href="<?= e(url('users/settings.php')) ?>"><?= e(t('Garage Settings', 'Garage Settings')) ?></a>.</p><?php endif; ?>
 </div>
+
+<?php if (can('payments.methods')):
+  $topMethods = Database::all(
+      "SELECT id, name, name_am, code, type, bank_name, account_name, account_number, phone_number, till_number, merchant_number, is_active
+       FROM payment_methods
+       WHERE code IN ('cbe', 'telebirr', 'awash', 'dashen', 'boa', 'cash')
+       ORDER BY display_order ASC"
+  );
+?>
+<div class="card reveal-up card-interactive" style="border:1px solid rgba(212,175,55,0.35);background:var(--card-bg,#1E293B);margin-bottom:28px;">
+  <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <span class="dashboard-eyebrow" style="color:var(--gold,#D4AF37);font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+        <?= e(t('PAYMENT CONFIGURATION', 'የክፍያ ማዋቀሪያ')) ?>
+      </span>
+      <h3 style="margin:2px 0 0 0;"><?= e(t('Garage Bank & Telebirr Accounts', 'የጋራዡ የባንክ እና የቴሌብር ሂሳቦች')) ?></h3>
+      <span class="muted small"><?= e(t('Directly edit garage account numbers, merchant till codes, and account holder names.', 'የጋራዡን የባንክ ሂሳብ ቁጥሮች፣ የነጋዴ ቲል ኮዶችን እና የሂሳብ ባለቤት ስሞችን በቀጥታ ያስተካክሉ።')) ?></span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a class="btn btn-primary btn-sm btn-interactive" href="<?= e(url('payments/methods.php')) ?>">
+        <?= e(t('Manage All Payment Providers →', 'ሁሉንም የክፍያ መንገዶች አስተዳድር →')) ?>
+      </a>
+    </div>
+  </div>
+  <div class="grid-3" style="gap:16px;margin-top:16px;">
+    <?php foreach ($topMethods as $tm): 
+      $rawId = $tm['account_number'] ?: ($tm['merchant_number'] ?: ($tm['till_number'] ?: ($tm['phone_number'] ?: '')));
+      $idLabel = $tm['type'] === 'bank' ? t('Account No:', 'የሂሳብ ቁጥር:') : ($tm['type'] === 'mobile_money' ? t('Phone / Till:', 'ስልክ / ቲል:') : t('Payment Channel:', 'የክፍያ ቻናል:'));
+    ?>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;position:relative;display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <strong style="font-size:1rem;color:var(--text,#fff);">
+            <?= e(current_lang() === 'am' && !empty($tm['name_am']) ? $tm['name_am'] : $tm['name']) ?>
+          </strong>
+          <span class="badge <?= !empty($tm['is_active']) ? 'badge-active' : 'badge-inactive' ?>" style="font-size:0.75rem;">
+            <?= !empty($tm['is_active']) ? e(t('Active', 'ንቁ')) : e(t('Inactive', 'ቦዝኗል')) ?>
+          </span>
+        </div>
+        <div style="font-size:0.85rem;margin-bottom:4px;" class="muted">
+          <span><?= e(t('Account Name:', 'የሂሳብ ባለቤት:')) ?></span>
+          <strong style="color:var(--text,#fff);"><?= e($tm['account_name'] ?: 'ALPHA GARAGE PLC') ?></strong>
+        </div>
+        <div style="font-size:0.85rem;margin-bottom:8px;">
+          <span class="muted"><?= e($idLabel) ?></span>
+          <span class="mono" style="font-weight:700;color:var(--gold,#D4AF37);letter-spacing:0.5px;">
+            <?= e($rawId ?: '—') ?>
+          </span>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:flex-end;">
+        <a href="<?= e(url('payments/methods.php?edit=' . (int)$tm['id'])) ?>" class="btn btn-ghost btn-sm" style="padding:4px 10px;font-size:0.8rem;">
+          ✏️ <?= e(t('Edit Account', 'ሂሳብ አስተካክል')) ?>
+        </a>
+      </div>
+    </div>
+    <?php endforeach; ?>
+  </div>
+</div>
+<?php endif; ?>
 
 <div class="dashboard-section-head reveal-up"><div><span class="dashboard-eyebrow"><?= e(t('CHARTS', 'CHARTS')) ?></span><h3><?= e(t('Interactive financial analytics', 'Interactive financial analytics')) ?></h3></div><span class="muted small">Chart.js · updates with date filters (no full reload)</span></div>
 <div class="chart-grid">
@@ -232,6 +313,70 @@ ui_header('Dashboard', 'dashboard');
   <a class="inv-stat status-bad card-interactive" href="<?= e(url('inventory/?stock=low')) ?>"><strong><?= $inv['out'] ?></strong><span><?= e(t('Out of stock', 'Out of stock')) ?></span></a>
   <div class="inv-stat card-interactive"><strong><?= e($currency.' '.number_format($inv['value'],2)) ?></strong><span><?= e(t('Inventory valuation', 'Inventory valuation')) ?></span></div>
 </div>
+<?php if ($adminPendingParts): ?>
+<div class="card reveal-up card-interactive mb-4" style="border-top: 4px solid #D4AF37;">
+  <div class="card-head">
+    <div>
+      <h3 style="display:flex; align-items:center; gap:8px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#D4AF37" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <?= e(t('Operations Approval & Removal Queue', 'Operations Approval & Removal Queue')) ?>
+      </h3>
+      <span class="muted small"><?= e(t('Review technician requests: 1-click Approve to issue parts from warehouse, or Remove / Reject to decline.', 'Review technician requests: 1-click Approve to issue parts from warehouse, or Remove / Reject to decline.')) ?></span>
+    </div>
+    <span class="badge badge-pending"><?= count($adminPendingParts) ?> <?= e(t('decisions pending', 'decisions pending')) ?></span>
+  </div>
+  <div class="table-wrap">
+    <table class="table stack">
+      <thead>
+        <tr>
+          <th><?= e(t('Job Card', 'Job Card')) ?></th>
+          <th><?= e(t('Vehicle & Customer', 'Vehicle & Customer')) ?></th>
+          <th><?= e(t('Requested Part', 'Requested Part')) ?></th>
+          <th class="num"><?= e(t('Req Qty', 'Req Qty')) ?></th>
+          <th class="num"><?= e(t('In Stock', 'In Stock')) ?></th>
+          <th><?= e(t('Requested By', 'Requested By')) ?></th>
+          <th><?= e(t('Action / Decision', 'Action / Decision')) ?></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($adminPendingParts as $pr):
+          $short = ((int)$pr['in_stock'] < (int)$pr['quantity']);
+        ?>
+          <tr>
+            <td>
+              <a href="<?= e(url('job-cards/view.php?id=' . $pr['job_id'])) ?>"><strong><?= e($pr['job_number']) ?></strong></a>
+              <div class="muted small"><?= badge(t($pr['job_status'], $pr['job_status'])) ?></div>
+            </td>
+            <td>
+              <strong><?= e($pr['plate_number']) ?></strong>
+              <div class="muted small"><?= e($pr['make'] . ' ' . $pr['model']) ?> · <?= e($pr['customer_name']) ?></div>
+            </td>
+            <td>
+              <strong><?= e($pr['part_name']) ?></strong> <span class="muted small"><code><?= e($pr['sku']) ?></code></span>
+              <?php if ($pr['note']): ?>
+                <div class="muted small" style="font-style:italic;">“<?= e($pr['note']) ?>”</div>
+              <?php endif; ?>
+            </td>
+            <td class="num"><strong><?= (int)$pr['quantity'] ?></strong> <?= e($pr['unit']) ?></td>
+            <td class="num">
+              <strong><?= (int)$pr['in_stock'] ?></strong> <?= e($pr['unit']) ?>
+              <?= $short ? badge(t('Short', 'Short'), 'badge-out') : badge(t('Available', 'Available'), 'badge-confirmed') ?>
+            </td>
+            <td class="small">
+              <?= e($pr['requester_name'] ?: '—') ?>
+              <br><small class="muted"><?= fmt_datetime($pr['created_at']) ?></small>
+            </td>
+            <td class="nowrap">
+              <?= post_button(url('inventory/issue.php'), ['do' => 'fulfil', 'request_id' => $pr['id'], 'job_id' => $pr['job_id'], 'return_url' => 'dashboard.php'], t('Approve & Issue', 'Approve & Issue'), 'btn btn-primary btn-sm', $short ? t('Stock looks short. Continue with issuance?', 'Stock looks short. Continue with issuance?') : '') ?>
+              <?= post_button(url('inventory/issue.php'), ['do' => 'reject', 'request_id' => $pr['id'], 'job_id' => $pr['job_id'], 'return_url' => 'dashboard.php'], t('Remove / Reject', 'Remove / Reject'), 'btn btn-ghost btn-sm text-danger', t('Reject and remove this part request?', 'Reject and remove this part request?')) ?>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+<?php endif; ?>
 <?php $lowList = InventoryService::lowStock(8); if ($lowList): ?>
 <div class="card reveal-up card-interactive"><div class="card-head"><h3><?= e(t('Inventory alerts', 'Inventory alerts')) ?></h3><span class="muted small"><?= e(t('Click an item to review stock', 'Click an item to review stock')) ?></span></div>
 <div class="inv-alert-list"><?php foreach ($lowList as $p):
@@ -246,7 +391,7 @@ ui_header('Dashboard', 'dashboard');
 <div class="alert alert-warn" role="status"><strong>Expense ledger not ready.</strong> Apply <code>database/migrations/20261108_expense_ledger.sql</code> and grant the runtime account <code>SELECT, INSERT</code> on <code>expenses</code>. Profit/loss and expense charts will use real ledger data once enabled. See documentation/INSTALLATION_GUIDE.md.</div>
 <?php endif; ?>
 
-<p class="analytics-limit-note"><strong>Financial definitions (real records only):</strong> Total Revenue = payments received minus refunds (collected cash). Total Expenses = manual expense ledger entries + inventory stock purchases (opening stock excluded). Net Profit/Loss is a cash-basis management estimate, not audited accrual profit. Pending Payments = outstanding invoice balances (invoiced amounts not yet collected). No sample or fabricated values are displayed.</p>
+<p class="analytics-limit-note"><strong><?= e(t('Financial definitions (real records only):', 'Financial definitions (real records only):')) ?></strong> <?= e(t('Total Revenue = payments received minus refunds (collected cash). Total Expenses = manual expense ledger entries + inventory stock purchases (opening stock excluded). Net Profit/Loss is a cash-basis management estimate, not audited accrual profit. Pending Payments = outstanding invoice balances (invoiced amounts not yet collected). No sample or fabricated values are displayed.', 'Total Revenue = payments received minus refunds (collected cash). Total Expenses = manual expense ledger entries + inventory stock purchases (opening stock excluded). Net Profit/Loss is a cash-basis management estimate, not audited accrual profit. Pending Payments = outstanding invoice balances (invoiced amounts not yet collected). No sample or fabricated values are displayed.')) ?></p>
 </div><!-- /dashboard-data -->
 
 <?php ui_footer();

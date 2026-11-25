@@ -71,7 +71,29 @@ select.input option, select.form-control option {
   padding: 0.5rem;
 }
 input[type="date"].input, input[type="datetime-local"].input, input[type="time"].input, input[type="number"].input,
-input[type="date"].form-control, input[type="datetime-local"].form-control, input[type="time"].form-control, input[type="number"].form-control { font-variant-numeric: tabular-nums; cursor: pointer; }
+input[type="date"].form-control, input[type="datetime-local"].form-control, input[type="time"].form-control, input[type="number"].form-control { font-variant-numeric: tabular-nums; cursor: pointer; position: relative; }
+
+/* Enhanced Date & Time Picker Calendar Icons */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: inline-block !important;
+  cursor: pointer !important;
+  opacity: 0.9 !important;
+  padding: 4px !important;
+  margin-right: -2px !important;
+  border-radius: var(--radius-sm, 4px) !important;
+  filter: invert(45%) sepia(85%) saturate(500%) hue-rotate(15deg) brightness(85%) contrast(90%) !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1 !important;
+  transform: scale(1.18) !important;
+  filter: invert(55%) sepia(95%) saturate(700%) hue-rotate(15deg) brightness(95%) contrast(100%) !important;
+}
 input[type="checkbox"], input[type="radio"] { accent-color: var(--gold-primary, #D4AF37); width: 1.05rem; height: 1.05rem; cursor: pointer; }
 .check { display: flex; gap: var(--space-2); align-items: center; }
 .check input { width: 1.05rem; flex: none; }

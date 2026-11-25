@@ -714,12 +714,12 @@ ui_header(t('Customer Portal', 'Customer Portal'), 'dashboard');
         <div class="booking-field-group">
           <label class="booking-field-label" for="modalApptTime"><?= e(t('Preferred Time', 'Preferred Time')) ?> <span class="req">*</span></label>
           <select class="input" id="modalApptTime" name="appointment_time" required>
-            <option value="08:30:00">08:30 AM (Morning Slot)</option>
-            <option value="10:00:00">10:00 AM (Morning Slot)</option>
-            <option value="11:30:00">11:30 AM (Morning Slot)</option>
-            <option value="14:00:00" selected>02:00 PM (Afternoon Slot)</option>
-            <option value="15:30:00">03:30 PM (Afternoon Slot)</option>
-            <option value="17:00:00">05:00 PM (Late Slot)</option>
+            <option value="08:30:00"><?= e(t('08:30 AM (Morning Slot)', '08:30 AM (Morning Slot)')) ?></option>
+            <option value="10:00:00"><?= e(t('10:00 AM (Morning Slot)', '10:00 AM (Morning Slot)')) ?></option>
+            <option value="11:30:00"><?= e(t('11:30 AM (Morning Slot)', '11:30 AM (Morning Slot)')) ?></option>
+            <option value="14:00:00" selected><?= e(t('02:00 PM (Afternoon Slot)', '02:00 PM (Afternoon Slot)')) ?></option>
+            <option value="15:30:00"><?= e(t('03:30 PM (Afternoon Slot)', '03:30 PM (Afternoon Slot)')) ?></option>
+            <option value="17:00:00"><?= e(t('05:00 PM (Late Slot)', '05:00 PM (Late Slot)')) ?></option>
           </select>
         </div>
       </div>

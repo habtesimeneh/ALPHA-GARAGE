@@ -59,6 +59,42 @@ $jobsNeedingParts = Database::all(
      LIMIT 6"
 );
 
+// 4b. Pending Mechanic Part Requests for Manager Approval or Removal
+$pendingRequests = Database::all(
+    "SELECT pr.*, sp.name AS part_name, sp.sku, sp.quantity AS in_stock, sp.unit,
+            j.job_number, j.status AS job_status,
+            c.full_name AS customer_name, v.plate_number, v.make, v.model,
+            u.full_name AS requester_name
+     FROM part_requests pr
+     JOIN spare_parts sp ON sp.id = pr.part_id
+     JOIN job_cards j ON j.id = pr.job_id
+     JOIN customers c ON c.id = j.customer_id
+     JOIN vehicles v ON v.id = j.vehicle_id
+     LEFT JOIN users u ON u.id = pr.requested_by
+     WHERE pr.status = 'pending'
+     ORDER BY pr.id ASC
+     LIMIT 50"
+);
+$pendingRequestCount = count($pendingRequests);
+
+// 4b. Pending Mechanic Part Requests for Manager Approval or Removal
+$pendingPartRequests = Database::all(
+    "SELECT pr.*, sp.name AS part_name, sp.sku, sp.quantity AS in_stock, sp.unit,
+            j.job_number, j.status AS job_status,
+            c.full_name AS customer_name, v.plate_number, v.make, v.model,
+            u.full_name AS requester_name
+     FROM part_requests pr
+     JOIN spare_parts sp ON sp.id = pr.part_id
+     JOIN job_cards j ON j.id = pr.job_id
+     JOIN customers c ON c.id = j.customer_id
+     JOIN vehicles v ON v.id = j.vehicle_id
+     LEFT JOIN users u ON u.id = pr.requested_by
+     WHERE pr.status = 'pending'
+     ORDER BY pr.id ASC
+     LIMIT 50"
+);
+$pendingRequestCount = count($pendingPartRequests);
+
 // 5. Chart Data: Stock health distribution
 $healthyCount = max(0, $totalPartTypes - $lowStockCount - $outOfStockCount);
 
@@ -133,29 +169,29 @@ ui_header('Inventory & Supply Dashboard', 'dashboard');
 
 <div class="dashboard-section-head reveal-up">
   <div><span class="dashboard-eyebrow"><?= e(t('WAREHOUSE STATUS', 'WAREHOUSE STATUS')) ?></span><h3><?= e(t('Inventory stock indicators', 'Inventory stock indicators')) ?></h3></div>
-  <span class="muted small">Real-time parts inventory · <?= e(date('F j, Y')) ?></span>
+  <span class="muted small"><?= e(t('Real-time parts inventory', 'Real-time parts inventory')) ?> · <?= e(date('F j, Y')) ?></span>
 </div>
 
 <div class="kpi-grid">
   <a class="kpi-card tone-blue reveal-up card-interactive stagger-1" href="<?= e(url('inventory/')) ?>">
     <div class="kpi-label"><?= e(t('Catalog Item Types', 'Catalog Item Types')) ?></div>
     <div class="kpi-value"><?= $totalPartTypes ?></div>
-    <div class="kpi-sub"><?= number_format($totalUnitsInStock) ?> physical units on shelf</div>
+    <div class="kpi-sub"><?= number_format($totalUnitsInStock) ?> <?= e(t('physical units on shelf', 'physical units on shelf')) ?></div>
     <div class="kpi-cmp trend-flat"><?= e(t('Active catalog', 'Active catalog')) ?></div>
   </a>
 
   <a class="kpi-card <?= $outOfStockCount > 0 ? 'tone-red' : 'tone-green' ?> reveal-up card-interactive stagger-2" href="<?= e(url('inventory/?stock=low')) ?>">
     <div class="kpi-label"><?= e(t('Out of Stock', 'Out of Stock')) ?></div>
     <div class="kpi-value"><?= $outOfStockCount ?></div>
-    <div class="kpi-sub"><?= $outOfStockCount > 0 ? 'Urgent parts procurement needed' : 'Zero depleted items' ?></div>
-    <div class="kpi-cmp <?= $outOfStockCount > 0 ? 'trend-down' : 'trend-flat' ?>"><?= $outOfStockCount > 0 ? 'Critical' : 'Healthy' ?></div>
+    <div class="kpi-sub"><?= $outOfStockCount > 0 ? e(t('Urgent parts procurement needed', 'Urgent parts procurement needed')) : e(t('Zero depleted items', 'Zero depleted items')) ?></div>
+    <div class="kpi-cmp <?= $outOfStockCount > 0 ? 'trend-down' : 'trend-flat' ?>"><?= $outOfStockCount > 0 ? e(t('Critical', 'Critical')) : e(t('Healthy', 'Healthy')) ?></div>
   </a>
 
   <a class="kpi-card <?= $lowStockCount > 0 ? 'tone-amber' : 'tone-green' ?> reveal-up card-interactive stagger-3" href="<?= e(url('inventory/?stock=low')) ?>">
     <div class="kpi-label"><?= e(t('Low Stock Alerts', 'Low Stock Alerts')) ?></div>
     <div class="kpi-value"><?= $lowStockCount ?></div>
     <div class="kpi-sub"><?= e(t('Items at or below reorder threshold', 'Items at or below reorder threshold')) ?></div>
-    <div class="kpi-cmp <?= $lowStockCount > 0 ? 'trend-down' : 'trend-flat' ?>">Reorder required</div>
+    <div class="kpi-cmp <?= $lowStockCount > 0 ? 'trend-down' : 'trend-flat' ?>"><?= e(t('Reorder required', 'Reorder required')) ?></div>
   </a>
 
   <a class="kpi-card tone-gold reveal-up card-interactive stagger-4" href="<?= e(url('suppliers/')) ?>">
@@ -166,9 +202,88 @@ ui_header('Inventory & Supply Dashboard', 'dashboard');
   </a>
 </div>
 
+<!-- Operations Approval & Removal Queue for Owner / Inventory Manager -->
+<div class="dashboard-section-head reveal-up" id="approval-queue">
+  <div>
+    <span class="dashboard-eyebrow" style="color: #D97706;"><?= e(t('OWNER & MANAGER APPROVAL QUEUE', 'OWNER & MANAGER APPROVAL QUEUE')) ?></span>
+    <h3><?= e(t('Pending Mechanic Part Requests', 'Pending Mechanic Part Requests')) ?> (<?= $pendingRequestCount ?>)</h3>
+  </div>
+  <?php if ($pendingRequestCount > 0): ?>
+    <span class="badge badge-pending"><?= $pendingRequestCount ?> <?= e(t('decisions pending', 'decisions pending')) ?></span>
+  <?php else: ?>
+    <span class="badge badge-confirmed">✓ <?= e(t('All requests fulfilled', 'All requests fulfilled')) ?></span>
+  <?php endif; ?>
+</div>
+
+<div class="card card-interactive reveal-up mb-4" style="border-top: 4px solid #D4AF37;">
+  <div class="card-head">
+    <div>
+      <h3 style="display:flex; align-items:center; gap:8px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#D4AF37" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <?= e(t('Operations Approval & Removal Queue', 'Operations Approval & Removal Queue')) ?>
+      </h3>
+      <span class="muted small"><?= e(t('Review technician requests: 1-click Approve to issue parts from warehouse, or Remove / Reject to decline.', 'Review technician requests: 1-click Approve to issue parts from warehouse, or Remove / Reject to decline.')) ?></span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="table stack">
+      <thead>
+        <tr>
+          <th><?= e(t('Job Card', 'Job Card')) ?></th>
+          <th><?= e(t('Vehicle & Customer', 'Vehicle & Customer')) ?></th>
+          <th><?= e(t('Requested Part', 'Requested Part')) ?></th>
+          <th class="num"><?= e(t('Req Qty', 'Req Qty')) ?></th>
+          <th class="num"><?= e(t('In Stock', 'In Stock')) ?></th>
+          <th><?= e(t('Requested By', 'Requested By')) ?></th>
+          <th><?= e(t('Action / Decision', 'Action / Decision')) ?></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if ($pendingRequests): ?>
+          <?php foreach ($pendingRequests as $pr):
+            $short = ((int)$pr['in_stock'] < (int)$pr['quantity']);
+          ?>
+            <tr>
+              <td>
+                <a href="<?= e(url('job-cards/view.php?id=' . $pr['job_id'])) ?>"><strong><?= e($pr['job_number']) ?></strong></a>
+                <div class="muted small"><?= badge(t($pr['job_status'], $pr['job_status'])) ?></div>
+              </td>
+              <td>
+                <strong><?= e($pr['plate_number']) ?></strong>
+                <div class="muted small"><?= e($pr['make'] . ' ' . $pr['model']) ?> · <?= e($pr['customer_name']) ?></div>
+              </td>
+              <td>
+                <strong><?= e($pr['part_name']) ?></strong> <span class="muted small"><code><?= e($pr['sku']) ?></code></span>
+                <?php if ($pr['note']): ?>
+                  <div class="muted small" style="font-style:italic;">“<?= e($pr['note']) ?>”</div>
+                <?php endif; ?>
+              </td>
+              <td class="num"><strong><?= (int)$pr['quantity'] ?></strong> <?= e($pr['unit']) ?></td>
+              <td class="num">
+                <strong><?= (int)$pr['in_stock'] ?></strong> <?= e($pr['unit']) ?>
+                <?= $short ? badge(t('Short', 'Short'), 'badge-out') : badge(t('Available', 'Available'), 'badge-confirmed') ?>
+              </td>
+              <td class="small">
+                <?= e($pr['requester_name'] ?: '—') ?>
+                <br><small class="muted"><?= fmt_datetime($pr['created_at']) ?></small>
+              </td>
+              <td class="nowrap">
+                <?= post_button(url('inventory/issue.php'), ['do' => 'fulfil', 'request_id' => $pr['id'], 'job_id' => $pr['job_id'], 'return_url' => 'dashboard.php'], t('Approve & Issue', 'Approve & Issue'), 'btn btn-primary btn-sm', $short ? t('Stock looks short. Continue with issuance?', 'Stock looks short. Continue with issuance?') : '') ?>
+                <?= post_button(url('inventory/issue.php'), ['do' => 'reject', 'request_id' => $pr['id'], 'job_id' => $pr['job_id'], 'return_url' => 'dashboard.php'], t('Remove / Reject', 'Remove / Reject'), 'btn btn-ghost btn-sm text-danger', t('Reject and remove this part request?', 'Reject and remove this part request?')) ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <tr><td colspan="7" class="empty">✓ <?= e(t('All mechanic part requests are currently reviewed and fulfilled.', 'All mechanic part requests are currently reviewed and fulfilled.')) ?></td></tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <div class="dashboard-section-head reveal-up">
   <div><span class="dashboard-eyebrow"><?= e(t('INVENTORY ANALYTICS', 'INVENTORY ANALYTICS')) ?></span><h3><?= e(t('Stock health & parts movements', 'Stock health & parts movements')) ?></h3></div>
-  <span class="muted small">Visual parts stock analysis · Real database inventory records</span>
+  <span class="muted small"><?= e(t('Visual parts stock analysis · Real database inventory records', 'Visual parts stock analysis · Real database inventory records')) ?></span>
 </div>
 
 <div class="chart-grid mb-4">
@@ -200,6 +315,81 @@ ui_header('Inventory & Supply Dashboard', 'dashboard');
     <div class="chart-wrap">
       <canvas id="chart-inventory-movement-trend" aria-label="Inventory movement transactions bar chart" role="img"></canvas>
     </div>
+  </div>
+</div>
+
+<!-- Manager Operations & Part Request Approvals Queue -->
+<div class="dashboard-section-head reveal-up" id="approval-queue">
+  <div>
+    <span class="dashboard-eyebrow" style="color: #D97706; font-weight:700; letter-spacing:0.05em;"><?= e(t('OWNER & MANAGER APPROVAL QUEUE', 'OWNER & MANAGER APPROVAL QUEUE')) ?></span>
+    <h3><?= e(t('Pending Mechanic Part Requests', 'Pending Mechanic Part Requests')) ?> (<?= $pendingRequestCount ?>)</h3>
+  </div>
+  <span class="badge <?= $pendingRequestCount > 0 ? 'badge-cancelled' : 'badge-confirmed' ?>"><?= $pendingRequestCount ?> <?= e(t('decisions pending', 'decisions pending')) ?></span>
+</div>
+
+<div class="card card-interactive reveal-up mb-4" style="border-top: 4px solid #D4AF37;">
+  <div class="card-head">
+    <div>
+      <h3 style="display:flex; align-items:center; gap:8px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#D4AF37" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <?= e(t('Operations Approval & Removal Queue', 'Operations Approval & Removal Queue')) ?>
+      </h3>
+      <span class="muted small"><?= e(t('Review technician requests: 1-click Approve to issue parts from warehouse, or Remove / Reject to decline.', 'Review technician requests: 1-click Approve to issue parts from warehouse, or Remove / Reject to decline.')) ?></span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="table stack">
+      <thead>
+        <tr>
+          <th><?= e(t('Job Card', 'Job Card')) ?></th>
+          <th><?= e(t('Vehicle & Customer', 'Vehicle & Customer')) ?></th>
+          <th><?= e(t('Requested Part', 'Requested Part')) ?></th>
+          <th class="num"><?= e(t('Req Qty', 'Req Qty')) ?></th>
+          <th class="num"><?= e(t('In Stock', 'In Stock')) ?></th>
+          <th><?= e(t('Requested By', 'Requested By')) ?></th>
+          <th><?= e(t('Action / Decision', 'Action / Decision')) ?></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if ($pendingPartRequests): ?>
+          <?php foreach ($pendingPartRequests as $pr):
+            $short = ((int)$pr['in_stock'] < (int)$pr['quantity']);
+          ?>
+            <tr>
+              <td>
+                <a href="<?= e(url('job-cards/view.php?id=' . $pr['job_id'])) ?>"><strong><?= e($pr['job_number']) ?></strong></a>
+                <div class="muted small"><?= badge(t($pr['job_status'], $pr['job_status'])) ?></div>
+              </td>
+              <td>
+                <strong><?= e($pr['plate_number']) ?></strong>
+                <div class="muted small"><?= e($pr['make'] . ' ' . $pr['model']) ?> · <?= e($pr['customer_name']) ?></div>
+              </td>
+              <td>
+                <strong><?= e($pr['part_name']) ?></strong> <span class="muted small"><code><?= e($pr['sku']) ?></code></span>
+                <?php if ($pr['note']): ?>
+                  <div class="muted small" style="font-style:italic;">“<?= e($pr['note']) ?>”</div>
+                <?php endif; ?>
+              </td>
+              <td class="num"><strong><?= (int)$pr['quantity'] ?></strong> <?= e($pr['unit']) ?></td>
+              <td class="num">
+                <strong><?= (int)$pr['in_stock'] ?></strong> <?= e($pr['unit']) ?>
+                <?= $short ? badge(t('Short', 'Short'), 'badge-out') : badge(t('Available', 'Available'), 'badge-confirmed') ?>
+              </td>
+              <td class="small">
+                <?= e($pr['requester_name'] ?: '—') ?>
+                <br><small class="muted"><?= fmt_datetime($pr['created_at']) ?></small>
+              </td>
+              <td class="nowrap">
+                <?= post_button(url('inventory/issue.php'), ['do' => 'fulfil', 'request_id' => $pr['id'], 'job_id' => $pr['job_id'], 'return_url' => 'dashboard.php'], t('Approve & Issue', 'Approve & Issue'), 'btn btn-primary btn-sm', $short ? t('Stock looks short. Continue with issuance?', 'Stock looks short. Continue with issuance?') : '') ?>
+                <?= post_button(url('inventory/issue.php'), ['do' => 'reject', 'request_id' => $pr['id'], 'job_id' => $pr['job_id'], 'return_url' => 'dashboard.php'], t('Remove / Reject', 'Remove / Reject'), 'btn btn-ghost btn-sm text-danger', t('Reject and remove this part request?', 'Reject and remove this part request?')) ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <tr><td colspan="7" class="empty">✓ <?= e(t('All mechanic part requests are currently reviewed and fulfilled.', 'All mechanic part requests are currently reviewed and fulfilled.')) ?></td></tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -360,8 +550,8 @@ ui_header('Inventory & Supply Dashboard', 'dashboard');
               </td>
               <td class="nowrap"><strong><?= (int)$mv['quantity'] ?></strong> <?= e($mv['unit']) ?></td>
               <td class="nowrap"><?= (int)$mv['balance_after'] ?></td>
-              <td><?= e($mv['notes'] ?: ($mv['reference'] ? 'Ref: ' . $mv['reference'] : '—')) ?></td>
-              <td><?= e($mv['operator_name'] ?: 'System') ?></td>
+              <td><?= e($mv['notes'] ?: ($mv['reference'] ? t('Ref', 'Ref') . ': ' . $mv['reference'] : '—')) ?></td>
+              <td><?= e($mv['operator_name'] ?: t('System', 'System')) ?></td>
             </tr>
           <?php endforeach; ?>
         <?php else: ?>

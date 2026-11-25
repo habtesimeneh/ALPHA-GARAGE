@@ -190,6 +190,68 @@ final class InventoryService
         });
     }
 
+    /** Return a single issued part line back to warehouse stock and remove it from active job billing. */
+    public static function returnSinglePart(int $jobId, int $jobPartId, ?string $reason = null): void
+    {
+        Database::transaction(function () use ($jobId, $jobPartId, $reason) {
+            $jp = Database::one('SELECT id, part_id, quantity, unit_price, returned FROM job_parts WHERE id = ? AND job_id = ? FOR UPDATE', [$jobPartId, $jobId]);
+            if (!$jp) { throw new DomainException('Issued part record not found.'); }
+            if ($jp['returned']) { throw new DomainException('This part has already been returned.'); }
+
+            $job = Database::one('SELECT id, job_number, status FROM job_cards WHERE id = ? FOR UPDATE', [$jobId]);
+            if (!$job) { throw new DomainException('Job card not found.'); }
+            if (in_array($job['status'], ['Delivered', 'Cancelled'], true)) {
+                throw new DomainException('Cannot modify parts on a delivered or cancelled job card.');
+            }
+
+            $p = self::lockPart((int) $jp['part_id']);
+            $qty = (int) $jp['quantity'];
+            $after = (int) $p['quantity'] + $qty;
+
+            Database::run('UPDATE spare_parts SET quantity = ? WHERE id = ?', [$after, $p['id']]);
+            Database::run('UPDATE job_parts SET returned = 1 WHERE id = ?', [$jobPartId]);
+
+            $uid = current_user()['id'] ?? null;
+            self::ledger((int) $p['id'], 'return', $qty, $after, $p['unit_cost'], null, $job['job_number'], $jobId, $reason ?: 'Part removed from job card by manager');
+            Database::run("INSERT INTO job_updates (job_id, user_id, update_type, note) VALUES (?,?, 'parts', ?)",
+                [$jobId, $uid, 'Removed ' . $qty . ' × ' . $p['name'] . ' from job card (returned to stock)' . ($reason ? ': ' . $reason : '')]);
+            AuditLogger::log('part_returned_single', 'inventory', (int) $p['id'],
+                ['job_id' => $jobId, 'job_part_id' => $jobPartId, 'quantity' => $qty],
+                ['quantity' => $after, 'job_card' => $job['job_number']]);
+        });
+    }
+
+    /** Delete or safely archive a spare part from the catalog. */
+    public static function deletePart(int $id): array
+    {
+        return Database::transaction(function () use ($id) {
+            $p = Database::one('SELECT id, sku, name, quantity, is_active FROM spare_parts WHERE id = ? FOR UPDATE', [$id]);
+            if (!$p) { throw new DomainException('Spare part not found.'); }
+
+            $pendingReqs = (int) Database::value('SELECT COUNT(*) FROM part_requests WHERE part_id = ? AND status = "pending"', [$id]);
+            if ($pendingReqs > 0) {
+                throw new DomainException('Cannot remove part with pending mechanic requests. Please approve or reject pending requests first.');
+            }
+
+            $usedInJobs = (int) Database::value('SELECT COUNT(*) FROM job_parts WHERE part_id = ?', [$id]);
+            $usedInTxns = (int) Database::value('SELECT COUNT(*) FROM inventory_transactions WHERE part_id = ? AND txn_type <> "purchase"', [$id]);
+
+            if ($usedInJobs > 0 || $usedInTxns > 0) {
+                // Historical references exist - deactivate to protect financial and audit integrity
+                Database::run('UPDATE spare_parts SET is_active = 0 WHERE id = ?', [$id]);
+                AuditLogger::log('part_archived_removed', 'inventory', $id, ['name' => $p['name'], 'sku' => $p['sku']], ['is_active' => 0]);
+                return ['deleted' => false, 'archived' => true, 'name' => $p['name']];
+            } else {
+                // Safe clean deletion
+                Database::run('DELETE FROM inventory_transactions WHERE part_id = ?', [$id]);
+                Database::run('DELETE FROM part_requests WHERE part_id = ?', [$id]);
+                Database::run('DELETE FROM spare_parts WHERE id = ?', [$id]);
+                AuditLogger::log('part_deleted', 'inventory', $id, ['name' => $p['name'], 'sku' => $p['sku']], null);
+                return ['deleted' => true, 'archived' => false, 'name' => $p['name']];
+            }
+        });
+    }
+
     public static function lowStock(int $limit = 50): array
     {
         return Database::all('SELECT id, sku, name, quantity, reorder_level, unit FROM spare_parts

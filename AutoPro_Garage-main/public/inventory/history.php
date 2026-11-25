@@ -16,16 +16,17 @@ $pg = paginate((int) Database::value("SELECT COUNT(*) FROM inventory_transaction
 $rows = Database::all("SELECT t.*, p.name, p.sku, u.full_name AS user_name FROM inventory_transactions t JOIN spare_parts p ON p.id = t.part_id LEFT JOIN users u ON u.id = t.created_by
     WHERE $w ORDER BY t.id DESC LIMIT {$pg['per_page']} OFFSET {$pg['offset']}", $params);
 $part = $pid ? Database::one('SELECT name FROM spare_parts WHERE id = ?', [$pid]) : null;
-ui_header('Stock history', 'inventory');
-page_header('Stock movement history', $part ? $part['name'] : 'All parts');
+ui_header(t('Stock history', 'Stock history'), 'inventory');
+page_header(t('Stock movement history', 'Stock movement history'), $part ? $part['name'] : t('All parts', 'All parts'));
+$typeLabels = ['purchase' => t('Purchase', 'Purchase'), 'issue' => t('Issue', 'Issue'), 'return' => t('Return', 'Return'), 'adjustment_in' => t('Adjustment In', 'Adjustment In'), 'adjustment_out' => t('Adjustment Out', 'Adjustment Out')];
 ?>
 <form class="filters" method="get"><?php if ($pid): ?><input type="hidden" name="part_id" value="<?= $pid ?>"><?php endif; ?>
-<div class="field"><label for="type">Type</label><select class="input" id="type" name="type" data-autosubmit><option value="">All</option><?php foreach (['purchase', 'issue', 'return', 'adjustment_in', 'adjustment_out'] as $t): ?><option value="<?= e($t) ?>"<?= $type === $t ? ' selected' : '' ?>><?= e(ucwords(str_replace('_', ' ', $t))) ?></option><?php endforeach; ?></select></div>
-<div class="field"><label for="from">From</label><input class="input" type="date" id="from" name="from" value="<?= e($from) ?>"></div><div class="field"><label for="to">To</label><input class="input" type="date" id="to" name="to" value="<?= e($to) ?>"></div>
-<button class="btn btn-primary" type="submit">Filter</button></form>
-<div class="table-wrap"><table class="table stack"><thead><tr><th>Date</th><th>Part</th><th>Type</th><th class="num">Qty</th><th class="num">Balance</th><th>Reference</th><th>By</th><th>Notes</th></tr></thead><tbody>
+<div class="field"><label for="type"><?= e(t('Type', 'Type')) ?></label><select class="input" id="type" name="type" data-autosubmit><option value=""><?= e(t('All', 'All')) ?></option><?php foreach ($typeLabels as $k => $l): ?><option value="<?= e($k) ?>"<?= $type === $k ? ' selected' : '' ?>><?= e($l) ?></option><?php endforeach; ?></select></div>
+<div class="field"><label for="from"><?= e(t('From', 'From')) ?></label><input class="input" type="date" id="from" name="from" value="<?= e($from) ?>"></div><div class="field"><label for="to"><?= e(t('To', 'To')) ?></label><input class="input" type="date" id="to" name="to" value="<?= e($to) ?>"></div>
+<button class="btn btn-primary" type="submit"><?= e(t('Filter', 'Filter')) ?></button></form>
+<div class="table-wrap"><table class="table stack"><thead><tr><th><?= e(t('Date', 'Date')) ?></th><th><?= e(t('Part', 'Part')) ?></th><th><?= e(t('Type', 'Type')) ?></th><th class="num"><?= e(t('Qty', 'Qty')) ?></th><th class="num"><?= e(t('Balance', 'Balance')) ?></th><th><?= e(t('Reference', 'Reference')) ?></th><th><?= e(t('By', 'By')) ?></th><th><?= e(t('Notes', 'Notes')) ?></th></tr></thead><tbody>
 <?php foreach ($rows as $t): $in = in_array($t['txn_type'], ['purchase', 'return', 'adjustment_in'], true); ?>
-<tr><td class="nowrap"><?= e(fmt_datetime($t['created_at'])) ?></td><td><?= e($t['name']) ?> <span class="muted small"><?= e($t['sku']) ?></span></td><td><?= badge(ucwords(str_replace('_', ' ', $t['txn_type'])), $in ? 'badge-completed' : 'badge-in-progress') ?></td>
+<tr><td class="nowrap"><?= e(fmt_datetime($t['created_at'])) ?></td><td><?= e($t['name']) ?> <span class="muted small"><?= e($t['sku']) ?></span></td><td><?= badge($typeLabels[$t['txn_type']] ?? ucwords(str_replace('_', ' ', $t['txn_type'])), $in ? 'badge-completed' : 'badge-in-progress') ?></td>
 <td class="num"><?= $in ? '+' : '−' ?><?= (int) $t['quantity'] ?></td><td class="num"><?= (int) $t['balance_after'] ?></td><td><?= e($t['reference'] ?: '—') ?></td><td><?= e($t['user_name'] ?: '—') ?></td><td><?= e($t['notes'] ?: '') ?></td></tr>
-<?php endforeach; ?><?php if (!$rows): ?><tr><td colspan="8" class="empty">No stock movements.</td></tr><?php endif; ?></tbody></table></div>
+<?php endforeach; ?><?php if (!$rows): ?><tr><td colspan="8" class="empty"><?= e(t('No stock movements.', 'No stock movements.')) ?></td></tr><?php endif; ?></tbody></table></div>
 <?php pagination_links($pg, ['part_id' => $pid ?: '', 'type' => $type, 'from' => $from, 'to' => $to]); ui_footer();

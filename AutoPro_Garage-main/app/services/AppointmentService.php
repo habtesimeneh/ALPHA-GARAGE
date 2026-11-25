@@ -100,8 +100,8 @@ final class AppointmentService
             }
 
             $id = Database::insert(
-                'INSERT INTO appointments (appointment_number, customer_id, vehicle_id, service_id, appointment_date, appointment_time, status, problem_description, created_by)
-                 VALUES (?, ?, ?, ?, ?, ?, "scheduled", ?, ?)',
+                'INSERT INTO appointments (appointment_number, customer_id, vehicle_id, service_id, appointment_date, appointment_time, status, workflow_stage, problem_description, created_by)
+                 VALUES (?, ?, ?, ?, ?, ?, "scheduled", "pending_reception", ?, ?)',
                 [Numbering::placeholder(), $custId, $vehId, $srvId, $date, $time, $prob ?: null, current_user()['id'] ?? null]
             );
             $number = Numbering::make('APT', $id);
@@ -111,13 +111,11 @@ final class AppointmentService
                 'appointment_number' => $number, 'customer_id' => $custId, 'vehicle_id' => $vehId, 'date' => $date, 'time' => $time
             ]);
 
-            // Notify receptionists
-            NotificationService::broadcast(
-                'New Appointment Booked',
-                "Appointment $number booked for $date at $time.",
-                'appointments/',
-                'receptionist'
-            );
+            // Notify receptionists & customer via SMS and In-App
+            $aptData = self::find($id);
+            if ($aptData) {
+                SmsService::notifyBookingReceived($aptData);
+            }
 
             return $id;
         });
@@ -140,10 +138,69 @@ final class AppointmentService
         });
     }
 
-    /** 1-Click Conversion: Converts an Appointment into a Job Card */
-    public static function convertToJob(int $id): int
+    /**
+     * Step 2: Receptionist submits booking to Manager for approval
+     */
+    public static function sendToManager(int $id, ?string $notes = null): void
     {
-        return (int) Database::transaction(function () use ($id) {
+        Database::transaction(function () use ($id, $notes) {
+            $apt = self::find($id);
+            if (!$apt) {
+                throw new DomainException('Appointment not found.');
+            }
+            if ($apt['status'] === 'cancelled') {
+                throw new DomainException('A cancelled appointment cannot be submitted to manager.');
+            }
+
+            Database::run(
+                'UPDATE appointments SET workflow_stage = "pending_manager", manager_notes = ? WHERE id = ?',
+                [$notes ?: ($apt['manager_notes'] ?? null), $id]
+            );
+
+            AuditLogger::log('appointment_submitted_to_manager', 'appointments', $id, null, [
+                'appointment_number' => $apt['appointment_number'],
+                'notes' => $notes
+            ]);
+
+            SmsService::notifySentToManager($apt);
+        });
+    }
+
+    /**
+     * Step 3 & 4: Manager approves service booking and returns to Reception
+     */
+    public static function managerApprove(int $id, ?string $notes = null): void
+    {
+        Database::transaction(function () use ($id, $notes) {
+            $apt = self::find($id);
+            if (!$apt) {
+                throw new DomainException('Appointment not found.');
+            }
+            if ($apt['status'] === 'cancelled') {
+                throw new DomainException('A cancelled appointment cannot be approved.');
+            }
+
+            $currentUserId = current_user()['id'] ?? 1;
+            Database::run(
+                'UPDATE appointments SET workflow_stage = "manager_approved", status = "confirmed", manager_approved_by = ?, manager_approved_at = NOW(), manager_notes = ? WHERE id = ?',
+                [$currentUserId, $notes ?: ($apt['manager_notes'] ?? null), $id]
+            );
+
+            AuditLogger::log('appointment_manager_approved', 'appointments', $id, null, [
+                'appointment_number' => $apt['appointment_number'],
+                'approved_by' => $currentUserId,
+                'notes' => $notes
+            ]);
+
+            $updatedApt = self::find($id);
+            SmsService::notifyManagerApproved($updatedApt ?: $apt);
+        });
+    }
+
+    /** 1-Click Conversion: Converts an Appointment into a Job Card */
+    public static function convertToJob(int $id, ?int $mechanicId = null): int
+    {
+        return (int) Database::transaction(function () use ($id, $mechanicId) {
             $apt = self::find($id);
             if (!$apt) {
                 throw new DomainException('Appointment not found.');
@@ -162,7 +219,7 @@ final class AppointmentService
             $jobId = JobService::create([
                 'customer_id' => $apt['customer_id'],
                 'vehicle_id' => $apt['vehicle_id'],
-                'mechanic_id' => null,
+                'mechanic_id' => $mechanicId,
                 'date_received' => date('Y-m-d'),
                 'reported_problem' => $problem,
                 'initial_condition' => 'Checked in via Appointment #' . $apt['appointment_number'],
@@ -175,14 +232,14 @@ final class AppointmentService
             // If a specific catalog service was chosen in appointment, attach it to job_services
             if (!empty($apt['service_id'])) {
                 try {
-                    CatalogService::attachToJob($jobId, (int) $apt['service_id'], null, 'Booked via appointment');
+                    CatalogService::attachToJob($jobId, (int) $apt['service_id'], $mechanicId, 'Booked via appointment');
                 } catch (Throwable $e) {
                     // non-fatal if service price already counted
                 }
             }
 
             // Update appointment
-            Database::run('UPDATE appointments SET status = "in_progress", converted_job_id = ? WHERE id = ?', [$jobId, $id]);
+            Database::run('UPDATE appointments SET status = "in_progress", workflow_stage = "converted_to_job", converted_job_id = ? WHERE id = ?', [$jobId, $id]);
             AuditLogger::log('appointment_converted_to_job', 'appointments', $id, null, [
                 'appointment_number' => $apt['appointment_number'], 'job_id' => $jobId
             ]);

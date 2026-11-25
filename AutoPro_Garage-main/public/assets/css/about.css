@@ -595,7 +595,7 @@ body.landing-page.about-page {
 }
 
 @media (max-width: 520px) {
-  .about-hero-content h1 { font-size: clamp(2.55rem, 13vw, 3.8rem); }
+  .about-hero-content h1 { font-size: clamp(1.35rem, 5.8vw, 1.75rem); }
   .about-hero-actions { display: grid; grid-template-columns: 1fr; }
   .about-hero-actions > a { width: 100%; min-width: 0; box-sizing: border-box; }
   .about-story .about-image-wrap { min-height: 280px; }

@@ -75,7 +75,7 @@ if (is_post()) {
     }
 }
 $customers = Database::all('SELECT id, full_name, phone FROM customers WHERE is_active = 1 OR id = ? ORDER BY full_name LIMIT 2000', [(int) ($veh['customer_id'] ?? 0)]);
-$custOptions = ['' => '— Select customer —'];
+$custOptions = ['' => t('— Select customer —', '— Select customer —')];
 foreach ($customers as $c) { $custOptions[$c['id']] = $c['full_name'] . ' (' . $c['phone'] . ')'; }
 
 ui_header($veh ? 'Edit vehicle' : 'Register vehicle', 'vehicles');
@@ -95,6 +95,6 @@ page_header($veh ? 'Edit vehicle' : 'Register vehicle', 'One customer can own mu
     <?php form_select('vehicle_type', 'Vehicle type', array_combine($types, $types), $v['vehicle_type'], $errors, ['required' => true]); ?>
     <div class="full"><?php form_textarea('notes', 'Vehicle notes / special instructions', $v['notes'] ?? '', $errors, ['rows' => 3, 'placeholder' => 'Any vehicle modifications, past damage, or handling notes...']); ?></div>
   </div>
-  <div class="form-actions"><button class="btn btn-primary" type="submit">Save vehicle</button><a class="btn btn-ghost" href="<?= e(url($veh ? 'vehicles/view.php?id=' . $id : 'vehicles/')) ?>">Cancel</a></div>
+  <div class="form-actions"><button class="btn btn-primary" type="submit"><?= e(t('Save vehicle', 'Save vehicle')) ?></button><a class="btn btn-ghost" href="<?= e(url($veh ? 'vehicles/view.php?id=' . $id : 'vehicles/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a></div>
 </form></div>
 <?php ui_footer();

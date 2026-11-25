@@ -39,70 +39,70 @@ $users = Database::all(
 $qs = ['q' => $q, 'module' => $module, 'action' => $action, 'result' => $result, 'user_id' => $uid ?: '', 'from' => $from, 'to' => $to];
 
 ui_header('Audit logs', 'audit');
-page_header('Audit logs', 'Append-only and hash-chained: records cannot be edited or deleted through the application', '<a class="btn btn-ghost" href="?' . e(http_build_query($qs + ['export' => 'csv'])) . '">Export CSV</a>');
-if ($verify): ?><div class="alert <?= $verify['ok'] ? 'alert-ok' : 'alert-danger' ?>" role="alert"><strong><?= $verify['ok'] ? '✔ Chain verified.' : '✖ Tampering detected.' ?></strong> <?= e($verify['message']) ?></div><?php endif; ?>
-<div class="card gap-row no-print"><form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="do" value="verify"><button class="btn btn-primary btn-sm" type="submit">Verify integrity of the whole chain</button></form><span class="muted small">Recomputes every SHA-256 link and compares it with the stored chain head.</span></div>
+page_header('Audit logs', 'Append-only and hash-chained: records cannot be edited or deleted through the application', '<a class="btn btn-ghost" href="?' . e(http_build_query($qs + ['export' => 'csv'])) . '">' . e(t('Export CSV', 'Export CSV')) . '</a>');
+if ($verify): ?><div class="alert <?= $verify['ok'] ? 'alert-ok' : 'alert-danger' ?>" role="alert"><strong><?= $verify['ok'] ? e(t('✔ Chain verified.', '✔ Chain verified.')) : e(t('✖ Tampering detected.', '✖ Tampering detected.')) ?></strong> <?= e($verify['message']) ?></div><?php endif; ?>
+<div class="card gap-row no-print"><form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="do" value="verify"><button class="btn btn-primary btn-sm" type="submit"><?= e(t('Verify integrity of the whole chain', 'Verify integrity of the whole chain')) ?></button></form><span class="muted small"><?= e(t('Recomputes every SHA-256 link and compares it with the stored chain head.', 'Recomputes every SHA-256 link and compares it with the stored chain head.')) ?></span></div>
 <form class="filters" method="get">
 <div class="field grow">
-    <label for="q">Search</label>
-    <input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="User, action, IP, record ID, old/new value"></div>
+    <label for="q"><?= e(t('Search', 'Search')) ?></label>
+    <input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="<?= e(t('User, action, IP, record ID, old/new value', 'User, action, IP, record ID, old/new value')) ?>"></div>
 <div class="field">
-    <label for="module">Module</label>
+    <label for="module"><?= e(t('Module', 'Module')) ?></label>
     <select class="input" id="module" name="module" data-autosubmit>
-        <option value="">All</option>
+        <option value=""><?= e(t('All', 'All')) ?></option>
         <?php foreach ($modules as $m): ?>
             <option<?= $module === $m ? ' selected' : '' ?>>
-                <?= e($m) ?></option><?php endforeach; ?>
+                <?= e(t($m, $m)) ?></option><?php endforeach; ?>
             </select>
         </div>
 <div class="field">
-    <label for="action">Action</label>
+    <label for="action"><?= e(t('Action', 'Action')) ?></label>
     <select class="input" id="action" name="action" data-autosubmit>
-        <option value="">All</option>
+        <option value=""><?= e(t('All', 'All')) ?></option>
         <?php foreach ($actions as $a): ?>
             <option<?= $action === $a ? ' selected' : '' ?>>
-                <?= e($a) ?></option><?php endforeach; ?>
+                <?= e(t($a, $a)) ?></option><?php endforeach; ?>
             </select>
         </div>
 <div class="field">
-    <label for="result">Result</label>
+    <label for="result"><?= e(t('Result', 'Result')) ?></label>
     <select class="input" id="result" name="result" data-autosubmit>
-        <option value="">All</option>
+        <option value=""><?= e(t('All', 'All')) ?></option>
         <?php foreach (['success', 'failure', 'denied'] as $r): ?>
             <option<?= $result === $r ? ' selected' : '' ?>>
-                <?= e($r) ?></option><?php endforeach; ?>
+                <?= e(t($r, $r)) ?></option><?php endforeach; ?>
             </select>
         </div>
 <div class="field">
-    <label for="user_id">User</label>
+    <label for="user_id"><?= e(t('User', 'User')) ?></label>
     <select class="input" id="user_id" name="user_id" data-autosubmit>
-        <option value="">All</option>
+        <option value=""><?= e(t('All', 'All')) ?></option>
         <?php foreach ($users as $u): ?>
             <option value="<?= (int) $u['id'] ?>"<?= $uid === (int) $u['id'] ? ' selected' : '' ?>>
                 <?= e($u['username']) ?></option><?php endforeach; ?>
             </select>
         </div>
 <div class="field">
-    <label for="from">From</label>
+    <label for="from"><?= e(t('From', 'From')) ?></label>
     <input class="input" type="date" id="from" name="from" value="<?= e($from) ?>">
 </div>
 <div class="field">
-    <label for="to">To</label>
+    <label for="to"><?= e(t('To', 'To')) ?></label>
     <input class="input" type="date" id="to" name="to" value="<?= e($to) ?>">
 </div>
-<button class="btn btn-primary" type="submit">Filter</button>
-<a class="btn btn-ghost" href="<?= e(url('audit-logs/')) ?>">Reset</a>
+<button class="btn btn-primary" type="submit"><?= e(t('Filter', 'Filter')) ?></button>
+<a class="btn btn-ghost" href="<?= e(url('audit-logs/')) ?>"><?= e(t('Reset', 'Reset')) ?></a>
 </form>
 <div class="table-wrap">
     <table class="table">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Time</th>
-                <th>User</th>
-                <th>Action</th>
-                <th>Module / record</th>
-                <th>Result</th>
+                <th><?= e(t('Time', 'Time')) ?></th>
+                <th><?= e(t('User', 'User')) ?></th>
+                <th><?= e(t('Action', 'Action')) ?></th>
+                <th><?= e(t('Module / record', 'Module / record')) ?></th>
+                <th><?= e(t('Result', 'Result')) ?></th>
                 <th>IP</th>
                 <th>Changes</th>
             </tr>

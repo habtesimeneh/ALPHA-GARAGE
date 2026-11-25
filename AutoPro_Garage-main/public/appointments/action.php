@@ -11,6 +11,18 @@ if (!$id || !$action) { abort(400, 'Invalid request.'); }
 
 try {
     switch ($action) {
+        case 'send_to_manager':
+            AppointmentService::sendToManager($id, post('notes'));
+            flash('success', 'Appointment submitted to Manager for approval. SMS sent to Manager.');
+            redirect('appointments/');
+            break;
+
+        case 'manager_approve':
+            AppointmentService::managerApprove($id, post('notes'));
+            flash('success', 'Appointment approved by Manager. SMS notification sent to Receptionist and Customer.');
+            redirect('appointments/');
+            break;
+
         case 'confirm':
             AppointmentService::updateStatus($id, 'confirmed');
             flash('success', 'Appointment confirmed.');
@@ -24,8 +36,9 @@ try {
             break;
 
         case 'convert':
-            $jobId = AppointmentService::convertToJob($id);
-            flash('success', 'Appointment successfully converted to Job Card!');
+            $mechId = post_int('mechanic_id') ?: null;
+            $jobId = AppointmentService::convertToJob($id, $mechId);
+            flash('success', 'Appointment converted to Job Card with Claim Ticket generated! Mechanic and Customer notified via SMS.');
             redirect('job-cards/view.php?id=' . $jobId);
             break;
 

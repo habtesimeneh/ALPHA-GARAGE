@@ -47,7 +47,27 @@ try {
         case 'request_part':
             require_permission('jobs.request_parts');
             JobService::requestPart($id, post_int('part_id'), post_int('quantity'), post('note'));
-            flash('success', 'Part request sent to the inventory manager.');
+            flash('success', t('Part request sent to the inventory manager.', 'Part request sent to the inventory manager.'));
+            break;
+        case 'approve_part_request':
+            require_permission('inventory.issue');
+            $reqId = post_int('request_id');
+            $req = Database::one('SELECT * FROM part_requests WHERE id = ? AND job_id = ?', [$reqId, $id]);
+            if (!$req) { throw new DomainException('Part request not found.'); }
+            InventoryService::issue($id, (int) $req['part_id'], (int) $req['quantity'], $reqId);
+            flash('success', t('Parts issued and stock updated.', 'Parts issued and stock updated.'));
+            break;
+        case 'reject_part_request':
+            require_permission('inventory.issue');
+            $reqId = post_int('request_id');
+            InventoryService::rejectRequest($reqId, post('note', ''));
+            flash('success', t('Request rejected.', 'Request rejected.'));
+            break;
+        case 'return_part':
+            require_permission('inventory.issue');
+            $jobPartId = post_int('job_part_id');
+            InventoryService::returnSinglePart($id, $jobPartId, post('reason'));
+            flash('success', t('Part removed from job card and returned to stock.', 'Part removed from job card and returned to stock.'));
             break;
         case 'attach_service':
             require_permission('jobs.progress');
@@ -62,6 +82,36 @@ try {
             $st = post('service_status');
             CatalogService::updateServiceStatus($id, $jsId, $st);
             flash('success', 'Service item status updated.');
+            break;
+        /* Workshop Workflow Actions */
+        case 'complete_work':
+            JobService::completeWork($id, post('note', ''));
+            flash('success', 'Repair work marked completed! Reception team notified via SMS.');
+            break;
+        case 'send_to_finance':
+            JobService::sendToFinance($id, post('note', ''));
+            flash('success', 'Submitted to Finance Manager for billing clearance. SMS dispatched.');
+            break;
+        case 'finance_clearance':
+            require_permission('jobs.finance_clear', 'invoices.view');
+            $res = JobService::financeClearance($id, post('note', ''));
+            flash('success', "Financial clearance issued: {$res['status']} (Balance: " . money((string)$res['balance']) . '). Reception notified via SMS.');
+            break;
+        case 'notify_customer_pickup':
+            JobService::notifyCustomerPickup($id);
+            flash('success', 'Vehicle ready SMS sent to customer with Claim Ticket! Customer notified for pickup.');
+            break;
+        case 'release_vehicle':
+            require_permission('jobs.release_vehicle', 'jobs.progress');
+            $ticket = post('claim_ticket');
+            if (!$ticket) { throw new DomainException('Please enter the customer presented Claim Ticket #.'); }
+            JobService::releaseVehicle($id, $ticket);
+            flash('success', 'Claim Ticket verified and vehicle released to customer! Manager notified via SMS for delivery sign-off.');
+            break;
+        case 'manager_deliver':
+            require_permission('jobs.manager_deliver', 'jobs.edit');
+            JobService::managerDeliver($id, post('note', ''));
+            flash('success', 'Final delivery sign-off complete! Vehicle marked Delivered and thank-you SMS sent to customer.');
             break;
         default:
             abort(400, 'Unknown action.');

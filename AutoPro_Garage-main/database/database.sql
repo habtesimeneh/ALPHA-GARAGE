@@ -130,6 +130,21 @@ CREATE TABLE job_cards (
   mileage_in INT UNSIGNED NULL,
   status ENUM('Pending','Diagnosing','Waiting for Parts','In Progress','Completed','Delivered','Cancelled')
     NOT NULL DEFAULT 'Pending',
+  workflow_stage VARCHAR(50) NOT NULL DEFAULT 'assigned',
+  claim_ticket_number VARCHAR(50) NULL UNIQUE,
+  work_completed_by INT UNSIGNED NULL,
+  work_completed_at DATETIME NULL,
+  work_completion_notes TEXT NULL,
+  finance_status ENUM('Pending','Cleared','Payment Due') NOT NULL DEFAULT 'Pending',
+  finance_balance DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  finance_reviewed_by INT UNSIGNED NULL,
+  finance_reviewed_at DATETIME NULL,
+  finance_notes VARCHAR(500) NULL,
+  customer_notified_at DATETIME NULL,
+  vehicle_released_by INT UNSIGNED NULL,
+  vehicle_released_at DATETIME NULL,
+  delivered_by INT UNSIGNED NULL,
+  delivered_at DATETIME NULL,
   created_by INT UNSIGNED NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -201,6 +216,10 @@ CREATE TABLE appointments (
   appointment_date DATE NOT NULL,
   appointment_time TIME NOT NULL,
   status ENUM('scheduled','confirmed','in_progress','completed','cancelled') NOT NULL DEFAULT 'scheduled',
+  workflow_stage VARCHAR(50) NOT NULL DEFAULT 'pending_reception',
+  manager_approved_by INT UNSIGNED NULL,
+  manager_approved_at DATETIME NULL,
+  manager_notes VARCHAR(500) NULL,
   problem_description TEXT NULL,
   converted_job_id INT UNSIGNED NULL,
   created_by INT UNSIGNED NULL,
@@ -447,6 +466,23 @@ CREATE TABLE notifications (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_notif_user (user_id, is_read),
   INDEX idx_notif_role (role_name, is_read)
+) ENGINE=InnoDB;
+
+CREATE TABLE sms_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  recipient_phone VARCHAR(50) NOT NULL,
+  recipient_name VARCHAR(150) NULL,
+  recipient_role VARCHAR(50) NULL,
+  message TEXT NOT NULL,
+  event_type VARCHAR(80) NOT NULL,
+  related_entity_type VARCHAR(50) NULL,
+  related_entity_id INT UNSIGNED NULL,
+  status ENUM('sent', 'queued', 'failed') NOT NULL DEFAULT 'sent',
+  gateway VARCHAR(50) NOT NULL DEFAULT 'local_spool',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_phone (recipient_phone),
+  INDEX idx_event (event_type),
+  INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE password_resets (

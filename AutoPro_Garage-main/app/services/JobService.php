@@ -84,7 +84,8 @@ final class JobService
                      $d['estimated_completion'] ?: null, $d['mileage_in'] !== '' ? (int) $d['mileage_in'] : null, current_user()['id'] ?? null]);
             }
             $number = Numbering::make('JC', $id);
-            Database::run('UPDATE job_cards SET job_number = ? WHERE id = ?', [$number, $id]);
+            $claimTicket = 'TKT-' . date('Ymd') . '-' . str_pad((string) $id, 4, '0', STR_PAD_LEFT);
+            Database::run('UPDATE job_cards SET job_number = ?, claim_ticket_number = ?, workflow_stage = "assigned" WHERE id = ?', [$number, $claimTicket, $id]);
             if ($d['mileage_in'] !== '') {
                 Database::run('UPDATE vehicles SET mileage = GREATEST(mileage, ?) WHERE id = ?', [(int) $d['mileage_in'], $veh['id']]);
             }
@@ -99,11 +100,15 @@ final class JobService
 
             self::addUpdate($id, 'status', 'Job card created', null, 'Pending');
             $audit = ['job_number' => $number, 'customer_id' => $cust['id'], 'vehicle_id' => $veh['id'],
-                'mechanic_id' => $mech['id'] ?? null, 'labor_cost' => from_cents($totalLaborCents), 'service_ids' => array_values($serviceIds)];
+                'mechanic_id' => $mech['id'] ?? null, 'labor_cost' => from_cents($totalLaborCents), 'service_ids' => array_values($serviceIds), 'claim_ticket' => $claimTicket];
             if ($hasPriority) { $audit['priority'] = $priority; }
             AuditLogger::log('job_created', 'job_cards', $id, null, $audit);
             if ($mech) {
                 AuditLogger::log('mechanic_assigned', 'job_cards', $id, ['mechanic_id' => null], ['mechanic_id' => $mech['id'], 'mechanic' => $mech['full_name']]);
+                $fullJob = self::find($id);
+                if ($fullJob) {
+                    SmsService::notifyMechanicAssigned($fullJob, $mech, $claimTicket);
+                }
             }
             return $id;
         });
@@ -197,11 +202,18 @@ final class JobService
             $old = self::lock($id);
             self::assertOpen($old);
             $mech = $mechanicId ? self::activeMechanic($mechanicId) : null;
-            Database::run('UPDATE job_cards SET mechanic_id = ? WHERE id = ?', [$mech['id'] ?? null, $id]);
+            $claimTicket = $old['claim_ticket_number'] ?: ('TKT-' . date('Ymd') . '-' . str_pad((string) $id, 4, '0', STR_PAD_LEFT));
+            Database::run('UPDATE job_cards SET mechanic_id = ?, claim_ticket_number = ?, workflow_stage = "assigned" WHERE id = ?', [$mech['id'] ?? null, $claimTicket, $id]);
             self::addUpdate($id, 'assignment', $mech ? 'Assigned to ' . $mech['full_name'] : 'Mechanic unassigned');
             AuditLogger::log('mechanic_assigned', 'job_cards', $id, ['mechanic_id' => $old['mechanic_id']], ['mechanic_id' => $mech['id'] ?? null, 'mechanic' => $mech['full_name'] ?? null]);
             foreach (array_unique(array_filter([(int) $old['mechanic_id'], (int) ($mech['id'] ?? 0)])) as $mid) {
                 self::syncMechanicAvailability($mid);
+            }
+            if ($mech) {
+                $fullJob = self::find($id);
+                if ($fullJob) {
+                    SmsService::notifyMechanicAssigned($fullJob, $mech, $claimTicket);
+                }
             }
         });
     }
@@ -290,6 +302,206 @@ final class JobService
         if (!$m || $m['availability'] === 'off_duty') { return; }
         $active = (int) Database::value("SELECT COUNT(*) FROM job_cards WHERE mechanic_id = ? AND status IN ('Diagnosing','In Progress')", [$mechanicId]);
         Database::run('UPDATE mechanics SET availability = ? WHERE id = ?', [$active > 0 ? 'busy' : 'available', $mechanicId]);
+    }
+
+    /* ------------------------------------------------------------ Operational Workshop Workflow */
+
+    /**
+     * Step 6: Mechanic completes work and notifies Receptionist
+     */
+    public static function completeWork(int $id, string $notes = ''): void
+    {
+        Database::transaction(function () use ($id, $notes) {
+            $job = self::lock($id);
+            if (!in_array($job['status'], self::OPEN, true) && $job['status'] !== 'Completed') {
+                throw new DomainException('Only open jobs can be marked as completed.');
+            }
+            if (!$job['mechanic_id']) {
+                throw new DomainException('Cannot complete work without an assigned mechanic.');
+            }
+
+            $currentUserId = current_user()['id'] ?? 1;
+            $oldStatus = $job['status'];
+
+            Database::run(
+                'UPDATE job_cards SET status = "Completed", workflow_stage = "work_completed", actual_completion = CURDATE(), 
+                    work_completed_by = ?, work_completed_at = NOW(), work_completion_notes = ? WHERE id = ?',
+                [$currentUserId, $notes ?: null, $id]
+            );
+
+            self::addUpdate($id, 'status', 'Work completed by mechanic: ' . ($notes ?: 'Repairs finalized'), $oldStatus, 'Completed');
+            AuditLogger::log('job_work_completed', 'job_cards', $id, ['status' => $oldStatus], ['status' => 'Completed', 'notes' => $notes]);
+
+            self::syncMechanicAvailability((int) $job['mechanic_id']);
+
+            $fullJob = self::find($id);
+            if ($fullJob) {
+                SmsService::notifyWorkCompleted($fullJob, $fullJob['mechanic_name'] ?? null);
+            }
+        });
+    }
+
+    /**
+     * Step 7: Receptionist sends completed job to Finance Manager
+     */
+    public static function sendToFinance(int $id, ?string $notes = null): void
+    {
+        Database::transaction(function () use ($id, $notes) {
+            $job = self::lock($id);
+            if ($job['status'] !== 'Completed' && $job['workflow_stage'] !== 'work_completed') {
+                throw new DomainException('Only completed jobs can be submitted to Finance for clearance.');
+            }
+
+            Database::run(
+                'UPDATE job_cards SET workflow_stage = "pending_finance" WHERE id = ?',
+                [$id]
+            );
+
+            self::addUpdate($id, 'finance', 'Submitted to Finance Manager for billing clearance: ' . ($notes ?: 'Awaiting invoice & payment review'));
+            AuditLogger::log('job_submitted_to_finance', 'job_cards', $id, null, ['notes' => $notes]);
+
+            $fullJob = self::find($id);
+            if ($fullJob) {
+                SmsService::notifySentToFinance($fullJob);
+            }
+        });
+    }
+
+    /**
+     * Step 8: Finance Manager inspects billing, payment status, and sends clearance to Reception
+     */
+    public static function financeClearance(int $id, ?string $notes = null): array
+    {
+        return Database::transaction(function () use ($id, $notes) {
+            $job = self::lock($id);
+
+            // Ensure invoice exists; if not, create it
+            $inv = Database::one('SELECT id, balance, payment_status, grand_total FROM invoices WHERE job_card_id = ?', [$id]);
+            if (!$inv) {
+                try {
+                    $invId = InvoiceService::createForJob($id);
+                    $inv = Database::one('SELECT id, balance, payment_status, grand_total FROM invoices WHERE id = ?', [$invId]);
+                } catch (Throwable $e) {
+                    // Invoice generation fallback
+                }
+            }
+
+            $balance = (float) ($inv['balance'] ?? 0.00);
+            $isPaid = ($balance <= 0.01 && ($inv['payment_status'] ?? '') === 'Paid');
+            $status = $isPaid ? 'Cleared' : 'Payment Due';
+
+            $currentUserId = current_user()['id'] ?? 1;
+            Database::run(
+                'UPDATE job_cards SET workflow_stage = "finance_cleared", finance_status = ?, finance_balance = ?,
+                    finance_reviewed_by = ?, finance_reviewed_at = NOW(), finance_notes = ? WHERE id = ?',
+                [$status, $balance, $currentUserId, $notes ?: null, $id]
+            );
+
+            self::addUpdate($id, 'finance', "Financial clearance issued: {$status} (Outstanding Balance: " . money((string) $balance) . ")");
+            AuditLogger::log('job_finance_cleared', 'job_cards', $id, null, [
+                'status' => $status,
+                'balance' => $balance,
+                'notes' => $notes
+            ]);
+
+            $fullJob = self::find($id);
+            if ($fullJob) {
+                SmsService::notifyFinanceCleared($fullJob, $status, (string) $balance);
+            }
+
+            return ['status' => $status, 'balance' => $balance, 'invoice' => $inv];
+        });
+    }
+
+    /**
+     * Step 9: Receptionist calls/sends SMS to Customer for vehicle pickup
+     */
+    public static function notifyCustomerPickup(int $id): void
+    {
+        Database::transaction(function () use ($id) {
+            $job = self::lock($id);
+            $ticket = $job['claim_ticket_number'] ?: ('TKT-' . date('Ymd') . '-' . str_pad((string) $id, 4, '0', STR_PAD_LEFT));
+
+            Database::run(
+                'UPDATE job_cards SET workflow_stage = "customer_notified", customer_notified_at = NOW() WHERE id = ?',
+                [$id]
+            );
+
+            self::addUpdate($id, 'customer_call', "Customer notified for vehicle pickup via SMS with Claim Ticket {$ticket}.");
+            AuditLogger::log('job_customer_notified_pickup', 'job_cards', $id, null, ['ticket' => $ticket]);
+
+            $fullJob = self::find($id);
+            if ($fullJob) {
+                SmsService::notifyCustomerPickupReady($fullJob, (string) ($fullJob['finance_balance'] ?? 0), $ticket);
+            }
+        });
+    }
+
+    /**
+     * Step 10 & 11: Receptionist verifies Claim Ticket & releases vehicle (or directs unpaid to finance)
+     */
+    public static function releaseVehicle(int $id, string $presentedTicket): void
+    {
+        Database::transaction(function () use ($id, $presentedTicket) {
+            $job = self::lock($id);
+            $expectedTicket = trim($job['claim_ticket_number'] ?? '');
+
+            // Verify claim ticket
+            if ($expectedTicket !== '' && strtoupper(trim($presentedTicket)) !== strtoupper($expectedTicket)) {
+                throw new DomainException("Invalid Claim Ticket presented ('{$presentedTicket}'). Expected ticket is '{$expectedTicket}'.");
+            }
+
+            // Verify payment
+            $inv = Database::one('SELECT balance, payment_status FROM invoices WHERE job_card_id = ?', [$id]);
+            if ($inv && (float) $inv['balance'] > 0.01 && $inv['payment_status'] !== 'Paid') {
+                throw new DomainException('Vehicle cannot be released: Outstanding balance of ' . money($inv['balance']) . ' must be settled with Finance first.');
+            }
+
+            $currentUserId = current_user()['id'] ?? 1;
+            Database::run(
+                'UPDATE job_cards SET workflow_stage = "vehicle_released", vehicle_released_by = ?, vehicle_released_at = NOW() WHERE id = ?',
+                [$currentUserId, $id]
+            );
+
+            self::addUpdate($id, 'release', "Claim Ticket {$presentedTicket} verified. Vehicle handed over to customer.");
+            AuditLogger::log('job_vehicle_released', 'job_cards', $id, null, [
+                'ticket' => $presentedTicket,
+                'released_by' => $currentUserId
+            ]);
+
+            $fullJob = self::find($id);
+            if ($fullJob) {
+                SmsService::notifyVehicleReleased($fullJob);
+            }
+        });
+    }
+
+    /**
+     * Step 12 & 13: Manager signs off final vehicle delivery
+     */
+    public static function managerDeliver(int $id, ?string $signoffNotes = null): void
+    {
+        Database::transaction(function () use ($id, $signoffNotes) {
+            $job = self::lock($id);
+            $currentUserId = current_user()['id'] ?? 1;
+
+            Database::run(
+                'UPDATE job_cards SET status = "Delivered", workflow_stage = "delivered", delivered_by = ?, delivered_at = NOW(), actual_completion = COALESCE(actual_completion, CURDATE()) WHERE id = ?',
+                [$currentUserId, $id]
+            );
+
+            self::addUpdate($id, 'delivery', 'Manager signed off delivery: ' . ($signoffNotes ?: 'All repairs, payments, and vehicle handover verified.'));
+            AuditLogger::log('job_manager_delivered', 'job_cards', $id, ['status' => $job['status']], [
+                'status' => 'Delivered',
+                'delivered_by' => $currentUserId,
+                'notes' => $signoffNotes
+            ]);
+
+            $fullJob = self::find($id);
+            if ($fullJob) {
+                SmsService::notifyDeliveryFinalized($fullJob);
+            }
+        });
     }
 
     /* ------------------------------------------------------------ internals */

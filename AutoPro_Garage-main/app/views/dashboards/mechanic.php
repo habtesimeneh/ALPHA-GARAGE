@@ -125,7 +125,7 @@ ui_header('Mechanic Workstation', 'dashboard');
 <div class="hero reveal-up">
   <div>
     <h2><?= e(t('Welcome back', 'Welcome back')) ?>, <?= e(explode(' ', $user['full_name'])[0]) ?></h2>
-    <p><?= e($user['role_label']) ?> · <?= e($garageName) ?> · Workstation: <?= $mechanicProfile ? e($mechanicProfile['full_name'] . ' (' . ($mechanicProfile['specialty'] ?: 'Certified Technician') . ')') : 'Unassigned Workstation' ?></p>
+    <p><?= e($user['role_label']) ?> · <?= e($garageName) ?> · <?= e(t('Workstation', 'Workstation')) ?>: <?= $mechanicProfile ? e($mechanicProfile['full_name'] . ' (' . t($mechanicProfile['specialty'] ?: 'Certified Technician', $mechanicProfile['specialty'] ?: 'Certified Technician') . ')') : e(t('Unassigned Workstation', 'Unassigned Workstation')) ?></p>
   </div>
   <div class="page-actions">
     <a class="btn btn-back-home btn-interactive" href="<?= e(url('index.php')) ?>" title="Back to public homepage">
@@ -143,7 +143,7 @@ ui_header('Mechanic Workstation', 'dashboard');
 
 <?php if ($mechanicId < 1): ?>
   <div class="alert alert-warn reveal-fade" role="alert">
-    <strong>Workstation Notice:</strong> Your user account is not currently linked to an active mechanic profile. Please request your garage administrator to assign your mechanic profile under Workshop Settings.
+    <strong><?= e(t('Workstation Notice', 'Workstation Notice')) ?>:</strong> <?= e(t('Your user account is not currently linked to an active mechanic profile. Please request your garage administrator to assign your mechanic profile under Workshop Settings.', 'Your user account is not currently linked to an active mechanic profile. Please request your garage administrator to assign your mechanic profile under Workshop Settings.')) ?>
   </div>
 <?php endif; ?>
 
@@ -157,14 +157,14 @@ ui_header('Mechanic Workstation', 'dashboard');
     <div class="kpi-label"><?= e(t('Active Assigned Jobs', 'Active Assigned Jobs')) ?></div>
     <div class="kpi-value"><?= $activeJobsCount ?></div>
     <div class="kpi-sub"><?= e(t('Vehicles currently in your queue', 'Vehicles currently in your queue')) ?></div>
-    <div class="kpi-cmp trend-flat">In Progress / Diagnosing</div>
+    <div class="kpi-cmp trend-flat"><?= e(t('In Progress / Diagnosing', 'In Progress / Diagnosing')) ?></div>
   </div>
 
   <div class="kpi-card <?= $urgentJobsCount > 0 ? 'tone-red' : 'tone-gold' ?> reveal-up card-interactive stagger-2">
     <div class="kpi-label"><?= e(t('High & Urgent Priority', 'High & Urgent Priority')) ?></div>
     <div class="kpi-value"><?= $urgentJobsCount ?></div>
-    <div class="kpi-sub"><?= $urgentJobsCount > 0 ? 'Requires immediate diagnostic focus' : 'No urgent bottlenecks' ?></div>
-    <div class="kpi-cmp <?= $urgentJobsCount > 0 ? 'trend-down' : 'trend-flat' ?>"><?= $urgentJobsCount > 0 ? 'High priority' : 'Normal workflow' ?></div>
+    <div class="kpi-sub"><?= $urgentJobsCount > 0 ? e(t('Requires immediate diagnostic focus', 'Requires immediate diagnostic focus')) : e(t('No urgent bottlenecks', 'No urgent bottlenecks')) ?></div>
+    <div class="kpi-cmp <?= $urgentJobsCount > 0 ? 'trend-down' : 'trend-flat' ?>"><?= $urgentJobsCount > 0 ? e(t('High priority', 'High priority')) : e(t('Normal workflow', 'Normal workflow')) ?></div>
   </div>
 
   <div class="kpi-card tone-green reveal-up card-interactive stagger-3">
@@ -306,7 +306,7 @@ ui_header('Mechanic Workstation', 'dashboard');
               <td><a href="<?= e(url('job-cards/view.php?id=' . $cj['id'])) ?>"><strong><?= e($cj['job_number']) ?></strong></a></td>
               <td><strong><?= e($cj['plate_number']) ?></strong> <span class="muted small"><?= e($cj['make'] . ' ' . $cj['model']) ?></span></td>
               <td><?= e(mb_strimwidth($cj['reported_problem'], 0, 60, '…')) ?></td>
-              <td class="nowrap"><?= e($cj['actual_completion'] ? fmt_date($cj['actual_completion']) : 'Recently') ?></td>
+              <td class="nowrap"><?= e($cj['actual_completion'] ? fmt_date($cj['actual_completion']) : t('Recently', 'Recently')) ?></td>
               <td><?= badge($cj['status']) ?></td>
               <td><a class="btn btn-ghost btn-sm" href="<?= e(url('job-cards/view.php?id=' . $cj['id'])) ?>"><?= e(t('Review', 'Review')) ?></a></td>
             </tr>

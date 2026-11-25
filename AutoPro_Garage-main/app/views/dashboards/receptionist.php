@@ -110,7 +110,7 @@ ui_header('Reception Dashboard', 'dashboard');
 
 <div class="dashboard-section-head reveal-up">
   <div><span class="dashboard-eyebrow"><?= e(t('OPERATIONAL OVERVIEW', 'OPERATIONAL OVERVIEW')) ?></span><h3><?= e(t('Front desk & workshop activity', 'Front desk & workshop activity')) ?></h3></div>
-  <span class="muted small">Real-time status · <?= e(date('l, F j, Y')) ?></span>
+  <span class="muted small"><?= e(t('Real-time status', 'Real-time status')) ?> · <?= e(date('l, F j, Y')) ?></span>
 </div>
 
 <div class="kpi-grid">
@@ -145,7 +145,7 @@ ui_header('Reception Dashboard', 'dashboard');
 
 <div class="dashboard-section-head reveal-up">
   <div><span class="dashboard-eyebrow"><?= e(t('APPOINTMENT ANALYTICS', 'APPOINTMENT ANALYTICS')) ?></span><h3><?= e(t('Booking trends & status distribution', 'Booking trends & status distribution')) ?></h3></div>
-  <span class="muted small">Visual workload analysis · Real database records</span>
+  <span class="muted small"><?= e(t('Visual workload analysis · Real database records', 'Visual workload analysis · Real database records')) ?></span>
 </div>
 
 <div class="chart-grid mb-4">
@@ -200,7 +200,7 @@ ui_header('Reception Dashboard', 'dashboard');
                   <strong><?= e($apt['customer_name']) ?></strong>
                   <div class="muted small"><?= e($apt['plate_number']) ?> · <?= e($apt['make'] . ' ' . $apt['model']) ?></div>
                 </td>
-                <td><?= e($apt['service_name'] ?: 'General Service') ?></td>
+                <td><?= e(t($apt['service_name'] ?: 'General Service', $apt['service_name'] ?: 'General Service')) ?></td>
                 <td><?= badge($apt['status']) ?></td>
                 <td>
                   <?php if (can('appointments.manage')): ?>
@@ -258,7 +258,7 @@ ui_header('Reception Dashboard', 'dashboard');
                   <?php endif; ?>
                 </td>
                 <td><?= badge($jc['status']) ?></td>
-                <td><?= e($jc['mechanic_name'] ?: 'Unassigned') ?></td>
+                <td><?= e($jc['mechanic_name'] ? $jc['mechanic_name'] : t('Unassigned', 'Unassigned')) ?></td>
               </tr>
             <?php endforeach; ?>
           <?php else: ?>
@@ -298,18 +298,18 @@ ui_header('Reception Dashboard', 'dashboard');
               <td><a href="<?= e(url('customers/view.php?id=' . $c['id'])) ?>"><strong><?= e($c['full_name']) ?></strong></a></td>
               <td><?= e($c['phone']) ?></td>
               <td><?= e($c['email'] ?: '—') ?></td>
-              <td><span class="badge"><?= (int)$c['vehicle_count'] ?> vehicle<?= $c['vehicle_count'] == 1 ? '' : 's' ?></span></td>
+              <td><span class="badge"><?= (int)$c['vehicle_count'] ?> <?= e(t($c['vehicle_count'] == 1 ? 'vehicle' : 'vehicles', $c['vehicle_count'] == 1 ? 'vehicle' : 'vehicles')) ?></span></td>
               <td class="nowrap"><?= e(fmt_date($c['registered_at'])) ?></td>
               <td>
                 <div class="btn-group">
-                  <a class="btn btn-ghost btn-sm" href="<?= e(url('vehicles/form.php?customer_id=' . $c['id'])) ?>">+ Vehicle</a>
-                  <a class="btn btn-ghost btn-sm" href="<?= e(url('job-cards/form.php?customer_id=' . $c['id'])) ?>">+ Job</a>
+                  <a class="btn btn-ghost btn-sm" href="<?= e(url('vehicles/form.php?customer_id=' . $c['id'])) ?>"><?= e(t('+ Vehicle', '+ Vehicle')) ?></a>
+                  <a class="btn btn-ghost btn-sm" href="<?= e(url('job-cards/form.php?customer_id=' . $c['id'])) ?>"><?= e(t('+ Job', '+ Job')) ?></a>
                 </div>
               </td>
             </tr>
           <?php endforeach; ?>
         <?php else: ?>
-          <tr><td colspan="6" class="empty">No customer records found.</td></tr>
+          <tr><td colspan="6" class="empty"><?= e(t('No customer records found.', 'No customer records found.')) ?></td></tr>
         <?php endif; ?>
       </tbody>
     </table>

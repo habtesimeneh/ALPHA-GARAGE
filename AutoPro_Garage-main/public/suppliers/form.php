@@ -63,8 +63,8 @@ page_header($id ? 'Edit Supplier' : 'Add New Supplier', 'Vendor profile, contact
       <div class="full"><?php form_textarea('address', 'Physical Address / Warehouse', $data['address'], $errors, ['placeholder' => 'Street, Subcity, City...']); ?></div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" type="submit"><?= $id ? 'Save Changes' : 'Register Supplier' ?></button>
-      <a class="btn btn-ghost" href="<?= e(url('suppliers/')) ?>">Cancel</a>
+      <button class="btn btn-primary" type="submit"><?= e(t($id ? 'Save Changes' : 'Register Supplier', $id ? 'Save Changes' : 'Register Supplier')) ?></button>
+      <a class="btn btn-ghost" href="<?= e(url('suppliers/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a>
     </div>
   </form>
 </div>

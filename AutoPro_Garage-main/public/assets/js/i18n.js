@@ -228,7 +228,30 @@
     'This action cannot be undone.': 'ይህ እርምጃ ሊቀለበስ አይችልም።',
     'Please enter a valid value.': 'እባክዎ ትክክለኛ እሴት ያስገቡ።',
     'Password must be at least 10 characters and include uppercase, lowercase, numbers, and symbols.':
-      'የይለፍ ቃል ቢያንስ 10 ፊደላት መሆን አለበት እንዲሁም አቢይ፣ ንዑስ ፊደላት፣ ቁጥሮች እና ምልክቶችን ማካተት አለበት።'
+      'የይለፍ ቃል ቢያንስ 10 ፊደላት መሆን አለበት እንዲሁም አቢይ፣ ንዑስ ፊደላት፣ ቁጥሮች እና ምልክቶችን ማካተት አለበት።',
+
+    // Inventory terms
+    'No matching open job cards.': 'ምንም የሚዛመድ ክፍት የሥራ ካርድ የለም።',
+    'No open job cards available to issue parts to.': 'መለዋወጫ የሚወጣለት ምንም ክፍት የሥራ ካርድ የለም።',
+    'Select a job card.': 'እባክዎ የሥራ ካርድ ይምረጡ።',
+    'No matching parts found.': 'ምንም የሚዛመድ መለዋወጫ አልተገኘም።',
+    'No available parts.': 'ምንም የሚገኝ መለዋወጫ የለም።',
+    'Quantity exceeds available stock.': 'የተጠየቀው ብዛት በክምችት ካለው መጠን ይበልጣል።',
+    'Low stock alert.': 'የዝቅተኛ ክምችት ማስጠንቀቂያ።',
+    'Type to search parts…': 'መለዋወጫዎችን ለመፈለግ ይተይቡ…',
+    'Search and select part by name or SKU': 'መለዋወጫ በስም ወይም በSKU ይፈልጉ እና ይምረጡ',
+    'Search by job number, customer, plate, make/model': 'በሥራ ቁጥር፣ ደንበኛ፣ ታርጋ፣ ዓይነት ፈልግ',
+    'Loading open job cards…': 'ክፍት የሥራ ካርዶችን በመጫን ላይ…',
+    'available': 'በክምችት ይገኛል',
+    'left': 'ቀሪ',
+    'units': 'ክፍሎች',
+    'Approve': 'አጽድቅ',
+    'Approve & Issue': 'አጽድቅ እና ስጥ',
+    'Remove / Reject': 'አስወግድ / ውድቅ አድርግ',
+    'Remove / Return': 'አስወግድ / ወደ ክምችት መልስ',
+    'Remove Part': 'ዕቃ አስወግድ',
+    'Delete part': 'ዕቃ አስወግድ',
+    'Permanently remove this spare part? This action cannot be undone.': 'ይህ መለዋወጫ ዕቃ በቋሚነት ይወገድ? ይህ እርምጃ ሊመለስ አይችልም።'
   };
 
   function translate(key, fallback, params) {
@@ -325,6 +348,132 @@
     initSwitcher();
   }
 
+  // -------------------------------------------------------------------------
+  // Ethiopian Calendar & Time Client-Side Engine
+  // -------------------------------------------------------------------------
+  var ethMonths = {
+    1: { am: 'መስከረም', en: 'Meskerem' },
+    2: { am: 'ጥቅምት', en: 'Tikimt' },
+    3: { am: 'ኅዳር', en: 'Hidar' },
+    4: { am: 'ታኅሣሥ', en: 'Tahsas' },
+    5: { am: 'ጥር', en: 'Tir' },
+    6: { am: 'የካቲት', en: 'Yekatit' },
+    7: { am: 'መጋቢት', en: 'Megabit' },
+    8: { am: 'ሚያዝያ', en: 'Miyazya' },
+    9: { am: 'ግንቦት', en: 'Ginbot' },
+    10: { am: 'ሰኔ', en: 'Sene' },
+    11: { am: 'ሐምሌ', en: 'Hamle' },
+    12: { am: 'ነሐሴ', en: 'Nehase' },
+    13: { am: 'ጳጉሜ', en: 'Pagume' }
+  };
+
+  var ethDays = {
+    0: { am: 'እሑድ', en: 'Sunday' },
+    1: { am: 'ሰኞ', en: 'Monday' },
+    2: { am: 'ማክሰኞ', en: 'Tuesday' },
+    3: { am: 'ረቡዕ', en: 'Wednesday' },
+    4: { am: 'ሐሙስ', en: 'Thursday' },
+    5: { am: 'ዓርብ', en: 'Friday' },
+    6: { am: 'ቅዳሜ', en: 'Saturday' }
+  };
+
+  function gregorianToJdn(year, month, day) {
+    var a = Math.floor((14 - month) / 12);
+    var y = year + 4800 - a;
+    var m = month + 12 * a - 3;
+    return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+  }
+
+  function jdnToEthiopian(jdn) {
+    var r = (jdn - 1723856) % 1461;
+    var n = (r % 365) + 365 * Math.floor(r / 1460);
+    var year = 4 * Math.floor((jdn - 1723856) / 1461) + Math.floor(r / 365) - Math.floor(r / 1460);
+    var month = Math.floor(n / 30) + 1;
+    var day = (n % 30) + 1;
+    return { year: year, month: month, day: day };
+  }
+
+  function gregorianToEthiopian(year, month, day) {
+    return jdnToEthiopian(gregorianToJdn(year, month, day));
+  }
+
+  function ethiopianToJdn(year, month, day) {
+    return 1723856 + 365 * year + Math.floor(year / 4) + 30 * (month - 1) + day - 1;
+  }
+
+  function jdnToGregorian(jdn) {
+    var a = jdn + 32044;
+    var b = Math.floor((4 * a + 3) / 146097);
+    var c = a - Math.floor((146097 * b) / 4);
+    var d = Math.floor((4 * c + 3) / 1461);
+    var e = c - Math.floor((1461 * d) / 4);
+    var m = Math.floor((5 * e + 2) / 153);
+    var day = e - Math.floor((153 * m + 2) / 5) + 1;
+    var month = m + 3 - 12 * Math.floor(m / 10);
+    var year = 100 * b + d - 4800 + Math.floor(m / 10);
+    return { year: year, month: month, day: day };
+  }
+
+  function ethiopianToGregorian(year, month, day) {
+    return jdnToGregorian(ethiopianToJdn(year, month, day));
+  }
+
+  function gregorianToEthiopianTime(hour, minute, lang) {
+    var eh = (hour + 6) % 12;
+    if (eh === 0) eh = 12;
+    var period = '';
+    lang = lang || currentLang || 'am';
+    if (hour >= 6 && hour < 12) {
+      period = lang === 'am' ? 'ጥዋት' : 'Morning';
+    } else if (hour >= 12 && hour < 16) {
+      period = lang === 'am' ? 'ከሰዓት' : 'Afternoon';
+    } else if (hour >= 16 && hour < 19) {
+      period = lang === 'am' ? 'ከሰዓት' : 'Late Afternoon';
+    } else if (hour >= 19 && hour <= 23) {
+      period = lang === 'am' ? 'ምሽት' : 'Evening';
+    } else {
+      period = lang === 'am' ? 'ሌሊት' : 'Night';
+    }
+    var minStr = minute < 10 ? '0' + minute : minute;
+    var hrStr = eh < 10 ? '0' + eh : eh;
+    return {
+      hour: eh,
+      minute: minute,
+      period: period,
+      formatted: hrStr + ':' + minStr + ' ' + period
+    };
+  }
+
+  function formatEthiopianDate(dateObj, mode, lang) {
+    var d = dateObj ? (dateObj instanceof Date ? dateObj : new Date(dateObj)) : new Date();
+    if (isNaN(d.getTime())) return '—';
+    lang = lang || currentLang || 'am';
+    var eth = gregorianToEthiopian(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    var mName = (ethMonths[eth.month] && ethMonths[eth.month][lang]) || eth.month;
+    var dName = (ethDays[d.getDay()] && ethDays[d.getDay()][lang]) || '';
+    var suffix = lang === 'am' ? 'ዓ.ም' : 'E.C.';
+
+    if (mode === 'datetime') {
+      var etime = gregorianToEthiopianTime(d.getHours(), d.getMinutes(), lang);
+      if (lang === 'am') {
+        return mName + ' ' + eth.day + ', ' + eth.year + ' ' + suffix + '፣ ' + etime.formatted;
+      }
+      return mName + ' ' + eth.day + ', ' + eth.year + ' ' + suffix + ', ' + etime.formatted;
+    }
+
+    if (mode === 'full' || mode === 'today') {
+      if (lang === 'am') {
+        return dName + '፣ ' + mName + ' ' + eth.day + ' ቀን ' + eth.year + ' ' + suffix;
+      }
+      return dName + ', ' + mName + ' ' + eth.day + ', ' + eth.year + ' ' + suffix;
+    }
+
+    if (lang === 'am') {
+      return mName + ' ' + eth.day + ', ' + eth.year + ' ' + suffix;
+    }
+    return mName + ' ' + eth.day + ', ' + eth.year + ' ' + suffix;
+  }
+
   // Public API
   var api = {
     lang: currentLang,
@@ -332,9 +481,18 @@
     t: translate,
     setLang: setLanguage,
     dictionary: dictionary,
-    translations: dictionary
+    translations: dictionary,
+    ethiopian: {
+      gregorianToEthiopian: gregorianToEthiopian,
+      ethiopianToGregorian: ethiopianToGregorian,
+      gregorianToEthiopianTime: gregorianToEthiopianTime,
+      format: formatEthiopianDate,
+      months: ethMonths,
+      days: ethDays
+    }
   };
 
   window.GMS_I18N = api;
   window.GMS_LANG = api;
+  window.EthiopianCalendar = api.ethiopian;
 })();

@@ -252,8 +252,8 @@ if (!empty($errors['_'])): ?><div class="alert alert-danger" role="alert"><?= e(
     </section>
 
     <div class="form-actions">
-      <button class="btn btn-primary" type="submit" id="jobcard_submit"><?= $job ? 'Save changes' : 'Create job card' ?></button>
-      <a class="btn btn-ghost" href="<?= e(url($job ? 'job-cards/view.php?id=' . $id : 'job-cards/')) ?>">Cancel</a>
+      <button class="btn btn-primary" type="submit" id="jobcard_submit"><?= e(t($job ? 'Save changes' : 'Create job card', $job ? 'Save changes' : 'Create job card')) ?></button>
+      <a class="btn btn-ghost" href="<?= e(url($job ? 'job-cards/view.php?id=' . $id : 'job-cards/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a>
     </div>
   </form>
 </div>

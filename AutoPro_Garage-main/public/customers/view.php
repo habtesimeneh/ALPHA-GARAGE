@@ -31,11 +31,11 @@ $billing = can('invoices.view') ? Database::one(
 $openJobs = (int) Database::value("SELECT COUNT(*) FROM job_cards WHERE customer_id = ? AND status IN ('Pending','Diagnosing','Waiting for Parts','In Progress','Completed')", [$id]);
 
 $actions = '';
-if (can('appointments.manage') && $c['is_active']) { $actions .= '<a class="btn btn-ghost" href="' . e(url('appointments/form.php?customer_id=' . $id)) . '">+ Appointment</a>'; }
-if (can('customers.manage')) { $actions .= '<a class="btn btn-ghost" href="' . e(url('customers/form.php?id=' . $id)) . '">Edit Profile</a>'; }
-if (can('vehicles.manage') && $c['is_active']) { $actions .= '<a class="btn btn-ghost" href="' . e(url('vehicles/form.php?customer_id=' . $id)) . '">+ Vehicle</a>'; }
-if (can('jobs.create') && $c['is_active']) { $actions .= '<a class="btn btn-primary" href="' . e(url('job-cards/form.php?customer_id=' . $id)) . '">+ Job card</a>'; }
-if (!empty($invoices)) { $actions .= '<button type="button" class="btn btn-ghost" data-print>🖨 Print Statement</button>'; }
+if (can('appointments.manage') && $c['is_active']) { $actions .= '<a class="btn btn-ghost" href="' . e(url('appointments/form.php?customer_id=' . $id)) . '">' . e(t('+ Appointment', '+ Appointment')) . '</a>'; }
+if (can('customers.manage')) { $actions .= '<a class="btn btn-ghost" href="' . e(url('customers/form.php?id=' . $id)) . '">' . e(t('Edit Profile', 'Edit Profile')) . '</a>'; }
+if (can('vehicles.manage') && $c['is_active']) { $actions .= '<a class="btn btn-ghost" href="' . e(url('vehicles/form.php?customer_id=' . $id)) . '">' . e(t('+ Vehicle', '+ Vehicle')) . '</a>'; }
+if (can('jobs.create') && $c['is_active']) { $actions .= '<a class="btn btn-primary" href="' . e(url('job-cards/form.php?customer_id=' . $id)) . '">' . e(t('+ Job card', '+ Job card')) . '</a>'; }
+if (!empty($invoices)) { $actions .= '<button type="button" class="btn btn-ghost" data-print>' . e(t('🖨 Print Statement', '🖨 Print Statement')) . '</button>'; }
 if (can('customers.deactivate')) {
     $actions .= $c['is_active']
         ? post_button(url('customers/toggle.php'), ['id' => $id, 'action' => 'deactivate'], 'Deactivate', 'btn btn-danger', 'Deactivate this customer? Their history is preserved but no new vehicles or job cards can be created.')
@@ -48,13 +48,13 @@ page_header($c['full_name'], 'Customer Account: CUS-' . str_pad((string) $id, 5,
 
 <div class="grid grid-2">
   <div class="card">
-    <div class="card-head"><h3>Contact Information</h3></div>
+    <div class="card-head"><h3><?= e(t('Contact Information', 'Contact Information')) ?></h3></div>
     <dl class="kv">
-      <dt>Phone Number</dt><dd><strong><?= e($c['phone']) ?></strong></dd>
-      <dt>Email Address</dt><dd><?= e($c['email'] ?: '—') ?></dd>
-      <dt>Billing Address</dt><dd><?= e($c['address'] ?: '—') ?></dd>
-      <dt>Registered Date</dt><dd><?= e(fmt_datetime($c['registered_at'])) ?></dd>
-      <dt>Account Manager</dt><dd><?= e($c['created_by_name'] ?: 'System Administrator') ?></dd>
+      <dt><?= e(t('Phone Number', 'Phone Number')) ?></dt><dd><strong><?= e($c['phone']) ?></strong></dd>
+      <dt><?= e(t('Email Address', 'Email Address')) ?></dt><dd><?= e($c['email'] ?: '—') ?></dd>
+      <dt><?= e(t('Billing Address', 'Billing Address')) ?></dt><dd><?= e($c['address'] ?: '—') ?></dd>
+      <dt><?= e(t('Registered Date', 'Registered Date')) ?></dt><dd><?= e(fmt_datetime($c['registered_at'])) ?></dd>
+      <dt><?= e(t('Account Manager', 'Account Manager')) ?></dt><dd><?= e($c['created_by_name'] ?: 'System Administrator') ?></dd>
     </dl>
   </div>
 

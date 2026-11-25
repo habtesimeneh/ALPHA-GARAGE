@@ -29,23 +29,23 @@ $mechanics = can('jobs.view_all') ? Database::all('SELECT id, full_name FROM mec
 $mineOnly = !can('jobs.view_all');
 
 ui_header($mineOnly ? 'My jobs' : 'Job cards', 'jobs');
-page_header($mineOnly ? 'My assigned jobs' : 'Job cards', $mineOnly ? 'Only jobs assigned to you are shown' : 'Digital repair job cards', can('jobs.create') ? '<a class="btn btn-primary" href="' . e(url('job-cards/form.php')) . '">+ New job card</a>' : '');
+page_header($mineOnly ? 'My assigned jobs' : 'Job cards', $mineOnly ? 'Only jobs assigned to you are shown' : 'Digital repair job cards', can('jobs.create') ? '<a class="btn btn-primary" href="' . e(url('job-cards/form.php')) . '">' . e(t('+ New job card', '+ New job card')) . '</a>' : '');
 ?>
 <form class="filters" method="get">
-  <div class="field grow"><label for="q">Search</label><input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="Job no., plate, customer or problem"></div>
-  <div class="field"><label for="status">Status</label><select class="input" id="status" name="status" data-autosubmit><option value="">All statuses</option><?php foreach (JobService::STATUSES as $s): ?><option<?= $status === $s ? ' selected' : '' ?>><?= e($s) ?></option><?php endforeach; ?></select></div>
-  <?php if ($mechanics): ?><div class="field"><label for="mechanic_id">Mechanic</label><select class="input" id="mechanic_id" name="mechanic_id" data-autosubmit><option value="">All mechanics</option><?php foreach ($mechanics as $m): ?><option value="<?= (int) $m['id'] ?>"<?= $mech === (int) $m['id'] ? ' selected' : '' ?>><?= e($m['full_name']) ?></option><?php endforeach; ?></select></div><?php endif; ?>
-  <div class="field"><label for="from">Received from</label><input class="input" type="date" id="from" name="from" value="<?= e($from) ?>"></div>
-  <div class="field"><label for="to">to</label><input class="input" type="date" id="to" name="to" value="<?= e($to) ?>"></div>
+  <div class="field grow"><label for="q"><?= e(t('Search', 'Search')) ?></label><input class="input" id="q" name="q" value="<?= e($q) ?>" placeholder="<?= e(t('Job no., plate, customer or problem', 'Job no., plate, customer or problem')) ?>"></div>
+  <div class="field"><label for="status"><?= e(t('Status', 'Status')) ?></label><select class="input" id="status" name="status" data-autosubmit><option value=""><?= e(t('All statuses', 'All statuses')) ?></option><?php foreach (JobService::STATUSES as $s): ?><option value="<?= e($s) ?>"<?= $status === $s ? ' selected' : '' ?>><?= e(t($s, $s)) ?></option><?php endforeach; ?></select></div>
+  <?php if ($mechanics): ?><div class="field"><label for="mechanic_id"><?= e(t('Mechanic', 'Mechanic')) ?></label><select class="input" id="mechanic_id" name="mechanic_id" data-autosubmit><option value=""><?= e(t('All mechanics', 'All mechanics')) ?></option><?php foreach ($mechanics as $m): ?><option value="<?= (int) $m['id'] ?>"<?= $mech === (int) $m['id'] ? ' selected' : '' ?>><?= e($m['full_name']) ?></option><?php endforeach; ?></select></div><?php endif; ?>
+  <div class="field"><label for="from"><?= e(t('Received from', 'Received from')) ?></label><input class="input" type="date" id="from" name="from" value="<?= e($from) ?>"></div>
+  <div class="field"><label for="to"><?= e(t('to', 'to')) ?></label><input class="input" type="date" id="to" name="to" value="<?= e($to) ?>"></div>
   <?php if ($scope): ?><input type="hidden" name="scope" value="<?= e($scope) ?>"><?php endif; ?>
-  <button class="btn btn-primary" type="submit">Filter</button><a class="btn btn-ghost" href="<?= e(url('job-cards/')) ?>">Reset</a>
+  <button class="btn btn-primary" type="submit"><?= e(t('Filter', 'Filter')) ?></button><a class="btn btn-ghost" href="<?= e(url('job-cards/')) ?>"><?= e(t('Reset', 'Reset')) ?></a>
 </form>
-<div class="table-wrap"><table class="table stack"><thead><tr><th>Job card</th><th>Received</th><th>Customer / vehicle</th><th>Problem</th><th>Mechanic</th><th>Est. completion</th><th>Status</th></tr></thead><tbody>
+<div class="table-wrap"><table class="table stack"><thead><tr><th><?= e(t('Job card', 'Job card')) ?></th><th><?= e(t('Received', 'Received')) ?></th><th><?= e(t('Customer / vehicle', 'Customer / vehicle')) ?></th><th><?= e(t('Problem', 'Problem')) ?></th><th><?= e(t('Mechanic', 'Mechanic')) ?></th><th><?= e(t('Est. completion', 'Est. completion')) ?></th><th><?= e(t('Status', 'Status')) ?></th></tr></thead><tbody>
 <?php foreach ($rows as $j): ?>
   <tr><td><a href="<?= e(url('job-cards/view.php?id=' . $j['id'])) ?>"><strong><?= e($j['job_number']) ?></strong></a></td><td class="nowrap"><?= e(fmt_date($j['date_received'])) ?></td>
   <td><?= e($j['customer']) ?><div class="muted small"><?= e($j['plate_number'] . ' · ' . $j['make'] . ' ' . $j['model']) ?></div></td>
-  <td><?= e(mb_strimwidth($j['reported_problem'], 0, 70, '…')) ?></td><td><?= e($j['mechanic'] ?: 'Unassigned') ?></td><td class="nowrap"><?= e(fmt_date($j['estimated_completion'])) ?></td><td><?= badge($j['status']) ?></td></tr>
+  <td><?= e(mb_strimwidth($j['reported_problem'], 0, 70, '…')) ?></td><td><?= e($j['mechanic'] ? $j['mechanic'] : t('Unassigned', 'Unassigned')) ?></td><td class="nowrap"><?= e(fmt_date($j['estimated_completion'])) ?></td><td><?= badge($j['status']) ?></td></tr>
 <?php endforeach; ?>
-<?php if (!$rows): ?><tr><td colspan="7" class="empty">No job cards match.</td></tr><?php endif; ?>
+<?php if (!$rows): ?><tr><td colspan="7" class="empty"><?= e(t('No job cards match.', 'No job cards match.')) ?></td></tr><?php endif; ?>
 </tbody></table></div>
 <?php pagination_links($pg, ['q' => $q, 'status' => $status, 'mechanic_id' => $mech ?: '', 'scope' => $scope, 'from' => $from, 'to' => $to]); ui_footer();

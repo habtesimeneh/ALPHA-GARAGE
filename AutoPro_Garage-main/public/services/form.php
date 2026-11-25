@@ -64,8 +64,8 @@ page_header($id ? 'Edit Service' : 'Add New Service', 'Configure service details
       <div><?php form_input('estimated_hours', 'Estimated Hours', $data['estimated_hours'], $errors, ['type' => 'number', 'step' => '0.25', 'min' => '0.25', 'required' => true]); ?></div>
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" type="submit"><?= $id ? 'Save Changes' : 'Create Service' ?></button>
-      <a class="btn btn-ghost" href="<?= e(url('services/')) ?>">Cancel</a>
+      <button class="btn btn-primary" type="submit"><?= e(t($id ? 'Save Changes' : 'Create Service', $id ? 'Save Changes' : 'Create Service')) ?></button>
+      <a class="btn btn-ghost" href="<?= e(url('services/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a>
     </div>
   </form>
 </div>

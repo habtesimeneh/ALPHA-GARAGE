@@ -209,9 +209,9 @@ ui_header('Financial Dashboard', 'dashboard');
 
   <a class="kpi-card <?= $expensesReady ? 'tone-red' : 'tone-muted' ?> card-interactive reveal-up stagger-4" href="<?= e(url('expenses/')) ?>">
     <div class="kpi-label"><?= e(t('Total Expenses', 'Total Expenses')) ?> (<?= e($currency) ?>)</div>
-    <div class="kpi-value"><?= $expensesReady ? e($currency . ' ' . number_format($totalExpenses, 2)) : 'Not available' ?></div>
-    <div class="kpi-sub"><?= $expensesReady ? 'Recorded operating disbursements' : 'Expense ledger table not ready' ?></div>
-    <div class="kpi-cmp trend-flat"><?= $expensesReady ? 'Disbursements' : 'Check config' ?></div>
+    <div class="kpi-value"><?= $expensesReady ? e($currency . ' ' . number_format($totalExpenses, 2)) : e(t('Not available', 'Not available')) ?></div>
+    <div class="kpi-sub"><?= $expensesReady ? e(t('Recorded operating disbursements', 'Recorded operating disbursements')) : e(t('Expense ledger table not ready', 'Expense ledger table not ready')) ?></div>
+    <div class="kpi-cmp trend-flat"><?= $expensesReady ? e(t('Disbursements', 'Disbursements')) : e(t('Check config', 'Check config')) ?></div>
   </a>
 </div>
 
@@ -267,7 +267,7 @@ ui_header('Financial Dashboard', 'dashboard');
   <div class="card-head">
     <div>
       <h3><?= e(t('Outstanding Accounts Receivable', 'Outstanding Accounts Receivable')) ?></h3>
-      <span class="muted small">Uncollected customer invoices sorted by age (oldest first)</span>
+      <span class="muted small"><?= e(t('Uncollected customer invoices sorted by age (oldest first)', 'Uncollected customer invoices sorted by age (oldest first)')) ?></span>
     </div>
     <a class="btn btn-ghost btn-sm" href="<?= e(url('invoices/?status=outstanding')) ?>"><?= e(t('View all pending', 'View all pending')) ?> (<?= $unpaidInvoiceCount ?>)</a>
   </div>
@@ -307,15 +307,15 @@ ui_header('Financial Dashboard', 'dashboard');
               <td><?= badge($inv['payment_status']) ?></td>
               <td class="nowrap">
                 <?php if (can('payments.record')): ?>
-                  <a class="btn btn-primary btn-sm" href="<?= e(url('payments/record.php?invoice_id=' . $inv['id'])) ?>">Record payment &rarr;</a>
+                  <a class="btn btn-primary btn-sm" href="<?= e(url('payments/record.php?invoice_id=' . $inv['id'])) ?>"><?= e(t('Record payment', 'Record payment')) ?> &rarr;</a>
                 <?php else: ?>
-                  <a class="btn btn-ghost btn-sm" href="<?= e(url('invoices/view.php?id=' . $inv['id'])) ?>">View</a>
+                  <a class="btn btn-ghost btn-sm" href="<?= e(url('invoices/view.php?id=' . $inv['id'])) ?>"><?= e(t('View', 'View')) ?></a>
                 <?php endif; ?>
               </td>
             </tr>
           <?php endforeach; ?>
         <?php else: ?>
-          <tr><td colspan="8" class="empty">All invoices are settled in full. Zero outstanding receivables!</td></tr>
+          <tr><td colspan="8" class="empty"><?= e(t('All invoices are settled in full. Zero outstanding receivables!', 'All invoices are settled in full. Zero outstanding receivables!')) ?></td></tr>
         <?php endif; ?>
       </tbody>
     </table>

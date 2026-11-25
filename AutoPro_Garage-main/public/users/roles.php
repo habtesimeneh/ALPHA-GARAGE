@@ -29,10 +29,10 @@ $byModule = []; foreach ($perms as $p) { $byModule[$p['module']][] = $p; }
 ui_header('Roles & access', 'roles');
 page_header('Roles & permissions', 'Permissions are enforced on the server for every request');
 ?>
-<div class="tabs"><?php foreach ($roles as $r): ?><a class="tab<?= (int) $r['id'] === $rid ? ' active' : '' ?>" href="?role_id=<?= (int) $r['id'] ?>"><?= e($r['label']) ?></a><?php endforeach; ?></div>
+<div class="tabs"><?php foreach ($roles as $r): ?><a class="tab<?= (int) $r['id'] === $rid ? ' active' : '' ?>" href="?role_id=<?= (int) $r['id'] ?>"><?= e(t($r['label'], $r['label'])) ?></a><?php endforeach; ?></div>
 <form method="post"><?= csrf_field() ?><input type="hidden" name="role_id" value="<?= $rid ?>">
-<?php if ($locked): ?><div class="alert alert-info">The Administrator role is locked so the system can never be left without an administrator.</div><?php endif; ?>
-<?php foreach ($byModule as $mod => $list): ?><div class="card"><h3><?= e($mod) ?></h3><div class="perm-grid"><?php foreach ($list as $p): ?>
-<label class="check"><input type="checkbox" name="perm[]" value="<?= e($p['code']) ?>" <?= in_array($p['code'], $current, true) ? 'checked' : '' ?> <?= $locked ? 'disabled' : '' ?>> <span><?= e($p['label']) ?> <span class="muted small mono"><?= e($p['code']) ?></span></span></label><?php endforeach; ?></div></div><?php endforeach; ?>
-<?php if (!$locked): ?><button class="btn btn-primary" type="submit">Save permissions</button><?php endif; ?></form>
+<?php if ($locked): ?><div class="alert alert-info"><?= e(t('The Administrator role is locked so the system can never be left without an administrator.', 'The Administrator role is locked so the system can never be left without an administrator.')) ?></div><?php endif; ?>
+<?php foreach ($byModule as $mod => $list): ?><div class="card"><h3><?= e(t($mod, $mod)) ?></h3><div class="perm-grid"><?php foreach ($list as $p): ?>
+<label class="check"><input type="checkbox" name="perm[]" value="<?= e($p['code']) ?>" <?= in_array($p['code'], $current, true) ? 'checked' : '' ?> <?= $locked ? 'disabled' : '' ?>> <span><?= e(t($p['label'], $p['label'])) ?> <span class="muted small mono"><?= e($p['code']) ?></span></span></label><?php endforeach; ?></div></div><?php endforeach; ?>
+<?php if (!$locked): ?><button class="btn btn-primary" type="submit"><?= e(t('Save permissions', 'Save permissions')) ?></button><?php endif; ?></form>
 <?php ui_footer();

@@ -102,7 +102,7 @@ page_header('Operating expenses', 'Append-only expense records for the cash-basi
 <?php if (!empty($errors['_'])): ?><div class="alert alert-danger" role="alert"><?= e($errors['_']) ?></div><?php endif; ?>
 <?php if (can('expenses.manage')): ?>
 <div class="card w-md">
-  <h3>Record an operating expense</h3>
+  <h3><?= e(t('Record an operating expense', 'Record an operating expense')) ?></h3>
   <form method="post" data-validate novalidate>
     <?= csrf_field() ?>
     <div class="form-grid">
@@ -120,35 +120,35 @@ page_header('Operating expenses', 'Append-only expense records for the cash-basi
         echo '</div>';
       ?>
     </div>
-    <div class="form-actions"><button class="btn btn-primary" type="submit">Save expense</button></div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit"><?= e(t('Save expense', 'Save expense')) ?></button></div>
   </form>
 </div>
 <?php endif; ?>
 
 <div class="stats">
-  <div class="stat red"><div class="label">Operating expenses</div><div class="value"><?= e(money($total)) ?></div><div class="sub">Total for selected records</div></div>
+  <div class="stat red"><div class="label"><?= e(t('Operating expenses', 'Operating expenses')) ?></div><div class="value"><?= e(money($total)) ?></div><div class="sub"><?= e(t('Total for selected records', 'Total for selected records')) ?></div></div>
 </div>
 <form class="filters" method="get">
-  <div class="field"><label for="expense-from">From</label><input class="input" type="date" id="expense-from" name="from" value="<?= e($from) ?>"></div>
-  <div class="field"><label for="expense-to">To</label><input class="input" type="date" id="expense-to" name="to" value="<?= e($to) ?>"></div>
-  <button class="btn btn-primary" type="submit">Filter</button>
-  <a class="btn btn-ghost" href="<?= e(url('expenses/')) ?>">Clear</a>
+  <div class="field"><label for="expense-from"><?= e(t('From', 'From')) ?></label><input class="input" type="date" id="expense-from" name="from" value="<?= e($from) ?>"></div>
+  <div class="field"><label for="expense-to"><?= e(t('To', 'To')) ?></label><input class="input" type="date" id="expense-to" name="to" value="<?= e($to) ?>"></div>
+  <button class="btn btn-primary" type="submit"><?= e(t('Filter', 'Filter')) ?></button>
+  <a class="btn btn-ghost" href="<?= e(url('expenses/')) ?>"><?= e(t('Clear', 'Clear')) ?></a>
 </form>
 <div class="table-wrap">
   <table class="table stack">
-    <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Reference</th><th>Recorded by</th><th class="num">Amount</th></tr></thead>
+    <thead><tr><th><?= e(t('Date', 'Date')) ?></th><th><?= e(t('Category', 'Category')) ?></th><th><?= e(t('Description', 'Description')) ?></th><th><?= e(t('Reference', 'Reference')) ?></th><th><?= e(t('Recorded by', 'Recorded by')) ?></th><th class="num"><?= e(t('Amount', 'Amount')) ?></th></tr></thead>
     <tbody>
       <?php foreach ($expenses as $expense): ?>
       <tr>
         <td class="nowrap"><?= e(fmt_date($expense['expense_date'])) ?></td>
-        <td><?= e($categories[$expense['category']] ?? 'Other operating expense') ?></td>
+        <td><?= e(t($categories[$expense['category']] ?? 'Other operating expense', $categories[$expense['category']] ?? 'Other operating expense')) ?></td>
         <td><?= e($expense['description']) ?></td>
         <td><?= e($expense['reference'] ?: '—') ?></td>
         <td><?= e($expense['recorded_by_name'] ?: '—') ?></td>
         <td class="num"><?= e(money($expense['amount'])) ?></td>
       </tr>
       <?php endforeach; ?>
-      <?php if (!$expenses): ?><tr><td colspan="6" class="empty">No operating expenses found for this period.</td></tr><?php endif; ?>
+      <?php if (!$expenses): ?><tr><td colspan="6" class="empty"><?= e(t('No expenses recorded yet.', 'No expenses recorded yet.')) ?></td></tr><?php endif; ?>
     </tbody>
   </table>
 </div>

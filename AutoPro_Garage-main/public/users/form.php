@@ -63,10 +63,10 @@ page_header($u ? 'Edit user' : 'Add user', $u ? $u['username'] : 'The initial pa
 ?>
 <div class="card w-md"><form method="post" data-validate novalidate autocomplete="off"><?= csrf_field() ?><div class="form-grid">
 <?php form_input('full_name', 'Full name', $v['full_name'], $errors, ['required' => true, 'maxlength' => 120]);
-if ($u) { echo '<div class="field"><label>Username</label><div class="input">' . e($u['username']) . '</div></div>'; } else { form_input('username', 'Username', $v['username'], $errors, ['required' => true, 'minlength' => 3, 'maxlength' => 50, 'pattern' => '[A-Za-z0-9_.\-]+', 'title' => 'Letters, digits, dot, dash, underscore']); }
-form_input('email', 'Email', $v['email'], $errors, ['type' => 'email', 'required' => true, 'maxlength' => 150]); form_select('role_id', 'Role', ['' => '— Select role —'] + $roleOpts, $v['role_id'], $errors, ['required' => true]);
+if ($u) { echo '<div class="field"><label>' . e(t('Username', 'Username')) . '</label><div class="input">' . e($u['username']) . '</div></div>'; } else { form_input('username', 'Username', $v['username'], $errors, ['required' => true, 'minlength' => 3, 'maxlength' => 50, 'pattern' => '[A-Za-z0-9_.\-]+', 'title' => 'Letters, digits, dot, dash, underscore']); }
+form_input('email', 'Email', $v['email'], $errors, ['type' => 'email', 'required' => true, 'maxlength' => 150]); form_select('role_id', 'Role', ['' => t('— Select role —', '— Select role —')] + $roleOpts, $v['role_id'], $errors, ['required' => true]);
 form_input('password', $u ? 'Reset password (leave blank to keep)' : 'Initial password', '', $errors, ['type' => 'password', 'autocomplete' => 'new-password'] + ($u ? [] : ['required' => true]) + ['data-strength' => 'pw-hint']); ?>
-<div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" name="is_active" value="1" <?= $v['is_active'] ? 'checked' : '' ?>> Account active</label><div class="field-error"><?= e($errors['is_active'] ?? '') ?></div></div></div>
+<div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" name="is_active" value="1" <?= $v['is_active'] ? 'checked' : '' ?>> <?= e(t('Account active', 'Account active')) ?></label><div class="field-error"><?= e($errors['is_active'] ?? '') ?></div></div></div>
 <p class="muted small" id="pw-hint"></p>
-<div class="form-actions"><button class="btn btn-primary" type="submit">Save user</button><a class="btn btn-ghost" href="<?= e(url('users/')) ?>">Cancel</a></div></form></div>
+<div class="form-actions"><button class="btn btn-primary" type="submit"><?= e(t('Save user', 'Save user')) ?></button><a class="btn btn-ghost" href="<?= e(url('users/')) ?>"><?= e(t('Cancel', 'Cancel')) ?></a></div></form></div>
 <?php ui_footer();

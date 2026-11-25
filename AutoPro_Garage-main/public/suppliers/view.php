@@ -28,22 +28,22 @@ ui_header($supplier['name'], 'suppliers');
 page_header(
     $supplier['name'],
     'Supplier Code: ' . $supplier['code'],
-    $canManage ? '<a class="btn btn-primary" href="' . e(url('suppliers/form.php?id=' . $id)) . '">Edit Profile</a>' : ''
+    $canManage ? '<a class="btn btn-primary" href="' . e(url('suppliers/form.php?id=' . $id)) . '">' . e(t('Edit Profile', 'Edit Profile')) . '</a>' : ''
 );
 ?>
 
 <div class="grid grid-2-1">
   <div>
     <div class="card">
-      <div class="card-head"><h3>Vendor Profile</h3><?= badge($supplier['is_active'] ? 'active' : 'inactive') ?></div>
+      <div class="card-head"><h3><?= e(t('Vendor Profile', 'Vendor Profile')) ?></h3><?= badge($supplier['is_active'] ? 'active' : 'inactive') ?></div>
       <dl class="kv">
-        <dt>Supplier Code</dt><dd><code><?= e($supplier['code']) ?></code></dd>
-        <dt>Company Name</dt><dd><strong><?= e($supplier['name']) ?></strong></dd>
-        <dt>Contact Person</dt><dd><?= e($supplier['contact_person'] ?: '—') ?></dd>
-        <dt>Phone</dt><dd><?= e($supplier['phone'] ?: '—') ?></dd>
-        <dt>Email</dt><dd><?= e($supplier['email'] ?: '—') ?></dd>
-        <dt>Address</dt><dd><?= e($supplier['address'] ?: '—') ?></dd>
-        <dt>Registered</dt><dd><?= fmt_datetime($supplier['created_at']) ?></dd>
+        <dt><?= e(t('Supplier Code', 'Supplier Code')) ?></dt><dd><code><?= e($supplier['code']) ?></code></dd>
+        <dt><?= e(t('Company Name', 'Company Name')) ?></dt><dd><strong><?= e($supplier['name']) ?></strong></dd>
+        <dt><?= e(t('Contact Person', 'Contact Person')) ?></dt><dd><?= e($supplier['contact_person'] ?: '—') ?></dd>
+        <dt><?= e(t('Phone', 'Phone')) ?></dt><dd><?= e($supplier['phone'] ?: '—') ?></dd>
+        <dt><?= e(t('Email', 'Email')) ?></dt><dd><?= e($supplier['email'] ?: '—') ?></dd>
+        <dt><?= e(t('Address', 'Address')) ?></dt><dd><?= e($supplier['address'] ?: '—') ?></dd>
+        <dt><?= e(t('Registered', 'Registered')) ?></dt><dd><?= fmt_datetime($supplier['created_at']) ?></dd>
       </dl>
     </div>
 

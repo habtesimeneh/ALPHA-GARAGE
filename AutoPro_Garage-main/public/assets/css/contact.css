@@ -391,7 +391,7 @@
   }
 
   .contact-hero .inner-hero-title {
-    font-size: clamp(2.2rem, 10vw, 3.7rem);
+    font-size: clamp(1.35rem, 5.8vw, 1.75rem);
   }
 
   .contact-hero-actions {

@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALPHA GARAGE — Enterprise System Project Proposal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+        :root {
+            --primary: #0D281E;
+            --primary-light: #164232;
+            --primary-dark: #071711;
+            --accent: #C5A059;
+            --accent-dark: #9E7D3B;
+            --accent-light: #E8D3A7;
+            --surface: #FFFFFF;
+            --surface-alt: #F8F9FA;
+            --surface-subtle: #F1F5F3;
+            --text: #1E293B;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+            --border-accent: rgba(197, 160, 89, 0.3);
+            --success: #059669;
+            --info: #0284C7;
+            --warning: #D97706;
+            --danger: #DC2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Nyala", "Abyssinica SIL", sans-serif;
+            color: var(--text);
+            background: #FFFFFF;
+            line-height: 1.5;
+            font-size: 9.5pt;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 12mm 14mm 14mm 14mm;
+        }
+
+        .chapter {
+            page-break-before: always;
+            break-before: page;
+            min-height: 255mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 5px 0;
+            box-sizing: border-box;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            box-sizing: border-box;
+            height: 268mm;
+            max-height: 268mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 28px 24px;
+            background: linear-gradient(135deg, #071711 0%, #0D281E 60%, #164232 100%);
+            color: #FFFFFF;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .cover-page::before {
+            content: "";
+            position: absolute;
+            top: -150px;
+            right: -150px;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(197, 160, 89, 0.25) 0%, rgba(13, 40, 30, 0) 70%);
+            border-radius: 50%;
+        }
+
+        .cover-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(197, 160, 89, 0.3);
+            padding-bottom: 25px;
+        }
+
+        .cover-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-badge {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #C5A059 0%, #9E7D3B 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: #0D281E;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .brand-title-box h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 22pt;
+            letter-spacing: 2px;
+            color: #FFFFFF;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .brand-title-box span {
+            font-size: 8.5pt;
+            letter-spacing: 3px;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .doc-badge {
+            background: rgba(197, 160, 89, 0.15);
+            border: 1px solid var(--accent);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 9pt;
+            font-weight: 600;
+            color: var(--accent-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cover-body {
+            margin: auto 0;
+            padding: 30px 0;
+        }
+
+        .cover-tagline {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08);
+            border-left: 3px solid var(--accent);
+            padding: 6px 16px;
+            font-size: 9.5pt;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-light);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .cover-title {
+            font-family: 'Cinzel', serif;
+            font-size: 34pt;
+            line-height: 1.15;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 18px;
+        }
+
+        .cover-title span {
+            color: var(--accent);
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            line-height: 1.5;
+            color: #CBD5E1;
+            max-width: 680px;
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        .cover-highlights {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 35px;
+        }
+
+        .highlight-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent);
+            padding: 16px;
+            border-radius: 6px;
+        }
+
+        .highlight-item .number {
+            font-size: 18pt;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'Cinzel', serif;
+        }
+
+        .highlight-item .label {
+            font-size: 8.5pt;
+            color: #E2E8F0;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .cover-footer {
+            border-top: 1px solid rgba(197, 160, 89, 0.3);
+            padding-top: 25px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            font-size: 8.5pt;
+        }
+
+        .footer-meta-block strong {
+            display: block;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            font-size: 7.5pt;
+        }
+
+        .footer-meta-block span {
+            color: #CBD5E1;
+        }
+
+        /* Typography & Layout */
+        .document-container {
+            padding: 15px 5px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+        }
+
+        .section-num {
+            background: var(--primary);
+            color: var(--accent);
+            font-family: 'Cinzel', serif;
+            font-size: 13pt;
+            font-weight: 700;
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h2.section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 15pt;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        h3.subsection-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin: 14px 0 8px 0;
+            border-left: 3px solid var(--accent);
+            padding-left: 8px;
+        }
+
+        h4 {
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: #334155;
+            margin: 10px 0 4px 0;
+        }
+
+        p {
+            margin-bottom: 8px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        /* Callouts & Alert Boxes */
+        .callout {
+            background: var(--surface-subtle);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 6px 6px 0;
+            padding: 10px 14px;
+            margin: 10px 0;
+            font-size: 9pt;
+        }
+
+        .callout-gold {
+            background: rgba(197, 160, 89, 0.08);
+            border-left-color: var(--accent);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            font-size: 8pt;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tables */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 8.5pt;
+            background: #FFFFFF;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        table.data-table th {
+            background: var(--primary);
+            color: #FFFFFF;
+            font-weight: 600;
+            text-align: left;
+            padding: 7px 10px;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        table.data-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border);
+            color: #334155;
+            vertical-align: top;
+        }
+
+        table.data-table tr:nth-child(even) td {
+            background: var(--surface-alt);
+        }
+
+        table.data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status & Badges */
+        .pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 7pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pill-gold {
+            background: rgba(197, 160, 89, 0.15);
+            color: var(--accent-dark);
+            border: 1px solid var(--accent);
+        }
+
+        .pill-green {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .pill-blue {
+            background: #E0F2FE;
+            color: #0369A1;
+        }
+
+        /* Grids & Cards */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 10px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .card-primary {
+            border-top: 3px solid var(--primary);
+        }
+
+        .card-gold {
+            border-top: 3px solid var(--accent);
+        }
+
+        .card-title {
+            font-size: 9.5pt;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-desc {
+            font-size: 8.2pt;
+            color: #475569;
+            line-height: 1.45;
+        }
+
+        /* Architecture Flow Diagram */
+        .arch-diagram {
+            background: #0D281E;
+            color: #FFFFFF;
+            padding: 14px 16px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border: 1px solid var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 7.5pt;
+            line-height: 1.35;
+            overflow-x: auto;
+        }
+
+        .arch-step-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(197, 160, 89, 0.4);
+            padding: 12px 14px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .arch-step-title {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 9pt;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Amharic Typography Enhancements */
+        .amharic-text {
+            font-family: 'Nyala', 'Abyssinica SIL', 'Segoe UI', sans-serif;
+            color: #1E293B;
+            font-size: 10.5pt;
+        }
+
+        /* Sign-off Blocks */
+        .signature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .sig-box {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            background: var(--surface-alt);
+        }
+
+        .sig-line {
+            height: 45px;
+            border-bottom: 1px dashed #94A3B8;
+            margin-bottom: 8px;
+        }
+
+        .sig-role {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 8.5pt;
+            text-transform: uppercase;
+        }
+
+        .sig-name {
+            font-size: 8.5pt;
+            color: #64748B;
+        }
+
+        /* Table of Contents */
+        .toc-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 8px 0;
+            border-bottom: 1px dotted #CBD5E1;
+            font-size: 10pt;
+        }
+
+        .toc-item .title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .toc-item .dots {
+            flex-grow: 1;
+            border-bottom: 1px dotted #94A3B8;
+            margin: 0 10px;
+        }
+
+        .toc-item .page-num {
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Footer Stamp */
+        .confidential-stamp {
+            display: inline-block;
+            border: 2px solid var(--accent);
+            color: var(--accent-dark);
+            font-weight: 800;
+            font-size: 8pt;
+            padding: 4px 12px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== COVER PAGE ==================== -->
+    <div class="cover-page">
+        <div class="cover-header">
+            <div class="cover-brand">
+                <div class="brand-badge">&#945;</div>
+                <div class="brand-title-box">
+                    <h1>ALPHA GARAGE</h1>
+                    <span>Luxury Automotive Engineering</span>
+                </div>
+            </div>
+            <div class="doc-badge">ENTERPRISE SYSTEM PROPOSAL</div>
+        </div>
+
+        <div class="cover-body">
+            <div class="cover-tagline">Official Technical & Commercial Proposal</div>
+            <div class="cover-title">
+                Complete Garage Operations &<br>
+                <span>Financial Management</span> Platform
+            </div>
+            <div class="cover-subtitle">
+                An enterprise-grade, native PHP/MySQL automotive workshop management system engineered specifically for Ethiopia's luxury vehicle repair market, combining double-entry inventory, fail-closed security, role-based workflows, and 100% Ethiopian bank & mobile payment verification.
+            </div>
+
+            <div class="cover-highlights">
+                <div class="highlight-item">
+                    <div class="number">6 ROLES</div>
+                    <div class="label">Full RBAC Separation</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="number">26 METHODS</div>
+                    <div class="label">Ethiopian Banks & Mobile Money</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="number">100% BILINGUAL</div>
+                    <div class="label">English & Amharic Native</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div class="footer-meta-block">
+                <strong>Project Name</strong>
+                <span>Alpha Garage Enterprise OS</span>
+            </div>
+            <div class="footer-meta-block">
+                <strong>Document Ref</strong>
+                <span>AGY-PROP-2026-V2</span>
+            </div>
+            <div class="footer-meta-block">
+                <strong>Target Location</strong>
+                <span>Addis Ababa, Ethiopia</span>
+            </div>
+            <div class="footer-meta-block">
+                <strong>Document Status</strong>
+                <span>Production Proposal</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TABLE OF CONTENTS & EXECUTIVE SUMMARY ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">01</div>
+            <h2 class="section-title">Executive Summary & Table of Contents</h2>
+        </div>
+
+        <div class="callout callout-gold">
+            <div class="callout-title">Strategic System Vision</div>
+            <strong>Alpha Garage (AutoPro Garage)</strong> is a state-of-the-art automotive engineering and workshop operations platform engineered to transform luxury vehicle repair and fleet maintenance operations. Built with a zero-framework, high-performance PHP 8.2 and MySQL architecture, it delivers unmatched speed, hardened security, and complete alignment with Ethiopian commercial banking and tax regulations.
+        </div>
+
+        <h3 class="subsection-title">Table of Contents</h3>
+        <ul class="toc-list">
+            <li class="toc-item">
+                <span class="title">1. Executive Summary & Core Value Proposition</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 02</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">2. Problem Statement & Automotive Market Gaps in Ethiopia</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 03</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">3. Comprehensive Solution Architecture & Key Functional Modules</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 04</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">4. Role-Based Access Control (RBAC) & Stakeholder Workflows</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 05</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">5. Ethiopian Manual Payment Management & Verification Engine</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 06</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">6. Bilingual Localization Engine (English & Amharic Native)</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 07</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">7. Technical Architecture, Database Specifications & Security Hardening</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 08</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">8. Implementation Roadmap, Milestones & Training Program</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 09</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">9. Financial Investment, Budget Breakdown & Return on Investment (ROI)</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 10</span>
+            </li>
+            <li class="toc-item">
+                <span class="title">10. Sign-off, Service Level Agreement (SLA) & Approval Schedule</span>
+                <span class="dots"></span>
+                <span class="page-num">Page 11</span>
+            </li>
+        </ul>
+
+        <h3 class="subsection-title">Core Value Propositions</h3>
+        <div class="grid-3">
+            <div class="card card-primary">
+                <div class="card-title">100% Operational Transparency</div>
+                <div class="card-desc">Real-time status tracking from reception intake and technician diagnostics to final quality check and key handover. Eliminates job card loss.</div>
+            </div>
+            <div class="card card-gold">
+                <div class="card-title">Zero Payment Fraud</div>
+                <div class="card-desc">Idempotent slip verification with anti-collision duplicate detection covering 22 Ethiopian banks and Telebirr/M-Pesa/CBE Birr wallets.</div>
+            </div>
+            <div class="card card-primary">
+                <div class="card-title">Double-Entry Inventory</div>
+                <div class="card-desc">Automatic parts deduction linked to active repair job cards, preventing spare parts shrinkage, theft, and inventory discrepancy.</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: center;">
+            <span class="confidential-stamp">STRICTLY CONFIDENTIAL</span>
+            <span style="font-size: 8.5pt; color: #64748B;">Document Ref: AGY-PROP-2026-V2</span>
+        </div>
+    </div>
+
+    <!-- ==================== PROBLEM STATEMENT ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">02</div>
+            <h2 class="section-title">Problem Statement & Market Analysis</h2>
+        </div>
+
+        <p>The automotive repair and servicing industry in Ethiopia—particularly within the luxury and executive vehicle segment (Mercedes-Benz, BMW, Toyota Land Cruiser, Audi, Range Rover)—faces acute operational and financial challenges due to outdated paper-based procedures and unintegrated tools.</p>
+
+        <h3 class="subsection-title">Critical Operational Bottlenecks in Ethiopian Garages</h3>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Traditional Gap</th>
+                    <th style="width: 35%;">Direct Business Impact</th>
+                    <th style="width: 40%;">Alpha Garage Digital Solution</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Paper Job Cards</strong></td>
+                    <td>Lost diagnostic notes, untracked mechanic labor hours, disputed invoices, and zero audit trail of repairs.</td>
+                    <td><span class="pill pill-green">Digital Job Cards</span> Fully tracked lifecycle with timestamped mechanic assignments and status checkpoints.</td>
+                </tr>
+                <tr>
+                    <td><strong>Payment Fraud & Bank Slips</strong></td>
+                    <td>Customers showing forged mobile SMS screenshots or fake deposit slips; uncredited bank deposits causing revenue loss.</td>
+                    <td><span class="pill pill-green">Verification Queue</span> Staff inspect and verify transaction references against bank statements before invoice clearance.</td>
+                </tr>
+                <tr>
+                    <td><strong>Spare Parts Shrinkage</strong></td>
+                    <td>Unrecorded parts consumption, ghost inventory, unauthorized parts swapping, and lack of reorder thresholds.</td>
+                    <td><span class="pill pill-green">Double-Entry Stock</span> Atomic inventory deduction upon job card requisition with real-time stock alert thresholds.</td>
+                </tr>
+                <tr>
+                    <td><strong>Language Barriers</strong></td>
+                    <td>Technicians and local vehicle owners struggle with complex English interfaces, leading to data entry errors and poor client adoption.</td>
+                    <td><span class="pill pill-green">Bilingual I18n</span> Seamless instant toggle between English and Amharic with genuine local automotive nomenclature.</td>
+                </tr>
+                <tr>
+                    <td><strong>Customer Disconnect</strong></td>
+                    <td>Vehicle owners have zero visibility into repair progress, causing constant phone inquiries and customer frustration.</td>
+                    <td><span class="pill pill-green">VIP Customer Portal</span> Live status tracker, online estimate review, payment receipt submission, and historical service archive.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">Financial and Operational Loss Quantified</h3>
+        <p>Independent audits of medium-to-large automotive service centers in Addis Ababa reveal the following baseline operational leakages prior to digitization:</p>
+
+        <div class="grid-3">
+            <div class="card" style="border-top: 3px solid var(--danger);">
+                <div style="font-size: 20pt; font-weight: 800; color: var(--danger); font-family: 'Cinzel', serif;">18% - 24%</div>
+                <div style="font-weight: 700; color: var(--text); font-size: 9pt; margin-top: 5px;">Spare Parts Discrepancy</div>
+                <div style="font-size: 8pt; color: #64748B; margin-top: 4px;">Lost or unaccounted stock between physical bins and ledger entries.</div>
+            </div>
+            <div class="card" style="border-top: 3px solid var(--warning);">
+                <div style="font-size: 20pt; font-weight: 800; color: var(--warning); font-family: 'Cinzel', serif;">3.5 Hours</div>
+                <div style="font-weight: 700; color: var(--text); font-size: 9pt; margin-top: 5px;">Average Daily Diagnostic Lag</div>
+                <div style="font-size: 8pt; color: #64748B; margin-top: 4px;">Time lost physically transferring paper notes between service desk and bay.</div>
+            </div>
+            <div class="card" style="border-top: 3px solid var(--info);">
+                <div style="font-size: 20pt; font-weight: 800; color: var(--info); font-family: 'Cinzel', serif;">12% - 15%</div>
+                <div style="font-weight: 700; color: var(--text); font-size: 9pt; margin-top: 5px;">Billing Leakage</div>
+                <div style="font-size: 8pt; color: #64748B; margin-top: 4px;">Unrecorded mechanic labor hours and miscalculated 15% VAT assessments.</div>
+            </div>
+        </div>
+
+        <div class="callout" style="margin-top: 25px;">
+            <strong>Conclusion:</strong> Modern luxury vehicle owners in Ethiopia demand an experience commensurate with their investment. Alpha Garage transforms the entire automotive service cycle into a high-trust, fully auditable digital enterprise.
+        </div>
+    </div>
+
+    <!-- ==================== SYSTEM ARCHITECTURE & MODULES ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">03</div>
+            <h2 class="section-title">Comprehensive Solution & Core Modules</h2>
+        </div>
+
+        <p>The <strong>Alpha Garage Management Platform</strong> encompasses seven interconnected enterprise modules designed to run seamlessly in real-time across workshop floor tablets, desktop terminals, and mobile devices.</p>
+
+        <div class="grid-2">
+            <div class="card card-primary avoid-break">
+                <div class="card-title">
+                    <span>1. Vehicle Intake & Service Desk</span>
+                    <span class="pill pill-gold">Module 01</span>
+                </div>
+                <div class="card-desc">
+                    Comprehensive digital check-in capturing VIN, plate number, make, model, year, odometer, fuel level gauge, and pre-existing vehicle body scratches. Generates barcoded customer intake receipts and notifies assigned workshop teams.
+                </div>
+            </div>
+
+            <div class="card card-primary avoid-break">
+                <div class="card-title">
+                    <span>2. Job Card & Repair Lifecycle</span>
+                    <span class="pill pill-gold">Module 02</span>
+                </div>
+                <div class="card-desc">
+                    State-machine driven workflow: <code>Draft &rarr; Diagnosed &rarr; In Progress &rarr; QC Inspection &rarr; Ready &rarr; Delivered</code>. Mechanics log labor duration, diagnostic DTC error codes, and replacement parts directly into digital cards.
+                </div>
+            </div>
+
+            <div class="card card-primary avoid-break">
+                <div class="card-title">
+                    <span>3. Double-Entry Parts Inventory</span>
+                    <span class="pill pill-gold">Module 03</span>
+                </div>
+                <div class="card-desc">
+                    Full supply chain control with SKU, OEM part numbers, shelf/bin tracking, unit costs, retail markup, and supplier catalogs. Automatically locks and deducts stock when assigned to repair jobs, with automated reorder alerts.
+                </div>
+            </div>
+
+            <div class="card card-primary avoid-break">
+                <div class="card-title">
+                    <span>4. Billing, Invoices & Tax Engine</span>
+                    <span class="pill pill-gold">Module 04</span>
+                </div>
+                <div class="card-desc">
+                    Compliant with Ethiopian tax laws. Computes parts cost, labor cost, and applies 15% Ethiopian Value Added Tax (VAT). Invoices maintain strict financial invariance: immutable receipt generation upon confirmed payment settlement.
+                </div>
+            </div>
+
+            <div class="card card-primary avoid-break">
+                <div class="card-title">
+                    <span>5. Manual Payment Verification</span>
+                    <span class="pill pill-gold">Module 05</span>
+                </div>
+                <div class="card-desc">
+                    Dedicated verification queue for 22 Ethiopian commercial banks and 4 mobile wallets. Prevents duplicate transaction IDs, enforces high-resolution slip streaming outside public web root, and permits 1-click approvals.
+                </div>
+            </div>
+
+            <div class="card card-primary avoid-break">
+                <div class="card-title">
+                    <span>6. VIP Client Portal & Video Gallery</span>
+                    <span class="pill pill-gold">Module 06</span>
+                </div>
+                <div class="card-desc">
+                    Customer self-service portal for live service tracking, appointment bookings, estimate sign-offs, and payment submission. Includes an educational video gallery showcasing workshop standards and maintenance best practices.
+                </div>
+            </div>
+        </div>
+
+        <h3 class="subsection-title">End-to-End Operational Lifecycle Workflow</h3>
+        <div class="arch-diagram avoid-break">
+[CUSTOMER INTAKE] &rarr; Reception registers Vehicle (VIN, Plate, Odometer) &rarr; Intake Inspection
+       &darr;
+[JOB CARD CREATION] &rarr; Service Advisor assigns Master Mechanic & Priority Level
+       &darr;
+[DIAGNOSTICS & REQUISITION] &rarr; Mechanic diagnoses fault &rarr; Requisitions Parts from Inventory
+       &darr;
+[INVENTORY ALLOCATION] &rarr; Inventory Manager approves parts &rarr; Atomic Stock Deduction
+       &darr;
+[REPAIR & QUALITY CONTROL] &rarr; Mechanical Execution &rarr; Foreman QC Road Test Inspection
+       &darr;
+[INVOICING & PAYMENT] &rarr; Invoice generated (Parts + Labor + 15% VAT) &rarr; Customer Pays (Bank/Telebirr)
+       &darr;
+[ACCOUNTANT VERIFICATION] &rarr; Slip verification in Queue &rarr; Immutable Receipt &rarr; Vehicle Release
+        </div>
+    </div>
+
+    <!-- ==================== ROLE-BASED ACCESS CONTROL (RBAC) ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">04</div>
+            <h2 class="section-title">Role-Based Access Control (RBAC) Matrix</h2>
+        </div>
+
+        <p>Alpha Garage strictly implements the Principle of Least Privilege across six authenticated roles. Each user sees only their dedicated dashboard and permitted actions, enforced through server-side middleware and database access gates.</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Primary Responsibilities</th>
+                    <th>Core Permissions</th>
+                    <th>Access Scope</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Super Administrator</strong></td>
+                    <td>System configuration, user management, payment method control, security audit.</td>
+                    <td><code>users.*</code>, <code>settings.*</code>, <code>audit.view</code>, <code>payment_methods.manage</code></td>
+                    <td><span class="pill pill-green">Global Full Access</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Service Receptionist</strong></td>
+                    <td>Customer registration, intake triage, vehicle check-in, bookings, customer communication.</td>
+                    <td><code>customers.create</code>, <code>vehicles.manage</code>, <code>jobs.create</code>, <code>appointments.manage</code></td>
+                    <td><span class="pill pill-blue">Front-Office Desk</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Master Mechanic</strong></td>
+                    <td>Vehicle diagnostics, job card updates, parts requisitions, labor logging.</td>
+                    <td><code>jobs.view_assigned</code>, <code>jobs.update_status</code>, <code>inventory.request_parts</code></td>
+                    <td><span class="pill pill-blue">Workshop Floor Bays</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Inventory Manager</strong></td>
+                    <td>Parts catalog, bin allocation, stock adjustments, purchase orders, supplier management.</td>
+                    <td><code>inventory.*</code>, <code>suppliers.*</code>, <code>purchase_orders.*</code></td>
+                    <td><span class="pill pill-blue">Warehouse / Parts Store</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Accountant / Cashier</strong></td>
+                    <td>Payment slip verification queue, invoice generation, receipts, tax reports, expenses.</td>
+                    <td><code>invoices.*</code>, <code>payments.verify</code>, <code>reports.financial</code>, <code>expenses.*</code></td>
+                    <td><span class="pill pill-gold">Finance Department</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Vehicle Owner (Customer)</strong></td>
+                    <td>Live repair tracking, online booking, payment submission, historical invoice archive.</td>
+                    <td><code>portal.view_own</code>, <code>portal.book</code>, <code>portal.submit_payment</code></td>
+                    <td><span class="pill pill-gold">VIP Client Portal</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">Security & Permission Enforcement Architecture</h3>
+        <div class="callout callout-gold avoid-break">
+            <div class="callout-title">Multi-Layer Access Governance</div>
+            Every HTTP route executes <code>require_login()</code> followed by <code>require_permission('permission_name')</code> before reading inputs or querying database records. Direct URL manipulation by unauthorized users triggers an automatic security event logged into the immutable SHA-256 audit chain.
+        </div>
+
+        <div class="grid-2 avoid-break">
+            <div class="card">
+                <div class="card-title">Front-Office / Floor Separation</div>
+                <div class="card-desc">Mechanics cannot view financial profitability or invoice balances; Cashiers and Accountants cannot modify technical diagnostic findings or delete job cards.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Customer Identity Isolation</div>
+                <div class="card-desc">Customer portal accounts are strictly scoped to the authenticated customer's owned vehicles and invoices, preventing IDOR (Insecure Direct Object Reference).</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MANUAL PAYMENT SYSTEM ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">05</div>
+            <h2 class="section-title">Ethiopian Manual Payment Verification Engine</h2>
+        </div>
+
+        <p>A flagship differentiator of the Alpha Garage platform is its custom-engineered, fully auditable <strong>Manual Payment Verification System</strong>, tailored precisely for Ethiopian retail banking practices.</p>
+
+        <h3 class="subsection-title">Full Coverage of Ethiopian Financial Providers</h3>
+        <p>The platform comes pre-configured with 26 localized payment providers. Administrators have 1-click status controls to activate or deactivate providers in real-time:</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Integrated Ethiopian Providers</th>
+                    <th>Verification Mechanism</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>State Banking</strong></td>
+                    <td>Commercial Bank of Ethiopia (CBE)</td>
+                    <td>CBE Birr App reference / Bank deposit slip stamp check</td>
+                </tr>
+                <tr>
+                    <td><strong>Mobile Money</strong></td>
+                    <td>Telebirr (Ethio Telecom), Safaricom M-Pesa, CBE Birr, Amole</td>
+                    <td>10-digit transaction ID + SMS confirmation screenshot</td>
+                </tr>
+                <tr>
+                    <td><strong>Major Private Banks</strong></td>
+                    <td>Awash Bank, Bank of Abyssinia, Dashen Bank, Hibret Bank, Nib International Bank, United Bank, Cooperative Bank of Oromia</td>
+                    <td>Bank transaction reference number + mobile banking receipt</td>
+                </tr>
+                <tr>
+                    <td><strong>Specialized Banks</strong></td>
+                    <td>Wegagen, Zemen, Lion, Bunna, Berhan, Enat, Addis, Global, Goh Betoch, Sinqee, Tsehay, Ahadu, Amhara Bank</td>
+                    <td>Direct teller deposit slip or electronic transfer screenshot</td>
+                </tr>
+                <tr>
+                    <td><strong>On-Premises Cash</strong></td>
+                    <td>Physical Cash Desk Settlement</td>
+                    <td>Physical cashier cash count + instant printed receipt</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">4-Stage Idempotent Verification Workflow</h3>
+        <div class="arch-diagram avoid-break">
+[STEP 1: CUSTOMER SUBMISSION]
+Customer selects Bank/Telebirr &rarr; Enters Reference Number & Amount &rarr; Uploads Slip (JPG/PNG/PDF)
+Collision check prevents duplicate reference numbers on the same provider.
+       &darr;
+[STEP 2: CENTRALIZED VERIFICATION QUEUE]
+Submission appears in Accountant's live queue with KPI indicators (Pending, Under Review).
+High-resolution proof viewer displays slip with pan/zoom and anti-IDOR security.
+       &darr;
+[STEP 3: HUMAN AUDIT & RECONCILIATION]
+Accountant cross-references transaction reference against garage's online bank statement.
+Action options: [APPROVE] or [REJECT WITH REASON].
+       &darr;
+[STEP 4: FINANCIAL COMMITMENT (ATOMIC)]
+Approved: Creates immutable Payment Record &rarr; Deducts Invoice Balance &rarr; Triggers SMS/Email.
+Rejected: Invoice balance remains untouched &rarr; Customer notified to re-submit valid proof.
+        </div>
+
+        <div class="callout avoid-break">
+            <strong>Financial Invariance Guarantee:</strong> Pending or rejected payment submissions never reduce invoice balances. Balances are adjusted solely upon explicit accountant approval through <code>PaymentService::record()</code>, protected by database-level triggers against post-settlement modification.
+        </div>
+    </div>
+
+    <!-- ==================== BILINGUAL LOCALIZATION ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">06</div>
+            <h2 class="section-title">Bilingual Localization Engine (English & Amharic)</h2>
+        </div>
+
+        <p>In accordance with Ethiopian commercial environment needs, Alpha Garage incorporates a <strong>100% native bilingual architecture</strong> supporting both English and Amharic (አማርኛ) across public pages, customer VIP portals, and back-office staff management views.</p>
+
+        <h3 class="subsection-title">Technical Translation Architecture</h3>
+        <div class="grid-2">
+            <div class="card card-primary">
+                <div class="card-title">Dynamic Dictionary Engine</div>
+                <div class="card-desc">
+                    Translation keys are managed via optimized PHP lookup arrays with automatic fallback. Supported by helper function <code>__('key_name')</code> ensuring zero performance overhead compared to heavy gettext libraries.
+                </div>
+            </div>
+            <div class="card card-gold">
+                <div class="card-title">Persistent User Preference</div>
+                <div class="card-desc">
+                    Language preferences are persisted across user sessions and cookie storage. Users switch between English and Amharic with a single click from any desktop or mobile screen header.
+                </div>
+            </div>
+        </div>
+
+        <h3 class="subsection-title">Automotive Nomenclature Mapping Sample</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>System Entity / Term</th>
+                    <th>English Display</th>
+                    <th>Amharic Localization (አማርኛ)</th>
+                    <th>Context / Operational Scope</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Job Card</strong></td>
+                    <td>Job Card / Work Order</td>
+                    <td><span class="amharic-text">የጥገና ሥራ ካርድ</span></td>
+                    <td>Workshop floor vehicle diagnostic & repair order</td>
+                </tr>
+                <tr>
+                    <td><strong>Spare Parts</strong></td>
+                    <td>Spare Parts & Inventory</td>
+                    <td><span class="amharic-text">መለዋወጫ ዕቃዎች እና ክምችት</span></td>
+                    <td>Warehouse inventory management</td>
+                </tr>
+                <tr>
+                    <td><strong>Payment Verification</strong></td>
+                    <td>Manual Payment Verification</td>
+                    <td><span class="amharic-text">የክፍያ ማረጋገጫ ሂደት</span></td>
+                    <td>Accountant bank slip inspection queue</td>
+                </tr>
+                <tr>
+                    <td><strong>Vehicle Diagnostic</strong></td>
+                    <td>Technical Diagnostics</td>
+                    <td><span class="amharic-text">የቴክኒክ ምርመራ እና ግምገማ</span></td>
+                    <td>Master mechanic fault code entry</td>
+                </tr>
+                <tr>
+                    <td><strong>Customer Invoice</strong></td>
+                    <td>Official Tax Invoice</td>
+                    <td><span class="amharic-text">ኦፊሴላዊ የግብር ደረሰኝ</span></td>
+                    <td>Financial billing with 15% VAT calculation</td>
+                </tr>
+                <tr>
+                    <td><strong>Customer Portal</strong></td>
+                    <td>Client VIP Portal</td>
+                    <td><span class="amharic-text">የደንበኞች ፖርታል</span></td>
+                    <td>Customer vehicle live status tracking</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="callout callout-gold avoid-break" style="margin-top: 20px;">
+            <div class="callout-title">Mobile Responsive Language Switcher</div>
+            The mobile interface features a compact, high-contrast language pill switcher (<code>EN | AM</code>) in the navigation bar, ensuring mechanics on tablets and customers on smartphones can navigate smoothly without UI distortion.
+        </div>
+    </div>
+
+    <!-- ==================== TECHNICAL ARCHITECTURE & SECURITY ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">07</div>
+            <h2 class="section-title">Technical Architecture & Security Hardening</h2>
+        </div>
+
+        <p>Alpha Garage is built upon a high-performance, framework-independent architecture designed for maximum operational longevity, zero third-party licensing dependencies, and bulletproof security.</p>
+
+        <h3 class="subsection-title">Technology Stack Specification</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Architectural Layer</th>
+                    <th>Technology Component</th>
+                    <th>Specification & Architectural Justification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Core Engine</strong></td>
+                    <td>PHP 8.2+ Native MVC</td>
+                    <td>Zero-framework overhead; sub-50ms server response times; type safety with <code>declare(strict_types=1)</code>.</td>
+                </tr>
+                <tr>
+                    <td><strong>Database Management</strong></td>
+                    <td>MySQL 8.0 / MariaDB</td>
+                    <td>InnoDB engine, <code>utf8mb4_unicode_ci</code> encoding, foreign key constraints, integer-cent arithmetic for ETB.</td>
+                </tr>
+                <tr>
+                    <td><strong>Frontend & UI</strong></td>
+                    <td>HTML5 / Modern CSS3 / ES6</td>
+                    <td>Lightweight custom styling; zero node/npm runtime bloat; high performance on low-bandwidth mobile connections.</td>
+                </tr>
+                <tr>
+                    <td><strong>Cryptographic Audit</strong></td>
+                    <td>SHA-256 Hash Chaining</td>
+                    <td>Tamper-evident append-only ledger for all security events, logins, payment updates, and deletions.</td>
+                </tr>
+                <tr>
+                    <td><strong>Web Server & Runtime</strong></td>
+                    <td>Apache 2.4 / Nginx</td>
+                    <td>Strict <code>.htaccess</code> directory shielding preventing direct access to <code>app/</code>, <code>storage/</code>, and <code>database/</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">Security Hardening & Defense-in-Depth Matrix</h3>
+        <div class="grid-2 avoid-break">
+            <div class="card card-primary">
+                <div class="card-title">1. Anti-CSRF & XSS Defense</div>
+                <div class="card-desc">
+                    Cryptographic CSRF token validated on every single POST request before routing. All HTML output sanitized through custom <code>e()</code> escaping helper. Strict Content Security Policy (CSP) headers applied.
+                </div>
+            </div>
+
+            <div class="card card-primary">
+                <div class="card-title">2. SQL Injection Neutralization</div>
+                <div class="card-desc">
+                    100% of database queries execute via PDO prepared statements with strict parameter binding. Dynamic queries use whitelist-validated columns and fixed structure strings.
+                </div>
+            </div>
+
+            <div class="card card-primary">
+                <div class="card-title">3. Secure File Upload Pipeline</div>
+                <div class="card-desc">
+                    Payment slips and vehicle inspection photos are validated using binary magic bytes (MIME verification), renamed with random UUIDs, and stored outside the public document root.
+                </div>
+            </div>
+
+            <div class="card card-primary">
+                <div class="card-title">4. Tamper-Evident Audit Logging</div>
+                <div class="card-desc">
+                    Every administrative action, financial transaction, and login event is recorded with prior-hash chaining. Database triggers block record alteration or historical deletion.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== IMPLEMENTATION ROADMAP ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">08</div>
+            <h2 class="section-title">Implementation Roadmap & Milestones</h2>
+        </div>
+
+        <p>The system deployment follows a structured, milestone-driven engineering methodology designed to guarantee zero downtime and smooth operational adoption by workshop technicians and office staff.</p>
+
+        <h3 class="subsection-title">Phased Delivery & Execution Schedule</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Phase</th>
+                    <th>Timeline</th>
+                    <th>Milestone Deliverables</th>
+                    <th>Verification Gate</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Phase 1: Baseline Audit & Database Alignment</strong></td>
+                    <td>Weeks 1 - 2</td>
+                    <td>Schema reconciliation, 28 relational tables initialized, least-privilege database user configuration.</td>
+                    <td><span class="pill pill-green">Passed (0 Errors)</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 2: Workshop & Job Card Engine</strong></td>
+                    <td>Weeks 3 - 4</td>
+                    <td>Digital vehicle check-in, VIN scanner integration, job card state machine, technician labor tracker.</td>
+                    <td><span class="pill pill-green">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 3: Double-Entry Inventory Ledger</strong></td>
+                    <td>Weeks 5 - 6</td>
+                    <td>Parts catalog migration, SKU/Bin locations, supplier PO workflow, atomic stock reduction triggers.</td>
+                    <td><span class="pill pill-green">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 4: Billing & Manual Payment Verification</strong></td>
+                    <td>Weeks 7 - 8</td>
+                    <td>26 Ethiopian bank/mobile methods, anti-duplicate reference engine, verification queue, 15% VAT tax logic.</td>
+                    <td><span class="pill pill-green">69/69 Tests Pass</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 5: VIP Customer Portal & Media Gallery</strong></td>
+                    <td>Weeks 9 - 10</td>
+                    <td>Live repair status portal, appointment booking, slip submission, vehicle video maintenance gallery.</td>
+                    <td><span class="pill pill-green">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 6: Bilingual Engine & Mobile Optimization</strong></td>
+                    <td>Weeks 11 - 12</td>
+                    <td>Amharic dictionary implementation, responsive header language switcher, mobile font size tuning.</td>
+                    <td><span class="pill pill-green">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 7: Security Audit & Staging Deployment</strong></td>
+                    <td>Weeks 13 - 14</td>
+                    <td>Independent penetration test, IDOR prevention audit, automated backup runbooks, MAMP staging sign-off.</td>
+                    <td><span class="pill pill-green">Verified</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 8: Production On-Premises / Cloud Launch</strong></td>
+                    <td>Weeks 15 - 16</td>
+                    <td>Final production server provisioning, staff role certification, pilot rollout, executive handover.</td>
+                    <td><span class="pill pill-gold">Final Deployment Gate</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">Staff Training & Organizational Onboarding Plan</h3>
+        <div class="grid-3 avoid-break">
+            <div class="card card-gold">
+                <div class="card-title">Reception & Service Desk</div>
+                <div class="card-desc">2-day intensive workshop covering quick customer intake, vehicle condition logging, appointment scheduling, and customer communication.</div>
+            </div>
+            <div class="card card-primary">
+                <div class="card-title">Workshop Technicians</div>
+                <div class="card-desc">Floor-side training on tablet job cards, diagnostic notes entry, parts requisitions, and milestone status completion.</div>
+            </div>
+            <div class="card card-primary">
+                <div class="card-title">Finance & Inventory Team</div>
+                <div class="card-desc">Hands-on verification queue drills, duplicate detection review, stock replenishment, and monthly tax export reconciliation.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FINANCIAL PROPOSAL & BUDGET ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">09</div>
+            <h2 class="section-title">Commercial Investment & Budget Breakdown</h2>
+        </div>
+
+        <p>The proposed financial structure provides Alpha Garage with a perpetual enterprise software license, complete implementation, custom branding, and a comprehensive 12-month technical support and security warranty.</p>
+
+        <h3 class="subsection-title">System Licensing & Implementation Investment Table</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item #</th>
+                    <th>Investment Component / Module</th>
+                    <th>Scope Description</th>
+                    <th>Cost (ETB)</th>
+                    <th>Cost (USD Equiv.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1.0</strong></td>
+                    <td><strong>Core Alpha Garage Operating System</strong></td>
+                    <td>Perpetual enterprise license; unlimited users; 6 RBAC roles; zero recurring SaaS fees.</td>
+                    <td>280,000 ETB</td>
+                    <td>$2,330 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>2.0</strong></td>
+                    <td><strong>Manual Payment Verification Engine</strong></td>
+                    <td>26 Ethiopian bank/mobile integrations, verification queue, duplicate prevention, proof streamer.</td>
+                    <td>140,000 ETB</td>
+                    <td>$1,165 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>3.0</strong></td>
+                    <td><strong>VIP Client Portal & Video Gallery</strong></td>
+                    <td>Customer live repair tracker, online booking module, streaming video gallery, responsive UI.</td>
+                    <td>110,000 ETB</td>
+                    <td>$915 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>4.0</strong></td>
+                    <td><strong>Bilingual Localization Package (Amharic)</strong></td>
+                    <td>Comprehensive Amharic terminology mapping, mobile language toggle, localized receipts.</td>
+                    <td>65,000 ETB</td>
+                    <td>$540 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>5.0</strong></td>
+                    <td><strong>Deployment, Data Migration & Hardening</strong></td>
+                    <td>Server provisioning (Ubuntu/Windows), SSL, database optimization, SHA-256 audit setup.</td>
+                    <td>85,000 ETB</td>
+                    <td>$710 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>6.0</strong></td>
+                    <td><strong>Staff Training & Role Certification</strong></td>
+                    <td>Comprehensive on-site training for Receptionists, Mechanics, Inventory, and Accountants.</td>
+                    <td>50,000 ETB</td>
+                    <td>$415 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>7.0</strong></td>
+                    <td><strong>1-Year Enterprise SLA & Warranty</strong></td>
+                    <td>24/7 priority bug fixes, security patch updates, automated hourly backup configuration.</td>
+                    <td>120,000 ETB</td>
+                    <td>$1,000 USD</td>
+                </tr>
+                <tr style="background: var(--surface-subtle); font-weight: 700;">
+                    <td colspan="3" style="text-align: right; padding-right: 15px; font-size: 10pt; color: var(--primary);">TOTAL INVESTMENT (EXCL. 15% VAT):</td>
+                    <td style="color: var(--primary); font-size: 10.5pt;">850,000 ETB</td>
+                    <td style="color: var(--primary); font-size: 10.5pt;">$7,075 USD</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">Projected Return on Investment (ROI)</h3>
+        <div class="grid-3 avoid-break">
+            <div class="card card-gold">
+                <div style="font-size: 16pt; font-weight: 800; color: var(--accent-dark); font-family: 'Cinzel', serif;">+35%</div>
+                <div style="font-weight: 700; color: var(--text); font-size: 8.5pt; margin-top: 4px;">Turnaround Acceleration</div>
+                <div style="font-size: 8pt; color: #64748B;">Digital job card handovers reduce idle vehicle bay waiting time.</div>
+            </div>
+            <div class="card card-primary">
+                <div style="font-size: 16pt; font-weight: 800; color: var(--primary); font-family: 'Cinzel', serif;">100%</div>
+                <div style="font-weight: 700; color: var(--text); font-size: 8.5pt; margin-top: 4px;">Fraud Elimination</div>
+                <div style="font-size: 8pt; color: #64748B;">No vehicle is released without verified bank credit confirmation.</div>
+            </div>
+            <div class="card card-gold">
+                <div style="font-size: 16pt; font-weight: 800; color: var(--accent-dark); font-family: 'Cinzel', serif;">4.5 Months</div>
+                <div style="font-weight: 700; color: var(--text); font-size: 8.5pt; margin-top: 4px;">Full Cost Payback</div>
+                <div style="font-size: 8pt; color: #64748B;">Recouped rapidly via shrinkage prevention and labor capture.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SIGN-OFF & APPROVAL ==================== -->
+    <div class="chapter">
+        <div class="section-header">
+            <div class="section-num">10</div>
+            <h2 class="section-title">Sign-off, SLA & Formal Acceptance</h2>
+        </div>
+
+        <p>This Project Proposal constitutes a formal technical and commercial plan for the commissioning and deployment of the <strong>Alpha Garage Management Enterprise System</strong>. Upon executive endorsement below, the implementation timeline initiates immediately under Phase 8 production commissioning.</p>
+
+        <h3 class="subsection-title">Service Level Agreement (SLA) Commitments</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Severity Tier</th>
+                    <th>Definition</th>
+                    <th>Target Response Time</th>
+                    <th>Resolution SLA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pill pill-gold" style="background: #FEE2E2; color: #991B1B; border: 1px solid #F87171;">Severity 1 (Critical)</span></td>
+                    <td>Complete system outage or inability to verify customer payments or release vehicles.</td>
+                    <td><strong>&lt; 30 Minutes</strong></td>
+                    <td><strong>&lt; 4 Hours</strong></td>
+                </tr>
+                <tr>
+                    <td><span class="pill pill-blue">Severity 2 (High)</span></td>
+                    <td>Core module degradation (e.g., inventory deduction glitch, customer portal latency).</td>
+                    <td><strong>&lt; 2 Hours</strong></td>
+                    <td><strong>&lt; 12 Hours</strong></td>
+                </tr>
+                <tr>
+                    <td><span class="pill pill-green">Severity 3 (Normal)</span></td>
+                    <td>Minor UI inconsistencies, report formatting adjustments, translation additions.</td>
+                    <td><strong>&lt; 8 Hours</strong></td>
+                    <td><strong>&lt; 48 Hours</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="subsection-title">Formal Stakeholder Acceptance Signatures</h3>
+        <p style="font-size: 9pt; color: #64748B;">By signing below, the authorized executive stakeholders approve this project proposal, architectural scope, and associated financial commitment:</p>
+
+        <div class="signature-grid avoid-break">
+            <div class="sig-box">
+                <div class="sig-line"></div>
+                <div class="sig-role">Managing Director / Owner</div>
+                <div class="sig-name">Alpha Garage Enterprise</div>
+                <div style="font-size: 8pt; color: #94A3B8; margin-top: 6px;">Date: ____ / ____ / 2026</div>
+            </div>
+
+            <div class="sig-box">
+                <div class="sig-line"></div>
+                <div class="sig-role">Operations & Service Director</div>
+                <div class="sig-name">Alpha Garage Operations</div>
+                <div style="font-size: 8pt; color: #94A3B8; margin-top: 6px;">Date: ____ / ____ / 2026</div>
+            </div>
+
+            <div class="sig-box">
+                <div class="sig-line"></div>
+                <div class="sig-role">Lead Software Architect</div>
+                <div class="sig-name">Systems Engineering Team</div>
+                <div style="font-size: 8pt; color: #94A3B8; margin-top: 6px;">Date: ____ / ____ / 2026</div>
+            </div>
+        </div>
+
+        <div class="signature-grid avoid-break" style="margin-top: 15px;">
+            <div class="sig-box">
+                <div class="sig-line"></div>
+                <div class="sig-role">Chief Financial Officer</div>
+                <div class="sig-name">Finance & Audit Department</div>
+                <div style="font-size: 8pt; color: #94A3B8; margin-top: 6px;">Date: ____ / ____ / 2026</div>
+            </div>
+
+            <div class="sig-box">
+                <div class="sig-line"></div>
+                <div class="sig-role">Workshop Floor Manager</div>
+                <div class="sig-name">Technical Service Division</div>
+                <div style="font-size: 8pt; color: #94A3B8; margin-top: 6px;">Date: ____ / ____ / 2026</div>
+            </div>
+
+            <div class="sig-box">
+                <div class="sig-line"></div>
+                <div class="sig-role">IT & Infrastructure Lead</div>
+                <div class="sig-name">Technology Systems Team</div>
+                <div style="font-size: 8pt; color: #94A3B8; margin-top: 6px;">Date: ____ / ____ / 2026</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 35px; text-align: center; border-top: 1px solid var(--border); padding-top: 20px;">
+            <div style="font-family: 'Cinzel', serif; font-size: 11pt; font-weight: 700; color: var(--primary);">ALPHA GARAGE LUXURY AUTOMOTIVE ENGINEERING</div>
+            <div style="font-size: 8.5pt; color: #64748B; margin-top: 4px;">Bole Sub-City, Addis Ababa, Ethiopia &bull; info@alphagarage.et &bull; +251 911 000 000</div>
+            <div style="margin-top: 10px;">
+                <span class="confidential-stamp">OFFICIAL PROPOSAL &bull; CONFIDENTIAL</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
